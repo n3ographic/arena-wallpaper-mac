@@ -39,7 +39,8 @@ final class AppModel: ObservableObject {
         }
         wallpaper = WallpaperService(
             repository: repository, cache: cache, renderedDirectory: support.appendingPathComponent("rendered"),
-            setter: WorkspaceWallpaper(), player: StillWallpaperPlayer(), checker: NoSensitivityChecker()
+            setter: WorkspaceWallpaper(), player: DesktopGIFPlayer(), checker: NoSensitivityChecker(),
+            reduceMotion: { NSWorkspace.shared.accessibilityDisplayShouldReduceMotion }
         )
         engine = RotationEngine(repository: repository, wallpaper: wallpaper, screens: screens, cache: cache)
         auth = WebAuth()

@@ -1,5 +1,6 @@
 import CoreGraphics
 import Foundation
+import ImageIO
 
 public enum ApplyError: Error, Equatable {
     case allScreensFailed(String)
@@ -17,6 +18,7 @@ public actor WallpaperService {
     private let player: LiveWallpaperPlayer
     private let checker: SensitivityChecker
     private let now: @Sendable () -> Date
+    private let reduceMotion: @Sendable () -> Bool
 
     /// Image ids on screen, one per screen.
     public private(set) var current: [Int] = []
@@ -26,7 +28,8 @@ public actor WallpaperService {
     public init(
         repository: ConfigRepository, cache: ImageCache, renderedDirectory: URL,
         setter: WallpaperSetter, player: LiveWallpaperPlayer, checker: SensitivityChecker,
-        now: @escaping @Sendable () -> Date = { Date() }
+        now: @escaping @Sendable () -> Date = { Date() },
+        reduceMotion: @escaping @Sendable () -> Bool = { false }
     ) {
         self.repository = repository
         self.cache = cache
@@ -35,6 +38,7 @@ public actor WallpaperService {
         self.player = player
         self.checker = checker
         self.now = now
+        self.reduceMotion = reduceMotion
     }
 
     public func apply(ids: [Int], screens: [Screen]) async throws {
@@ -63,7 +67,26 @@ public actor WallpaperService {
         }
         current = ids
         currentFiles = zip(screens, files).map { ($0.id, $1) }
-        await player.show([])
+        await player.show(animatedTargets(ids: ids, screens: screens, originals: originals, config: config))
+    }
+
+    /// GIFs play in windows over the still first frame that was just set.
+    private func animatedTargets(ids: [Int], screens: [Screen], originals: [Int: URL], config: Config) -> [LiveTarget] {
+        let blocks = Dictionary(config.channels.flatMap(\.blocks).map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
+        var frameCounts: [Int: Int] = [:]
+        var sizes: [Int: CGSize] = [:]
+        for (id, url) in originals where blocks[id]?.isGIF == true {
+            guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+                  let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+                  let width = properties[kCGImagePropertyPixelWidth] as? Int,
+                  let height = properties[kCGImagePropertyPixelHeight] as? Int else { continue }
+            frameCounts[id] = CGImageSourceGetCount(source)
+            sizes[id] = CGSize(width: width, height: height)
+        }
+        return liveTargets(
+            ids: ids, screens: screens, blocks: blocks, originals: originals, frameCounts: frameCounts, imageSizes: sizes,
+            mode: config.screenMode, reduceMotion: reduceMotion(), fit: config.fit, positionX: config.positionX, positionY: config.positionY
+        )
     }
 
     /// Sets the current files again: after a Space change, the system may still show an older

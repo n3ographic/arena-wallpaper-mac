@@ -17,8 +17,3 @@ struct WorkspaceWallpaper: WallpaperSetter {
         }
     }
 }
-
-/// Until the GIF windows exist (task 13): wallpapers stay still.
-struct StillWallpaperPlayer: LiveWallpaperPlayer {
-    func show(_ targets: [LiveTarget]) async {}
-}

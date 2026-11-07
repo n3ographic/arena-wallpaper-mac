@@ -28,3 +28,11 @@
 - [ ] Débrancher un écran : le fond est recalculé pour l'écran restant.
 - [ ] « Lancer au démarrage » : l'app apparaît dans Réglages Système > Ouverture et se lance après une reconnexion.
 - [ ] Le rythme change le décompte immédiatement ; l'ordre « dans l'ordre » suit l'ordre des channels.
+
+## Tâche 13 : GIF animés
+- [ ] Un GIF appliqué s'anime derrière les icônes ; les icônes restent cliquables.
+- [ ] En « contenir », les bandes du fond fixe (flou ou couleur) restent visibles autour du GIF.
+- [ ] Une app en plein écran met l'animation en pause (processeur de l'app quasi nul), elle reprend ensuite.
+- [ ] Passer à une image fixe ferme la fenêtre du GIF ; le mode étalé n'anime rien.
+- [ ] Avec « Réduire les animations » (Réglages Système > Accessibilité > Affichage), aucun GIF n'est animé.
+- [ ] Le GIF reste présent en changeant de Space.

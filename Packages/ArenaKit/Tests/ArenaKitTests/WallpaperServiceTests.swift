@@ -100,3 +100,25 @@ private func renderedFiles(_ dir: URL) throws -> [String] {
     #expect(calls[2].file == calls[0].file && calls[3].file == calls[1].file)
     #expect(calls[2].screenID == "main" && calls[3].screenID == "right")
 }
+
+@Test func animatedGIFIsSentToThePlayer() async throws {
+    let (repository, cache, rendered) = try await fixture(ids: [1], gifIDs: [1])
+    let player = RecordingPlayer()
+    let wallpaper = service(repository, cache, rendered, setter: RecordingSetter(), player: player)
+    try await wallpaper.apply(ids: [1], screens: [mainScreen])
+    let shown = try #require(await player.shown.last)
+    #expect(shown.count == 1)
+    #expect(shown.first?.gif == (await cache.cachedURL(for: 1)))
+    #expect(shown.first?.screenID == "main")
+}
+
+@Test func reduceMotionKeepsGIFsStill() async throws {
+    let (repository, cache, rendered) = try await fixture(ids: [1], gifIDs: [1])
+    let player = RecordingPlayer()
+    let wallpaper = WallpaperService(
+        repository: repository, cache: cache, renderedDirectory: rendered, setter: RecordingSetter(), player: player,
+        checker: NoSensitivityChecker(), reduceMotion: { true }
+    )
+    try await wallpaper.apply(ids: [1], screens: [mainScreen])
+    #expect(await player.shown == [[]])
+}
