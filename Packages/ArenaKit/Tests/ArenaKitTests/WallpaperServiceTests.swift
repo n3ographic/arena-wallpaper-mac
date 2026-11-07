@@ -7,7 +7,7 @@ private let rightScreen = testScreen("right", 192, 0, 128, 102)
 
 private func service(_ repository: ConfigRepository, _ cache: ImageCache, _ rendered: URL, setter: RecordingSetter, player: RecordingPlayer = RecordingPlayer()) -> WallpaperService {
     let clock = TestClock()
-    return WallpaperService(repository: repository, cache: cache, renderedDirectory: rendered, setter: setter, player: player, checker: NoSensitivityChecker(), now: clock.now)
+    return WallpaperService(repository: repository, cache: cache, renderedDirectory: rendered, setter: setter, player: player, checker: NoSensitivityChecker(), now: { clock.now() })
 }
 
 private func renderedFiles(_ dir: URL) throws -> [String] {
