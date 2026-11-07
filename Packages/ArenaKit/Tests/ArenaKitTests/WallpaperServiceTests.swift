@@ -88,3 +88,15 @@ private func renderedFiles(_ dir: URL) throws -> [String] {
     }
     #expect(await cache.cachedURL(for: 1) == nil)
 }
+
+@Test func reapplySetsTheSameFilesAgain() async throws {
+    let (repository, cache, rendered) = try await fixture(ids: [1, 2], mode: .perScreen)
+    let setter = RecordingSetter()
+    let wallpaper = service(repository, cache, rendered, setter: setter)
+    try await wallpaper.apply(ids: [1, 2], screens: [mainScreen, rightScreen])
+    await wallpaper.reapply()
+    let calls = await setter.calls
+    #expect(calls.count == 4)
+    #expect(calls[2].file == calls[0].file && calls[3].file == calls[1].file)
+    #expect(calls[2].screenID == "main" && calls[3].screenID == "right")
+}

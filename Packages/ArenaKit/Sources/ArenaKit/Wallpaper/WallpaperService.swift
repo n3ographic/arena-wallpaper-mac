@@ -20,6 +20,8 @@ public actor WallpaperService {
 
     /// Image ids on screen, one per screen.
     public private(set) var current: [Int] = []
+    /// The files last set, per screen id, to set them again without rendering.
+    private var currentFiles: [(screenID: String, file: URL)] = []
 
     public init(
         repository: ConfigRepository, cache: ImageCache, renderedDirectory: URL,
@@ -60,7 +62,16 @@ public actor WallpaperService {
             throw ApplyError.allScreensFailed(errors.first ?? "")
         }
         current = ids
+        currentFiles = zip(screens, files).map { ($0.id, $1) }
         await player.show([])
+    }
+
+    /// Sets the current files again: after a Space change, the system may still show an older
+    /// picture on the newly active Space.
+    public func reapply() async {
+        for (screenID, file) in currentFiles {
+            try? await setter.setWallpaper(file, screenID: screenID)
+        }
     }
 
     // MARK: Rendering

@@ -7,15 +7,19 @@ import AuthenticationServices
 final class AppModel: ObservableObject {
     @Published private(set) var config = Config()
     @Published private(set) var isConnected = false
+    @Published private(set) var nowPlaying = NowPlaying(ids: [], nextChange: nil, paused: false)
+    @Published private(set) var launchAtLogin = LaunchAtLogin.isEnabled
     @Published var lastError: String?
 
     let repository: ConfigRepository
     let library: LibraryService
     let cache: ImageCache
     let wallpaper: WallpaperService
+    let engine: RotationEngine
     let screens = SystemScreens()
     private let secrets: SecretStore
     private let auth: WebAuthenticator
+    private var clock: RotationClock?
 
     nonisolated static var userAgent: String {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0"
@@ -30,20 +34,44 @@ final class AppModel: ObservableObject {
         self.secrets = secrets
         repository = ConfigRepository(store: ConfigStore(directory: support))
         cache = ImageCache(directory: caches.appendingPathComponent("originals"))
+        library = LibraryService(repository: repository) {
+            ArenaClient(token: secrets.token(), userAgent: AppModel.userAgent)
+        }
         wallpaper = WallpaperService(
             repository: repository, cache: cache, renderedDirectory: support.appendingPathComponent("rendered"),
             setter: WorkspaceWallpaper(), player: StillWallpaperPlayer(), checker: NoSensitivityChecker()
         )
-        library = LibraryService(repository: repository) {
-            ArenaClient(token: secrets.token(), userAgent: AppModel.userAgent)
-        }
+        engine = RotationEngine(repository: repository, wallpaper: wallpaper, screens: screens, cache: cache)
         auth = WebAuth()
         isConnected = secrets.token() != nil
-        Task { await reloadConfig() }
+    }
+
+    /// Called once at launch: state, observers, library refresh, first image, timer.
+    func start() {
+        let clock = RotationClock(
+            engine: engine,
+            onError: { [weak self] error in self?.lastError = Self.message(for: error) },
+            onDailyRefresh: { [weak self] in await self?.refresh() }
+        )
+        self.clock = clock
+        Task {
+            await reloadConfig()
+            for await state in await engine.observe() {
+                nowPlaying = state
+            }
+        }
+        Task {
+            if isConnected { await refresh() }
+            clock.start(rotateNow: true)
+        }
     }
 
     func reloadConfig() async {
         config = await repository.config
+    }
+
+    func block(_ id: Int) -> Block? {
+        config.channels.lazy.flatMap(\.blocks).first { $0.id == id }
     }
 
     // MARK: Account
@@ -123,17 +151,78 @@ final class AppModel: ObservableObject {
         await reloadConfig()
     }
 
-    // MARK: Wallpaper
+    // MARK: Wallpaper and rotation
 
-    /// Click in the grid: this image on every screen.
+    /// Click in the grid: this image on every screen, and a new full wait.
     func apply(_ block: Block) async {
         let screens = await screens.screens()
+        await apply(ids: Array(repeating: block.id, count: screens.count), screens: screens)
+        clock?.restart()
+    }
+
+    func apply(ids: [Int], screens: [Screen]) async {
         do {
-            try await wallpaper.apply(ids: Array(repeating: block.id, count: screens.count), screens: screens)
+            try await engine.apply(ids: ids, screens: screens)
             lastError = nil
         } catch {
             lastError = Self.message(for: error)
         }
+    }
+
+    func next() async {
+        do {
+            try await engine.rotate(manual: true)
+            lastError = nil
+        } catch {
+            lastError = Self.message(for: error)
+        }
+        clock?.restart()
+    }
+
+    func togglePause() async {
+        await engine.setPaused(!nowPlaying.paused)
+    }
+
+    /// Draws the images on screen again with the current settings (or screens).
+    func rerender() async {
+        let screens = await screens.screens()
+        guard let ids = currentFor(nowPlaying.ids, screenCount: screens.count) else { return }
+        await apply(ids: ids, screens: screens)
+    }
+
+    /// After a Space change: the same files, set again.
+    func reapply() async {
+        await wallpaper.reapply()
+    }
+
+    func updateDisplay(_ change: (inout Config) -> Void) async {
+        do {
+            try await repository.update(change)
+            await reloadConfig()
+            await rerender()
+        } catch {
+            lastError = Self.message(for: error)
+        }
+    }
+
+    func updateRotation(_ change: (inout Config) -> Void) async {
+        let before = config.intervalMinutes
+        do {
+            try await repository.update(change)
+            await reloadConfig()
+            if config.intervalMinutes != before { clock?.restart() }
+        } catch {
+            lastError = Self.message(for: error)
+        }
+    }
+
+    func setLaunchAtLogin(_ enabled: Bool) {
+        do {
+            try LaunchAtLogin.set(enabled)
+        } catch {
+            lastError = Self.message(for: error)
+        }
+        launchAtLogin = LaunchAtLogin.isEnabled
     }
 
     // MARK: Messages

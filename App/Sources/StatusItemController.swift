@@ -1,14 +1,16 @@
 import AppKit
+import Combine
 import SwiftUI
 
 /// Menu bar icon. Left and right clicks open the same popover (a `MenuBarExtra` ignores the
-/// right click, see the prototype report).
+/// right click, see the prototype report). The icon fades while the rotation is paused.
 @MainActor
 final class StatusItemController: NSObject {
     private let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
     private let popover = NSPopover()
+    private var pausedSubscription: AnyCancellable?
 
-    init<Content: View>(panel: Content) {
+    init<Content: View>(panel: Content, paused: AnyPublisher<Bool, Never>) {
         super.init()
         popover.behavior = .transient
         popover.contentViewController = NSHostingController(rootView: panel)
@@ -18,6 +20,9 @@ final class StatusItemController: NSObject {
             button.target = self
             button.action = #selector(toggle(_:))
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+        }
+        pausedSubscription = paused.removeDuplicates().sink { [weak self] isPaused in
+            self?.item.button?.alphaValue = isPaused ? 0.4 : 1
         }
     }
 

@@ -19,3 +19,12 @@
 - [ ] Un clic dans la grille pose l'image sur les deux écrans, dans chaque cadrage (remplir, contenir, étirer, centrer).
 - [ ] Temps de pose ressenti noté (cible : moins d'une seconde).
 - [ ] Un écran débranché pendant la pose n'empêche pas l'autre.
+
+## Tâche 12 : panneau, rotation, réglages
+- [ ] Le panneau montre l'image en cours, son titre raccourci, le décompte juste et la ligne de progression.
+- [ ] Suivant et Pause depuis le panneau ; « Reprendre » en pause ; l'icône devient pâle en pause.
+- [ ] Les trois modes d'écran sur deux écrans ; cadrages, positions, fond flou ou couleur.
+- [ ] Changer de Space : le fond suit (sinon le noter : la ré-application sur changement de Space ne suffit pas).
+- [ ] Débrancher un écran : le fond est recalculé pour l'écran restant.
+- [ ] « Lancer au démarrage » : l'app apparaît dans Réglages Système > Ouverture et se lance après une reconnexion.
+- [ ] Le rythme change le décompte immédiatement ; l'ordre « dans l'ordre » suit l'ordre des channels.
