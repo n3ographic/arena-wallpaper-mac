@@ -59,8 +59,9 @@ public actor RotationEngine {
                 if firstError == nil { firstError = error }
             }
         }
+        // The pool again: images flagged during the attempts are gone from it.
         var cached: [Int] = []
-        for id in pool where await cache.cachedURL(for: id) != nil {
+        for id in enabledPool(await repository.config) where await cache.cachedURL(for: id) != nil {
             cached.append(id)
         }
         if let id = cached.randomElement() {

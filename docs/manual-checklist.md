@@ -42,3 +42,8 @@
 - [ ] Exclure grise l'image avec l'étiquette « Exclue » ; la rotation ne la choisit plus ; Réinclure la rétablit.
 - [ ] Ouvrir sur Are.na ouvre la bonne page dans le navigateur.
 - [ ] Panneau : Exclure ou Réinclure agit sur l'image en cours ; Are.na ouvre sa page.
+
+## Tâche 15 : contenu sensible
+- [ ] Sans compte payant : l'onglet « Contenu sensible » indique « Inactive » avec le bouton vers Réglages Système, et l'app pose les images normalement.
+- [ ] Avec le compte payant (configuration Release-Signed, équipe renseignée dans Xcode) et l'avertissement de contenu sensible activé : l'onglet indique « Active ».
+- [ ] Avec le profil de test d'Apple (« Testing your app's response to sensitive media ») : une image détectée n'est jamais posée, apparaît floutée avec « À vérifier », et « Garder cette image » la remet dans la rotation.
