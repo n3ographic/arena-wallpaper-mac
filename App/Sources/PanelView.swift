@@ -35,6 +35,12 @@ struct PanelView: View {
             .buttonStyle(.bordered)
             Divider()
             HStack {
+                Button(allExcluded ? "Réinclure" : "Exclure") { Task { await model.toggleExcluded(model.nowPlaying.ids) } }
+                    .disabled(model.nowPlaying.ids.isEmpty)
+                Button("Are.na") { model.nowPlaying.ids.first.map(model.openOnArena) }
+                    .disabled(model.nowPlaying.ids.isEmpty)
+                    .accessibilityLabel("Ouvrir sur Are.na")
+                Spacer()
                 Button("Réglages", action: openSettings)
                 Spacer()
                 Button("Quitter") { NSApp.terminate(nil) }
@@ -46,6 +52,10 @@ struct PanelView: View {
         }
         .padding(14)
         .frame(width: 300)
+    }
+
+    private var allExcluded: Bool {
+        !model.nowPlaying.ids.isEmpty && model.nowPlaying.ids.allSatisfy(model.isExcluded)
     }
 
     private var title: String {

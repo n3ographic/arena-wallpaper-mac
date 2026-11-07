@@ -36,3 +36,9 @@
 - [ ] Passer à une image fixe ferme la fenêtre du GIF ; le mode étalé n'anime rien.
 - [ ] Avec « Réduire les animations » (Réglages Système > Accessibilité > Affichage), aucun GIF n'est animé.
 - [ ] Le GIF reste présent en changeant de Space.
+
+## Tâche 14 : exclusion et menu contextuel
+- [ ] Clic droit sur une image : Appliquer ; en mode « une image par écran » avec deux écrans : Écran 1, Écran 2, Tous les écrans.
+- [ ] Exclure grise l'image avec l'étiquette « Exclue » ; la rotation ne la choisit plus ; Réinclure la rétablit.
+- [ ] Ouvrir sur Are.na ouvre la bonne page dans le navigateur.
+- [ ] Panneau : Exclure ou Réinclure agit sur l'image en cours ; Are.na ouvre sa page.

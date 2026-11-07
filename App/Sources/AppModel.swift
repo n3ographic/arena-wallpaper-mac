@@ -191,6 +191,31 @@ final class AppModel: ObservableObject {
         await apply(ids: ids, screens: screens)
     }
 
+    /// Context menu of the grid, in "one image per screen" mode: this image on one screen only.
+    func apply(_ block: Block, onScreen index: Int) async {
+        let screens = await screens.screens()
+        await apply(ids: withScreen(nowPlaying.ids, screenCount: screens.count, index: index, id: block.id), screens: screens)
+        clock?.restart()
+    }
+
+    func isExcluded(_ id: Int) -> Bool {
+        config.excluded.contains(id)
+    }
+
+    /// Excludes the images (or brings them back when they all are).
+    func toggleExcluded(_ ids: [Int]) async {
+        do {
+            try await repository.update { toggleExclusion(ids, in: &$0) }
+            await reloadConfig()
+        } catch {
+            lastError = Self.message(for: error)
+        }
+    }
+
+    func openOnArena(_ id: Int) {
+        NSWorkspace.shared.open(blockURL(id))
+    }
+
     /// After a Space change: the same files, set again.
     func reapply() async {
         await wallpaper.reapply()

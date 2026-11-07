@@ -43,7 +43,7 @@ struct ChannelsView: View {
                 .frame(width: 240)
                 Divider()
                 if let channel = model.config.channels.first(where: { $0.slug == selection }) {
-                    GridView(blocks: channel.blocks) { block in Task { await model.apply(block) } }
+                    GridView(blocks: channel.blocks)
                 } else {
                     Text("Choisis un channel pour voir ses images.")
                         .foregroundStyle(.secondary)
