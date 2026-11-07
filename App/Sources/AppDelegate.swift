@@ -3,7 +3,8 @@ import AppKit
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: StatusItemController?
-    private let settings = SettingsWindowController()
+    private let model = AppModel()
+    private lazy var settings = SettingsWindowController(model: model)
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)

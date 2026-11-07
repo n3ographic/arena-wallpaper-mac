@@ -1,9 +1,12 @@
 import SwiftUI
 
-/// Settings window content (sections arrive with later tasks).
+/// Settings window: one tab per area (more tabs arrive with later tasks).
 struct SettingsView: View {
     var body: some View {
-        Text("Réglages")
-            .frame(minWidth: 640, minHeight: 480)
+        TabView {
+            AccountView().tabItem { Text("Compte") }
+            ChannelsView().tabItem { Text("Channels") }
+        }
+        .frame(minWidth: 720, minHeight: 520)
     }
 }
