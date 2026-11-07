@@ -44,3 +44,39 @@ public struct Screen: Equatable, Sendable {
 public protocol ScreenProvider: Sendable {
     func screens() async -> [Screen]
 }
+
+/// Sets the desktop picture of one screen (NSWorkspace in the app, on the main thread).
+public protocol WallpaperSetter: Sendable {
+    func setWallpaper(_ file: URL, screenID: String) async throws
+}
+
+/// An animated GIF to play over a screen, in the rectangle the framing gives the image.
+public struct LiveTarget: Equatable, Sendable {
+    public var screenID: String
+    public var gif: URL
+    public var imageRect: PixelRect
+
+    public init(screenID: String, gif: URL, imageRect: PixelRect) {
+        self.screenID = screenID
+        self.gif = gif
+        self.imageRect = imageRect
+    }
+}
+
+/// Windows behind the desktop icons that play GIFs. An empty list closes them all.
+public protocol LiveWallpaperPlayer: Sendable {
+    func show(_ targets: [LiveTarget]) async
+}
+
+/// On-device sensitive content check (Apple's framework in signed builds).
+public protocol SensitivityChecker: Sendable {
+    func isActive() async -> Bool
+    func isSensitive(_ file: URL) async throws -> Bool
+}
+
+/// Used when the framework is unavailable: never active, never flags anything.
+public struct NoSensitivityChecker: SensitivityChecker {
+    public init() {}
+    public func isActive() async -> Bool { false }
+    public func isSensitive(_ file: URL) async throws -> Bool { false }
+}

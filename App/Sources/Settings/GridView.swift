@@ -3,6 +3,7 @@ import ArenaKit
 
 struct GridView: View {
     let blocks: [Block]
+    let onApply: (Block) -> Void
 
     var body: some View {
         ScrollView {
@@ -12,6 +13,8 @@ struct GridView: View {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: 8)], spacing: 8) {
                 ForEach(blocks, id: \.id) { block in
                     ThumbnailView(block: block)
+                        .onTapGesture { onApply(block) }
+                        .accessibilityAddTraits(.isButton)
                 }
             }
             .padding()

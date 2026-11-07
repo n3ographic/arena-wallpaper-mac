@@ -14,3 +14,8 @@
 - [ ] La grille s'affiche, les GIF sont figés avec le badge « GIF » ; « Actualiser » recharge.
 - [ ] Token révoqué : « Actualiser » affiche « Reconnecte-toi à Are.na. ».
 - [ ] Fermer la fenêtre de réglages libère la mémoire de la grille (moniteur d'activité).
+
+## Tâche 10 : pose
+- [ ] Un clic dans la grille pose l'image sur les deux écrans, dans chaque cadrage (remplir, contenir, étirer, centrer).
+- [ ] Temps de pose ressenti noté (cible : moins d'une seconde).
+- [ ] Un écran débranché pendant la pose n'empêche pas l'autre.

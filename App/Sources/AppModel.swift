@@ -12,6 +12,8 @@ final class AppModel: ObservableObject {
     let repository: ConfigRepository
     let library: LibraryService
     let cache: ImageCache
+    let wallpaper: WallpaperService
+    let screens = SystemScreens()
     private let secrets: SecretStore
     private let auth: WebAuthenticator
 
@@ -28,6 +30,10 @@ final class AppModel: ObservableObject {
         self.secrets = secrets
         repository = ConfigRepository(store: ConfigStore(directory: support))
         cache = ImageCache(directory: caches.appendingPathComponent("originals"))
+        wallpaper = WallpaperService(
+            repository: repository, cache: cache, renderedDirectory: support.appendingPathComponent("rendered"),
+            setter: WorkspaceWallpaper(), player: StillWallpaperPlayer(), checker: NoSensitivityChecker()
+        )
         library = LibraryService(repository: repository) {
             ArenaClient(token: secrets.token(), userAgent: AppModel.userAgent)
         }
@@ -117,6 +123,19 @@ final class AppModel: ObservableObject {
         await reloadConfig()
     }
 
+    // MARK: Wallpaper
+
+    /// Click in the grid: this image on every screen.
+    func apply(_ block: Block) async {
+        let screens = await screens.screens()
+        do {
+            try await wallpaper.apply(ids: Array(repeating: block.id, count: screens.count), screens: screens)
+            lastError = nil
+        } catch {
+            lastError = Self.message(for: error)
+        }
+    }
+
     // MARK: Messages
 
     static func message(for error: Error) -> String {
@@ -130,6 +149,12 @@ final class AppModel: ObservableObject {
         case OAuthError.tokenRejected(let status): return "Are.na a refusé la connexion (code \(status)). Utilise un token personnel."
         case OAuthError.denied: return "Connexion refusée."
         case OAuthError.stateMismatch, OAuthError.missingCode: return "Réponse de connexion invalide, réessaie."
+        case ImageCacheError.tooLarge: return "Image trop lourde."
+        case ImageCacheError.unreadable, RenderError.unreadable: return "Image illisible."
+        case ImageCacheError.download(let detail): return "Téléchargement impossible (\(detail))."
+        case ApplyError.allScreensFailed(let detail): return "Le système a refusé le fond d'écran (\(detail))."
+        case ApplyError.unknownImage: return "Image introuvable, actualise les channels."
+        case ApplyError.sensitive: return "Image masquée : contenu sensible détecté."
         default: return error.localizedDescription
         }
     }
