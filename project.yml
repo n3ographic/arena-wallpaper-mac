@@ -1,0 +1,51 @@
+name: ArenaWallpaper
+configs:
+  Debug: debug
+  Release: release
+  # Paid developer account only: Apple's sensitive content detection (restricted entitlement).
+  Release-Signed: release
+options:
+  bundleIdPrefix: com.n3ographic
+  developmentLanguage: fr
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+packages:
+  ArenaKit:
+    path: Packages/ArenaKit
+settings:
+  base:
+    SWIFT_VERSION: "5"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    # Texts are extracted into the string catalog (French source, English translation).
+    SWIFT_EMIT_LOC_STRINGS: YES
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+targets:
+  ArenaWallpaper:
+    type: application
+    platform: macOS
+    sources:
+      - App/Sources
+      - App/Config/AppOAuth.swift
+      - path: App/Resources
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.n3ographic.arenawallpaper.mac
+        PRODUCT_NAME: Arena Wallpaper
+        INFOPLIST_FILE: App/Config/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGN_ENTITLEMENTS: App/Config/ArenaWallpaper.entitlements
+        # Ad hoc signing until Neo's paid developer account exists.
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGN_STYLE: Manual
+        ENABLE_HARDENED_RUNTIME: YES
+      configs:
+        Release-Signed:
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: SENSITIVE_CONTENT
+          CODE_SIGN_ENTITLEMENTS: App/Config/ArenaWallpaper-Signed.entitlements
+          CODE_SIGN_STYLE: Automatic
+          CODE_SIGN_IDENTITY: Apple Development
+    dependencies:
+      - package: ArenaKit
+    scheme: {}
