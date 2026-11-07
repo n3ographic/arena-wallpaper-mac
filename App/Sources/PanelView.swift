@@ -27,7 +27,7 @@ struct PanelView: View {
                     Label("Suivant", systemImage: "forward.end.fill").frame(maxWidth: .infinity)
                 }
                 Button { Task { await model.togglePause() } } label: {
-                    Label(model.nowPlaying.paused ? "Reprendre" : "Pause", systemImage: model.nowPlaying.paused ? "play.fill" : "pause.fill")
+                    Label(model.nowPlaying.paused ? String(localized: "Reprendre") : String(localized: "Pause"), systemImage: model.nowPlaying.paused ? "play.fill" : "pause.fill")
                         .frame(maxWidth: .infinity)
                 }
             }
@@ -35,11 +35,11 @@ struct PanelView: View {
             .buttonStyle(.bordered)
             Divider()
             HStack {
-                Button(allExcluded ? "Réinclure" : "Exclure") { Task { await model.toggleExcluded(model.nowPlaying.ids) } }
+                Button(allExcluded ? String(localized: "Réinclure") : String(localized: "Exclure")) { Task { await model.toggleExcluded(model.nowPlaying.ids) } }
                     .disabled(model.nowPlaying.ids.isEmpty)
                 Button("Are.na") { model.nowPlaying.ids.first.map(model.openOnArena) }
                     .disabled(model.nowPlaying.ids.isEmpty)
-                    .accessibilityLabel("Ouvrir sur Are.na")
+                    .accessibilityLabel(Text("Ouvrir sur Are.na"))
                 Spacer()
                 Button("Réglages", action: openSettings)
                 Spacer()
@@ -59,16 +59,16 @@ struct PanelView: View {
     }
 
     private var title: String {
-        guard let block else { return "Aucune image affichée" }
+        guard let block else { return String(localized: "Aucune image affichée") }
         let others = Set(model.nowPlaying.ids).count - 1
-        return shortenedTitle(block.title ?? "Sans titre", max: 34) + (others > 0 ? " (+\(others))" : "")
+        return shortenedTitle(block.title ?? String(localized: "Sans titre"), max: 34) + (others > 0 ? " (+\(others))" : "")
     }
 
     private func subtitle(now: Date) -> String {
-        if model.nowPlaying.paused { return "En pause" }
+        if model.nowPlaying.paused { return String(localized: "En pause") }
         guard let next = model.nowPlaying.nextChange else { return "" }
         let minutes = remainingMinutes(until: next, now: now)
-        return minutes == 0 ? "Prochain changement dans moins d'une minute" : "Prochain changement dans \(minutes) min"
+        return minutes == 0 ? String(localized: "Prochain changement dans moins d'une minute") : String(localized: "Prochain changement dans \(minutes) min")
     }
 
     private func progressValue(now: Date) -> Double {
@@ -98,7 +98,7 @@ private struct PanelArt: View {
                 }
             }
             .accessibilityElement()
-            .accessibilityLabel(block?.title ?? "Aucune image affichée")
+            .accessibilityLabel(block?.title.map { Text(verbatim: $0) } ?? Text("Aucune image affichée"))
             .task(id: block?.id) {
                 image = nil
                 guard let block, let (data, _) = try? await URLSession.shared.data(from: block.previewURL) else { return }

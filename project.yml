@@ -6,6 +6,7 @@ configs:
   Release-Signed: release
 options:
   bundleIdPrefix: com.n3ographic
+  developmentLanguage: fr
   deploymentTarget:
     macOS: "14.0"
   createIntermediateGroups: true
@@ -16,6 +17,9 @@ settings:
   base:
     SWIFT_VERSION: "5"
     MACOSX_DEPLOYMENT_TARGET: "14.0"
+    # Texts are extracted into the string catalog (French source, English translation).
+    SWIFT_EMIT_LOC_STRINGS: YES
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
 targets:
   ArenaWallpaper:
     type: application
@@ -23,6 +27,8 @@ targets:
     sources:
       - App/Sources
       - App/Config/AppOAuth.swift
+      - path: App/Resources
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.n3ographic.arenawallpaper.mac

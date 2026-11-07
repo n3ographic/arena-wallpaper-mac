@@ -8,7 +8,7 @@ struct AccountView: View {
     var body: some View {
         Form {
             if model.isConnected {
-                LabeledContent("Are.na", value: "Connecté")
+                LabeledContent("Are.na") { Text("Connecté") }
                 Button("Se déconnecter") { model.disconnect() }
             } else {
                 Button("Se connecter à Are.na") { Task { await model.connect() } }

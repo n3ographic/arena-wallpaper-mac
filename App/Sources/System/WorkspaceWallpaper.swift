@@ -4,7 +4,7 @@ import ArenaKit
 enum WallpaperError: Error, LocalizedError {
     case screenGone
 
-    var errorDescription: String? { "Écran débranché" }
+    var errorDescription: String? { String(localized: "Écran débranché") }
 }
 
 /// Sets the desktop picture of one screen. The value read back right after is the previous

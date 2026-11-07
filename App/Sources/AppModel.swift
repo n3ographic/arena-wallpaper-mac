@@ -87,7 +87,7 @@ final class AppModel: ObservableObject {
 
     func connect() async {
         guard !AppOAuth.clientID.isEmpty else {
-            lastError = "La connexion Are.na n'est pas encore configurée : utilise un token personnel."
+            lastError = String(localized: "La connexion Are.na n'est pas encore configurée : utilise un token personnel.")
             return
         }
         let oauth = OAuthConfig(clientID: AppOAuth.clientID)
@@ -143,7 +143,7 @@ final class AppModel: ObservableObject {
     func refresh() async {
         let failures = await library.refreshAll()
         if failures.values.contains(.unauthorized) {
-            lastError = "Reconnecte-toi à Are.na."
+            lastError = String(localized: "Reconnecte-toi à Are.na.")
         } else if let (slug, error) = failures.first {
             lastError = "\(slug) : \(Self.message(for: error))"
         }
@@ -287,21 +287,21 @@ final class AppModel: ObservableObject {
 
     static func message(for error: Error) -> String {
         switch error {
-        case LibraryError.invalidChannel: return "Lien ou slug de channel invalide."
-        case LibraryError.alreadyAdded: return "Ce channel est déjà ajouté."
-        case ArenaError.unauthorized: return "Reconnecte-toi à Are.na."
-        case ArenaError.notFound: return "Channel introuvable ou privé."
-        case ArenaError.rateLimited(let seconds): return "Are.na limite les requêtes : réessaie dans \(seconds) s."
-        case ArenaError.network(let detail): return "Réseau indisponible (\(detail))."
-        case OAuthError.tokenRejected(let status): return "Are.na a refusé la connexion (code \(status)). Utilise un token personnel."
-        case OAuthError.denied: return "Connexion refusée."
-        case OAuthError.stateMismatch, OAuthError.missingCode: return "Réponse de connexion invalide, réessaie."
-        case ImageCacheError.tooLarge: return "Image trop lourde."
-        case ImageCacheError.unreadable, RenderError.unreadable: return "Image illisible."
-        case ImageCacheError.download(let detail): return "Téléchargement impossible (\(detail))."
-        case ApplyError.allScreensFailed(let detail): return "Le système a refusé le fond d'écran (\(detail))."
-        case ApplyError.unknownImage: return "Image introuvable, actualise les channels."
-        case ApplyError.sensitive: return "Image masquée : contenu sensible détecté."
+        case LibraryError.invalidChannel: return String(localized: "Lien ou slug de channel invalide.")
+        case LibraryError.alreadyAdded: return String(localized: "Ce channel est déjà ajouté.")
+        case ArenaError.unauthorized: return String(localized: "Reconnecte-toi à Are.na.")
+        case ArenaError.notFound: return String(localized: "Channel introuvable ou privé.")
+        case ArenaError.rateLimited(let seconds): return String(localized: "Are.na limite les requêtes : réessaie dans \(seconds) s.")
+        case ArenaError.network(let detail): return String(localized: "Réseau indisponible (\(detail)).")
+        case OAuthError.tokenRejected(let status): return String(localized: "Are.na a refusé la connexion (code \(status)). Utilise un token personnel.")
+        case OAuthError.denied: return String(localized: "Connexion refusée.")
+        case OAuthError.stateMismatch, OAuthError.missingCode: return String(localized: "Réponse de connexion invalide, réessaie.")
+        case ImageCacheError.tooLarge: return String(localized: "Image trop lourde.")
+        case ImageCacheError.unreadable, RenderError.unreadable: return String(localized: "Image illisible.")
+        case ImageCacheError.download(let detail): return String(localized: "Téléchargement impossible (\(detail)).")
+        case ApplyError.allScreensFailed(let detail): return String(localized: "Le système a refusé le fond d'écran (\(detail)).")
+        case ApplyError.unknownImage: return String(localized: "Image introuvable, actualise les channels.")
+        case ApplyError.sensitive: return String(localized: "Image masquée : contenu sensible détecté.")
         default: return error.localizedDescription
         }
     }

@@ -37,5 +37,5 @@ struct KeychainSecretStore: SecretStore {
 
 struct KeychainError: Error, LocalizedError {
     let status: OSStatus
-    var errorDescription: String? { "Trousseau indisponible (\(status))" }
+    var errorDescription: String? { String(localized: "Trousseau indisponible (\(status))") }
 }

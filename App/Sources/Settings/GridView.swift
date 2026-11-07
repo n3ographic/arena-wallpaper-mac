@@ -34,7 +34,7 @@ struct GridView: View {
             Button("Appliquer") { Task { await model.apply(block) } }
         }
         Divider()
-        Button(model.isExcluded(block.id) ? "Réinclure dans la rotation" : "Exclure de la rotation") {
+        Button(model.isExcluded(block.id) ? String(localized: "Réinclure dans la rotation") : String(localized: "Exclure de la rotation")) {
             Task { await model.toggleExcluded([block.id]) }
         }
         if model.isFlagged(block.id) {
@@ -82,7 +82,7 @@ struct ThumbnailView: View {
                 }
             }
             .accessibilityElement()
-            .accessibilityLabel((block.title ?? "Image sans titre") + (flagged ? ", à vérifier" : excluded ? ", exclue" : ""))
+            .accessibilityLabel(Text(verbatim: block.title ?? String(localized: "Image sans titre")) + Text(flagged ? ", à vérifier" : excluded ? ", exclue" : ""))
             .task(id: block.id) { image = await Thumbnails.shared.image(for: block) }
     }
 }

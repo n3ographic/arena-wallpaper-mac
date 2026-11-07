@@ -29,8 +29,8 @@ struct ChannelsView: View {
                                 set: { enabled in Task { await model.setEnabled(channel.slug, enabled) } }
                             ))
                             .labelsHidden()
-                            .accessibilityLabel("Utiliser \(channel.slug) dans la rotation")
-                            Text(channel.slug)
+                            .accessibilityLabel(Text("Utiliser \(channel.slug) dans la rotation"))
+                            Text(verbatim: channel.slug)
                             Spacer()
                             Text("\(channel.blocks.count)").foregroundStyle(.secondary)
                         }

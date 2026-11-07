@@ -16,7 +16,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         if window == nil {
             let root = SettingsView().environmentObject(model)
             let w = NSWindow(contentViewController: NSHostingController(rootView: root))
-            w.title = "Réglages"
+            w.title = String(localized: "Réglages")
             w.styleMask = [.titled, .closable, .miniaturizable, .resizable]
             w.isReleasedWhenClosed = false
             w.delegate = self
