@@ -19,7 +19,16 @@ final class DesktopGIFPlayer: LiveWallpaperPlayer, @unchecked Sendable {
         for target in targets {
             guard let screen = NSScreen.screens.first(where: { $0.screenID == target.screenID }),
                   let image = NSImage(contentsOf: target.gif) else { continue }
-            windows[target.screenID] = GIFWindow(image: image, frame: Self.frame(of: target.imageRect, on: screen))
+            let scale = screen.backingScaleFactor
+            let window = Self.frame(of: target.imageRect, on: screen)
+            // The whole GIF inside the window (AppKit view coordinates: origin at the bottom-left).
+            let c = target.contentRect
+            let content = NSRect(
+                x: CGFloat(c.x) / scale,
+                y: window.height - CGFloat(c.y + c.height) / scale,
+                width: CGFloat(c.width) / scale, height: CGFloat(c.height) / scale
+            )
+            windows[target.screenID] = GIFWindow(image: image, frame: window, content: content)
         }
     }
 
@@ -40,7 +49,7 @@ private final class GIFWindow {
     private var debouncer = VisibilityDebouncer(delay: 0.3)
     private var observer: NSObjectProtocol?
 
-    init(image: NSImage, frame: NSRect) {
+    init(image: NSImage, frame: NSRect, content: NSRect) {
         window = NSWindow(contentRect: frame, styleMask: .borderless, backing: .buffered, defer: false)
         window.isOpaque = false
         window.backgroundColor = .clear
@@ -49,12 +58,16 @@ private final class GIFWindow {
         window.ignoresMouseEvents = true
         window.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.desktopWindow)) + 1)
         window.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
-        imageView = NSImageView(frame: NSRect(origin: .zero, size: frame.size))
+        imageView = NSImageView(frame: content)
         imageView.image = image
         imageView.imageScaling = .scaleAxesIndependently
         imageView.animates = true
-        imageView.autoresizingMask = [.width, .height]
-        window.contentView = imageView
+        // The container clips the parts of a cropped (fill) GIF that fall outside the window.
+        let container = NSView(frame: NSRect(origin: .zero, size: frame.size))
+        container.wantsLayer = true
+        container.layer?.masksToBounds = true
+        container.addSubview(imageView)
+        window.contentView = container
         window.orderFrontRegardless()
         observer = NotificationCenter.default.addObserver(forName: NSWindow.didChangeOcclusionStateNotification, object: window, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated { self?.occlusionChanged() }

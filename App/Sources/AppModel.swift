@@ -143,6 +143,8 @@ final class AppModel: ObservableObject {
     func refresh() async {
         let failures = await library.refreshAll()
         if failures.values.contains(.unauthorized) {
+            // The token no longer works: back to signed out, so "Sign in" is offered.
+            disconnect()
             lastError = String(localized: "Reconnecte-toi à Are.na.")
         } else if let (slug, error) = failures.first {
             lastError = "\(slug) : \(Self.message(for: error))"
@@ -246,6 +248,10 @@ final class AppModel: ObservableObject {
 
     func openOnArena(_ id: Int) {
         NSWorkspace.shared.open(blockURL(id))
+    }
+
+    func refreshAnimations() async {
+        await wallpaper.refreshAnimations()
     }
 
     /// After a Space change: the same files, set again.

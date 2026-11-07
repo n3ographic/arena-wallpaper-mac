@@ -51,6 +51,8 @@ public actor RotationEngine {
         scheduler.sync(pool: pool, order: config.order)
         var firstError: Error?
         for _ in 0..<min(max(pool.count, 1), Self.maxAttempts) {
+            // A cancelled rotation stops at once: no draw is wasted, no fallback is applied.
+            if Task.isCancelled { return }
             guard let ids = pickIDs(screens: screens, config: config, poolSize: pool.count, manual: manual) else { return }
             do {
                 try await apply(ids: ids, screens: screens)
@@ -59,6 +61,7 @@ public actor RotationEngine {
                 if firstError == nil { firstError = error }
             }
         }
+        if Task.isCancelled { return }
         // The pool again: images flagged during the attempts are gone from it.
         var cached: [Int] = []
         for id in enabledPool(await repository.config) where await cache.cachedURL(for: id) != nil {

@@ -122,3 +122,53 @@ private func renderedFiles(_ dir: URL) throws -> [String] {
     try await wallpaper.apply(ids: [1], screens: [mainScreen])
     #expect(await player.shown == [[]])
 }
+
+@Test func reduceMotionTurnedOnLaterStopsTheAnimation() async throws {
+    let (repository, cache, rendered) = try await fixture(ids: [1], gifIDs: [1])
+    let player = RecordingPlayer()
+    let flag = ReduceMotionFlag()
+    let wallpaper = WallpaperService(
+        repository: repository, cache: cache, renderedDirectory: rendered, setter: RecordingSetter(), player: player,
+        checker: NoSensitivityChecker(), reduceMotion: { flag.value }
+    )
+    try await wallpaper.apply(ids: [1], screens: [mainScreen])
+    #expect(await player.shown.last?.count == 1)
+    flag.value = true
+    await wallpaper.refreshAnimations()
+    #expect(await player.shown.last == [])
+}
+
+/// Holds `isSensitive` for the image 1 until released, so a newer application can finish first.
+private actor GateChecker: SensitivityChecker {
+    private var waiting: CheckedContinuation<Void, Never>?
+    private(set) var isHolding = false
+
+    func isActive() async -> Bool { true }
+
+    func isSensitive(_ file: URL) async throws -> Bool {
+        if file.lastPathComponent == "1" {
+            isHolding = true
+            await withCheckedContinuation { waiting = $0 }
+        }
+        return false
+    }
+
+    func release() {
+        waiting?.resume()
+        waiting = nil
+    }
+}
+
+@Test func olderApplicationDoesNotOverrideANewerOne() async throws {
+    let (repository, cache, rendered) = try await fixture(ids: [1, 2])
+    let setter = RecordingSetter()
+    let gate = GateChecker()
+    let wallpaper = WallpaperService(repository: repository, cache: cache, renderedDirectory: rendered, setter: setter, player: RecordingPlayer(), checker: gate)
+    let older = Task { try await wallpaper.apply(ids: [1], screens: [mainScreen]) }
+    while await !gate.isHolding { await Task.yield() }
+    try await wallpaper.apply(ids: [2], screens: [mainScreen])
+    await gate.release()
+    try await older.value
+    #expect(await setter.calls.count == 1)
+    #expect(await wallpaper.current == [2])
+}

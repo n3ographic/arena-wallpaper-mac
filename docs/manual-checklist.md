@@ -12,7 +12,7 @@
 - [ ] « Se connecter à Are.na » ouvre la page Are.na, revient dans l'app, le compte apparaît connecté. Noter dans la spec (section 12) si l'échange sans secret marche ; sinon, le token personnel (plan B) doit marcher.
 - [ ] Ajouter un channel par lien et par slug ; doublon et texte invalide affichent un message.
 - [ ] La grille s'affiche, les GIF sont figés avec le badge « GIF » ; « Actualiser » recharge.
-- [ ] Token révoqué : « Actualiser » affiche « Reconnecte-toi à Are.na. ».
+- [ ] Token révoqué : « Actualiser » affiche « Reconnecte-toi à Are.na. » et le compte repasse à « Se connecter ».
 - [ ] Fermer la fenêtre de réglages libère la mémoire de la grille (moniteur d'activité).
 
 ## Tâche 10 : pose
@@ -32,6 +32,8 @@
 ## Tâche 13 : GIF animés
 - [ ] Un GIF appliqué s'anime derrière les icônes ; les icônes restent cliquables.
 - [ ] En « contenir », les bandes du fond fixe (flou ou couleur) restent visibles autour du GIF.
+- [ ] En « remplir » (réglage par défaut), un GIF qui n'a pas le ratio de l'écran est recadré comme l'image fixe, pas étiré ; la position déplace bien le recadrage.
+- [ ] Activer « Réduire les animations » pendant qu'un GIF joue l'arrête aussitôt ; le désactiver le relance.
 - [ ] Une app en plein écran met l'animation en pause (processeur de l'app quasi nul), elle reprend ensuite.
 - [ ] Passer à une image fixe ferme la fenêtre du GIF ; le mode étalé n'anime rien.
 - [ ] Avec « Réduire les animations » (Réglages Système > Accessibilité > Affichage), aucun GIF n'est animé.

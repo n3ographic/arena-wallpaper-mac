@@ -27,7 +27,11 @@ private func targets(mode: ScreenMode = .same, reduceMotion: Bool = false, frame
             imageSize: CGSize(width: 100, height: 50), canvasSize: CGSize(width: screen.frame.width, height: screen.frame.height),
             fit: .contain, positionX: 50, positionY: 50
         ).destination
-        return LiveTarget(screenID: screen.id, gif: gifURL, imageRect: PixelRect(x: Int(d.minX), y: Int(d.minY), width: Int(d.width), height: Int(d.height)))
+        return LiveTarget(
+            screenID: screen.id, gif: gifURL,
+            imageRect: PixelRect(x: Int(d.minX), y: Int(d.minY), width: Int(d.width), height: Int(d.height)),
+            contentRect: PixelRect(x: 0, y: 0, width: Int(d.width), height: Int(d.height))
+        )
     }
     #expect(targets() == expected)
 }
@@ -54,4 +58,19 @@ private let t = Date(timeIntervalSince1970: 1_000)
     var debouncer = VisibilityDebouncer(delay: 0.3)
     debouncer.observe(false, at: t)
     #expect(debouncer.settled(at: t.addingTimeInterval(0.31)) == false)
+}
+
+@Test func liveTargetsFillCropsLikeTheStillImage() {
+    let screen = testScreen("s", 0, 0, 100, 100)
+    func target(_ position: Int) -> LiveTarget? {
+        liveTargets(
+            ids: [1], screens: [screen], blocks: [1: gifBlock(1)], originals: [1: gifURL],
+            frameCounts: [1: 4], imageSizes: [1: CGSize(width: 200, height: 100)],
+            mode: .same, reduceMotion: false, fit: .fill, positionX: position, positionY: 50
+        ).first
+    }
+    // The window covers the screen; the whole GIF is scaled and shifted inside it, then clipped.
+    #expect(target(0)?.imageRect == PixelRect(x: 0, y: 0, width: 100, height: 100))
+    #expect(target(0)?.contentRect == PixelRect(x: 0, y: 0, width: 200, height: 100))
+    #expect(target(100)?.contentRect == PixelRect(x: -100, y: 0, width: 200, height: 100))
 }

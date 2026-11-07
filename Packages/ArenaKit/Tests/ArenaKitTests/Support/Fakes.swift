@@ -60,3 +60,7 @@ func fixture(ids: [Int], mode: ScreenMode = .same, gifIDs: Set<Int> = []) async 
     }
     return (repository, ImageCache(directory: originals), root.appendingPathComponent("rendered"))
 }
+
+final class ReduceMotionFlag: @unchecked Sendable {
+    var value = false
+}

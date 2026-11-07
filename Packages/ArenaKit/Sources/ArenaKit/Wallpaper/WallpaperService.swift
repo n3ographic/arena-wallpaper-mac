@@ -24,6 +24,10 @@ public actor WallpaperService {
     public private(set) var current: [Int] = []
     /// The files last set, per screen id, to set them again without rendering.
     private var currentFiles: [(screenID: String, file: URL)] = []
+    /// What was last applied, to recompute the animations without rendering again.
+    private var lastApplied: (ids: [Int], screens: [Screen], originals: [Int: URL])?
+    /// Increases with every application: an older one that finishes late must not win.
+    private var generation = 0
 
     public init(
         repository: ConfigRepository, cache: ImageCache, renderedDirectory: URL,
@@ -43,6 +47,8 @@ public actor WallpaperService {
 
     public func apply(ids: [Int], screens: [Screen]) async throws {
         guard !screens.isEmpty, ids.count == screens.count else { return }
+        generation += 1
+        let mine = generation
         let config = await repository.config
         var originals: [Int: URL] = [:]
         for id in Set(ids) {
@@ -53,9 +59,11 @@ public actor WallpaperService {
         }
         try await checkSensitive(originals: originals, config: config)
         let files = try await render(ids: ids, screens: screens, originals: originals, config: config)
+        guard mine == generation else { return }
 
         var errors: [String] = []
         for (screen, file) in zip(screens, files) {
+            guard mine == generation else { return }
             do {
                 try await setter.setWallpaper(file, screenID: screen.id)
             } catch {
@@ -66,9 +74,18 @@ public actor WallpaperService {
         if errors.count == screens.count {
             throw ApplyError.allScreensFailed(errors.first ?? "")
         }
+        guard mine == generation else { return }
         current = ids
         currentFiles = zip(screens, files).map { ($0.id, $1) }
+        lastApplied = (ids, screens, originals)
         await player.show(animatedTargets(ids: ids, screens: screens, originals: originals, config: config))
+    }
+
+    /// Recomputes the animations of what is on screen (for example after "Reduce motion" changed).
+    public func refreshAnimations() async {
+        guard let lastApplied else { return }
+        let config = await repository.config
+        await player.show(animatedTargets(ids: lastApplied.ids, screens: lastApplied.screens, originals: lastApplied.originals, config: config))
     }
 
     /// GIFs play in windows over the still first frame that was just set.

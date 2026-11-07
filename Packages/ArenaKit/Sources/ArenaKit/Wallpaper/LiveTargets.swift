@@ -13,10 +13,21 @@ public func liveTargets(
     return zip(screens, ids).compactMap { screen, id in
         guard blocks[id]?.isGIF == true, (frameCounts[id] ?? 0) > 1,
               let gif = originals[id], let size = imageSizes[id] else { return nil }
-        let d = FrameGeometry.placement(
+        let placement = FrameGeometry.placement(
             imageSize: size, canvasSize: CGSize(width: screen.frame.width, height: screen.frame.height),
             fit: fit, positionX: positionX, positionY: positionY
-        ).destination
-        return LiveTarget(screenID: screen.id, gif: gif, imageRect: PixelRect(x: Int(d.minX), y: Int(d.minY), width: Int(d.width), height: Int(d.height)))
+        )
+        let d = placement.destination, s = placement.source
+        // The whole GIF at the scale that maps the source crop onto the window.
+        let scaleX = d.width / s.width, scaleY = d.height / s.height
+        let content = PixelRect(
+            x: Int((-s.minX * scaleX).rounded()), y: Int((-s.minY * scaleY).rounded()),
+            width: Int((size.width * scaleX).rounded()), height: Int((size.height * scaleY).rounded())
+        )
+        return LiveTarget(
+            screenID: screen.id, gif: gif,
+            imageRect: PixelRect(x: Int(d.minX), y: Int(d.minY), width: Int(d.width), height: Int(d.height)),
+            contentRect: content
+        )
     }
 }

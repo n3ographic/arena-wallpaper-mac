@@ -100,3 +100,15 @@ extension Network {
         }
     }
 }
+
+@Test func cancelledRotationAppliesNothing() async throws {
+    let (repository, cache, rendered) = try await fixture(ids: [1, 2])
+    let setter = RecordingSetter()
+    let rotation = engine(repository, cache, rendered, setter: setter)
+    let task = Task {
+        withUnsafeCurrentTask { $0?.cancel() }
+        try await rotation.rotate(manual: false)
+    }
+    try? await task.value
+    #expect(await setter.calls.isEmpty)
+}

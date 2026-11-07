@@ -50,16 +50,20 @@ public protocol WallpaperSetter: Sendable {
     func setWallpaper(_ file: URL, screenID: String) async throws
 }
 
-/// An animated GIF to play over a screen, in the rectangle the framing gives the image.
+/// An animated GIF to play over a screen. `imageRect` is the window (screen pixels, top-left
+/// origin); `contentRect` is the whole scaled GIF relative to that window, larger than it when
+/// the framing crops (fill), so the window clips it exactly like the still image.
 public struct LiveTarget: Equatable, Sendable {
     public var screenID: String
     public var gif: URL
     public var imageRect: PixelRect
+    public var contentRect: PixelRect
 
-    public init(screenID: String, gif: URL, imageRect: PixelRect) {
+    public init(screenID: String, gif: URL, imageRect: PixelRect, contentRect: PixelRect) {
         self.screenID = screenID
         self.gif = gif
         self.imageRect = imageRect
+        self.contentRect = contentRect
     }
 }
 

@@ -42,9 +42,12 @@ final class RotationClock {
         start(rotateNow: false)
     }
 
+    /// Runs in its own task: restarting the clock cancels the wait, never a rotation in
+    /// progress (a cancelled download would make it fall back on a random cached image).
     private func rotate() async {
+        let engine = self.engine
         do {
-            try await engine.rotate(manual: false)
+            try await Task { try await engine.rotate(manual: false) }.value
         } catch {
             onError(error)
         }
