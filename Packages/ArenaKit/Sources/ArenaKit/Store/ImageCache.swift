@@ -28,17 +28,8 @@ public actor ImageCache {
 
     public func original(for block: Block) async throws -> URL {
         if let cached = cachedURL(for: block.id) { return cached }
-        let data: Data
-        let response: URLResponse
-        do {
-            // No custom User-Agent: the image CDN is not the API.
-            (data, response) = try await session.data(from: block.fullURL)
-        } catch {
-            throw ImageCacheError.download(error.localizedDescription)
-        }
-        let status = (response as? HTTPURLResponse)?.statusCode ?? 0
-        guard (200..<300).contains(status) else { throw ImageCacheError.download("HTTP \(status)") }
-        guard data.count <= maxBytes else { throw ImageCacheError.tooLarge }
+        // No custom User-Agent: the image CDN is not the API.
+        let data = try await downloadImage(block.fullURL, session: session, maxBytes: maxBytes)
         guard let (width, height) = pixelSize(of: data) else { throw ImageCacheError.unreadable }
         guard width * height <= maxPixels else { throw ImageCacheError.tooLarge }
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)

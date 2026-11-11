@@ -32,7 +32,10 @@ final class UpdateChecker: ObservableObject {
         guard let (data, response) = try? await URLSession.shared.data(for: request),
               (response as? HTTPURLResponse)?.statusCode == 200,
               let release = try? JSONDecoder().decode(Release.self, from: data),
-              let page = URL(string: release.html_url) else {
+              let page = URL(string: release.html_url),
+              // Only a page of this repository is offered as a download link.
+              page.scheme == "https", page.host == "github.com",
+              page.path.hasPrefix(Self.repository.path + "/") else {
             status = .failed
             return
         }

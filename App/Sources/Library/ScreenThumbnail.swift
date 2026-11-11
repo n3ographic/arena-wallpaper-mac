@@ -16,7 +16,7 @@ struct BlockPreview: View {
             .clipped()
             .task(id: block?.id) {
                 image = nil
-                guard let block, let (data, _) = try? await URLSession.shared.data(from: block.previewURL) else { return }
+                guard let block, let data = try? await downloadImage(block.previewURL) else { return }
                 image = Thumbnails.downscale(data, maxPixels: maxPixels)
             }
     }

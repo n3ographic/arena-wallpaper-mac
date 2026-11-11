@@ -8,6 +8,8 @@ Une app macOS qui met les images de tes channels [Are.na](https://www.are.na) en
 
 L'app est gratuite et n'est pas notarisée par Apple (pas de compte Developer payant). macOS la bloque donc au premier lancement : c'est normal.
 
+**Télécharge-la uniquement depuis les [Releases](../../releases/latest) de ce dépôt.** Les étapes ci-dessous lèvent la protection de macOS pour cette app : ne les applique jamais à un fichier venu d'ailleurs. Pour vérifier le fichier, compare son empreinte avec celle indiquée dans la Release : `shasum -a 256 ~/Downloads/Arena-Wallpaper.zip`.
+
 1. Télécharge `Arena-Wallpaper.zip` dans les [Releases](../../releases/latest), puis double-clique pour le décompresser.
 2. Glisse `Arena Wallpaper.app` dans le dossier Applications.
 3. Ouvre l'app. macOS affiche un message du type « Apple n'a pas pu vérifier… » : clique sur **OK** (ou **Terminé**).
@@ -21,6 +23,8 @@ Les mises à jour : l'app indique dans Préférences > Général quand une versi
 ## Installation (English)
 
 The app is free and not notarized by Apple (no paid Developer account), so macOS blocks it on first launch. This is expected.
+
+**Only download it from this repository's [Releases](../../releases/latest).** The steps below lift macOS protection for this app: never apply them to a file from anywhere else. To check the file, compare its fingerprint with the one in the Release: `shasum -a 256 ~/Downloads/Arena-Wallpaper.zip`.
 
 1. Download `Arena-Wallpaper.zip` from the [Releases](../../releases/latest) and double-click it to unzip.
 2. Drag `Arena Wallpaper.app` into the Applications folder.

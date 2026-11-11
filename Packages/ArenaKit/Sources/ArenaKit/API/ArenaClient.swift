@@ -138,7 +138,8 @@ public struct ArenaProfile: Equatable, Sendable {
         self.memberSince = memberSince
     }
 
-    public var profileURL: URL { URL(string: "https://www.are.na/\(slug)")! }
+    /// Built without parsing, so an unexpected character in the slug cannot crash the app.
+    public var profileURL: URL { URL(string: "https://www.are.na")!.appendingPathComponent(slug) }
 }
 
 private struct RawMe: Decodable {
