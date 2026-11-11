@@ -2,8 +2,6 @@ name: ArenaWallpaper
 configs:
   Debug: debug
   Release: release
-  # Paid developer account only: Apple's sensitive content detection (restricted entitlement).
-  Release-Signed: release
 options:
   bundleIdPrefix: com.n3ographic
   developmentLanguage: fr
@@ -40,12 +38,6 @@ targets:
         CODE_SIGN_IDENTITY: "-"
         CODE_SIGN_STYLE: Manual
         ENABLE_HARDENED_RUNTIME: YES
-      configs:
-        Release-Signed:
-          SWIFT_ACTIVE_COMPILATION_CONDITIONS: SENSITIVE_CONTENT
-          CODE_SIGN_ENTITLEMENTS: App/Config/ArenaWallpaper-Signed.entitlements
-          CODE_SIGN_STYLE: Automatic
-          CODE_SIGN_IDENTITY: Apple Development
     dependencies:
       - package: ArenaKit
     scheme: {}

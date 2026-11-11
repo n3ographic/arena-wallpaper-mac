@@ -71,16 +71,3 @@ public struct LiveTarget: Equatable, Sendable {
 public protocol LiveWallpaperPlayer: Sendable {
     func show(_ targets: [LiveTarget]) async
 }
-
-/// On-device sensitive content check (Apple's framework in signed builds).
-public protocol SensitivityChecker: Sendable {
-    func isActive() async -> Bool
-    func isSensitive(_ file: URL) async throws -> Bool
-}
-
-/// Used when the framework is unavailable: never active, never flags anything.
-public struct NoSensitivityChecker: SensitivityChecker {
-    public init() {}
-    public func isActive() async -> Bool { false }
-    public func isSensitive(_ file: URL) async throws -> Bool { false }
-}

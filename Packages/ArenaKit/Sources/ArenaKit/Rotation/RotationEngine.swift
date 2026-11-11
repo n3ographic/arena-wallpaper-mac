@@ -62,7 +62,7 @@ public actor RotationEngine {
             }
         }
         if Task.isCancelled { return }
-        // The pool again: images flagged during the attempts are gone from it.
+        // The pool again, as it is now.
         var cached: [Int] = []
         for id in enabledPool(await repository.config) where await cache.cachedURL(for: id) != nil {
             cached.append(id)

@@ -89,10 +89,8 @@ private func config(_ channels: [Channel]) -> Config {
     #expect(enabledPool(config([])).isEmpty)
 }
 
-@Test func enabledPoolSkipsExcludedAndFlaggedImages() {
+@Test func enabledPoolSkipsOnlyExcludedImages() {
     var c = config([channel("a", true, [1, 2, 3, 4])])
     c.excluded = [2]
-    c.sensitiveVerdicts = [3: true, 4: true]
-    c.sensitiveAllowed = [4]
-    #expect(enabledPool(c) == [1, 4])
+    #expect(enabledPool(c) == [1, 3, 4])
 }

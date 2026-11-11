@@ -9,7 +9,6 @@ final class AppModel: ObservableObject {
     @Published private(set) var isConnected = false
     @Published private(set) var nowPlaying = NowPlaying(ids: [], nextChange: nil, paused: false)
     @Published private(set) var launchAtLogin = LaunchAtLogin.isEnabled
-    @Published private(set) var sensitiveDetectionActive = false
     @Published var lastError: String?
 
     let repository: ConfigRepository
@@ -20,7 +19,6 @@ final class AppModel: ObservableObject {
     let screens = SystemScreens()
     private let secrets: SecretStore
     private let auth: WebAuthenticator
-    private let checker: SensitivityChecker
     private var clock: RotationClock?
 
     nonisolated static var userAgent: String {
@@ -34,12 +32,6 @@ final class AppModel: ObservableObject {
         let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
         let secrets = KeychainSecretStore()
         self.secrets = secrets
-        #if SENSITIVE_CONTENT
-        let checker: SensitivityChecker = AppleSensitivityChecker()
-        #else
-        let checker: SensitivityChecker = NoSensitivityChecker()
-        #endif
-        self.checker = checker
         repository = ConfigRepository(store: ConfigStore(directory: support))
         cache = ImageCache(directory: caches.appendingPathComponent("originals"))
         library = LibraryService(repository: repository) {
@@ -47,7 +39,7 @@ final class AppModel: ObservableObject {
         }
         wallpaper = WallpaperService(
             repository: repository, cache: cache, renderedDirectory: support.appendingPathComponent("rendered"),
-            setter: WorkspaceWallpaper(), player: DesktopGIFPlayer(), checker: checker,
+            setter: WorkspaceWallpaper(), player: DesktopGIFPlayer(),
             reduceMotion: { NSWorkspace.shared.accessibilityDisplayShouldReduceMotion }
         )
         engine = RotationEngine(repository: repository, wallpaper: wallpaper, screens: screens, cache: cache)
@@ -222,30 +214,6 @@ final class AppModel: ObservableObject {
         }
     }
 
-    /// Flagged as sensitive and not kept by the user.
-    func isFlagged(_ id: Int) -> Bool {
-        config.sensitiveVerdicts[id] == true && !config.sensitiveAllowed.contains(id)
-    }
-
-    var flaggedCount: Int {
-        config.sensitiveVerdicts.filter { $0.value && !config.sensitiveAllowed.contains($0.key) }.count
-    }
-
-    /// The user looked at a flagged image and keeps it in the rotation.
-    func keepSensitive(_ id: Int) async {
-        do {
-            try await repository.update { if !$0.sensitiveAllowed.contains(id) { $0.sensitiveAllowed.append(id) } }
-            await reloadConfig()
-        } catch {
-            lastError = Self.message(for: error)
-        }
-    }
-
-    func refreshSensitiveStatus() async {
-        sensitiveDetectionActive = await checker.isActive()
-        await reloadConfig()
-    }
-
     func openOnArena(_ id: Int) {
         NSWorkspace.shared.open(blockURL(id))
     }
@@ -307,7 +275,6 @@ final class AppModel: ObservableObject {
         case ImageCacheError.download(let detail): return String(localized: "Téléchargement impossible (\(detail)).")
         case ApplyError.allScreensFailed(let detail): return String(localized: "Le système a refusé le fond d'écran (\(detail)).")
         case ApplyError.unknownImage: return String(localized: "Image introuvable, actualise les channels.")
-        case ApplyError.sensitive: return String(localized: "Image masquée : contenu sensible détecté.")
         default: return error.localizedDescription
         }
     }

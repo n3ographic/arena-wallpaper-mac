@@ -45,14 +45,9 @@
 - [ ] Ouvrir sur Are.na ouvre la bonne page dans le navigateur.
 - [ ] Panneau : Exclure ou Réinclure agit sur l'image en cours ; Are.na ouvre sa page.
 
-## Tâche 15 : contenu sensible
-- [ ] Sans compte payant : l'onglet « Contenu sensible » indique « Inactive » avec le bouton vers Réglages Système, et l'app pose les images normalement.
-- [ ] Avec le compte payant (configuration Release-Signed, équipe renseignée dans Xcode) et l'avertissement de contenu sensible activé : l'onglet indique « Active ».
-- [ ] Avec le profil de test d'Apple (« Testing your app's response to sensitive media ») : une image détectée n'est jamais posée, apparaît floutée avec « À vérifier », et « Garder cette image » la remet dans la rotation.
-
 ## Tâche 16 : langues, accessibilité, archive
 - [ ] En français et en anglais (Réglages Système > Langue), tous les textes sont traduits, sans tiret long.
 - [ ] VoiceOver lit chaque bouton et le titre de chaque image ; la grille se parcourt au clavier.
 - [ ] Dans la fenêtre de réglages : Espace met en pause ou reprend, flèche droite passe à l'image suivante, Échap ferme un menu.
-- [ ] Avec le compte payant : archive (configuration Release-Signed), puis validation sans erreur dans Xcode Organizer.
+- [ ] Avec le compte payant : archive (configuration Release), puis validation sans erreur dans Xcode Organizer.
 - [ ] Passage complet de cette liste sur un Mac à deux écrans.

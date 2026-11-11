@@ -14,7 +14,7 @@ private func engine(
     _ repository: ConfigRepository, _ cache: ImageCache, _ rendered: URL, setter: RecordingSetter,
     screens: [Screen] = [landscape], now: @escaping @Sendable () -> Date = { Date(timeIntervalSince1970: 1_000) }
 ) -> RotationEngine {
-    let wallpaper = WallpaperService(repository: repository, cache: cache, renderedDirectory: rendered, setter: setter, player: RecordingPlayer(), checker: NoSensitivityChecker())
+    let wallpaper = WallpaperService(repository: repository, cache: cache, renderedDirectory: rendered, setter: setter, player: RecordingPlayer())
     return RotationEngine(repository: repository, wallpaper: wallpaper, screens: FixedScreens(list: screens), cache: cache, now: now)
 }
 

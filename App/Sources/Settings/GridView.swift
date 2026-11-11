@@ -12,7 +12,7 @@ struct GridView: View {
             }
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: 8)], spacing: 8) {
                 ForEach(blocks, id: \.id) { block in
-                    ThumbnailView(block: block, excluded: model.isExcluded(block.id), flagged: model.isFlagged(block.id))
+                    ThumbnailView(block: block, excluded: model.isExcluded(block.id))
                         .onTapGesture { Task { await model.apply(block) } }
                         .accessibilityAddTraits(.isButton)
                         .contextMenu { menu(for: block) }
@@ -37,9 +37,6 @@ struct GridView: View {
         Button(model.isExcluded(block.id) ? String(localized: "Réinclure dans la rotation") : String(localized: "Exclure de la rotation")) {
             Task { await model.toggleExcluded([block.id]) }
         }
-        if model.isFlagged(block.id) {
-            Button("Garder cette image") { Task { await model.keepSensitive(block.id) } }
-        }
         Button("Ouvrir sur Are.na") { model.openOnArena(block.id) }
     }
 }
@@ -48,7 +45,6 @@ struct GridView: View {
 struct ThumbnailView: View {
     let block: Block
     var excluded = false
-    var flagged = false
     @State private var image: NSImage?
 
     var body: some View {
@@ -58,13 +54,12 @@ struct ThumbnailView: View {
                 if let image {
                     Image(nsImage: image).resizable().scaledToFill()
                         .opacity(excluded ? 0.35 : 1)
-                        .blur(radius: flagged ? 12 : 0)
                 }
             }
             .clipShape(RoundedRectangle(cornerRadius: 6))
             .overlay(alignment: .bottomLeading) {
-                if excluded || flagged {
-                    Text(flagged ? "À vérifier" : "Exclue")
+                if excluded {
+                    Text("Exclue")
                         .font(.caption2)
                         .padding(.horizontal, 5)
                         .background(.background, in: RoundedRectangle(cornerRadius: 4))
@@ -82,7 +77,7 @@ struct ThumbnailView: View {
                 }
             }
             .accessibilityElement()
-            .accessibilityLabel(Text(verbatim: block.title ?? String(localized: "Image sans titre")) + Text(flagged ? ", à vérifier" : excluded ? ", exclue" : ""))
+            .accessibilityLabel(Text(verbatim: block.title ?? String(localized: "Image sans titre")) + Text(excluded ? ", exclue" : ""))
             .task(id: block.id) { image = await Thumbnails.shared.image(for: block) }
     }
 }
