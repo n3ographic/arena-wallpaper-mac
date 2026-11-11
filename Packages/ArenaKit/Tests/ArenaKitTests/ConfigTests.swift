@@ -79,3 +79,14 @@ private func sampleBlock(id: Int) -> Block {
     let text = String(decoding: try JSONEncoder().encode(config), as: UTF8.self)
     #expect(!text.contains("sensitive"))
 }
+
+@Test func legacyChannelHasNoNextPage() throws {
+    let channel = try JSONDecoder().decode(Channel.self, from: Data(#"{"slug": "a", "enabled": true, "blocks": []}"#.utf8))
+    #expect(channel.nextPage == nil && channel.etag == nil && channel.lastRefresh == nil)
+}
+
+@Test func channelPagingRoundTrips() throws {
+    let channel = Channel(slug: "a", nextPage: 3, etag: "x", lastRefresh: Date(timeIntervalSince1970: 1_000_000))
+    let decoded = try JSONDecoder().decode(Channel.self, from: JSONEncoder().encode(channel))
+    #expect(decoded == channel)
+}
