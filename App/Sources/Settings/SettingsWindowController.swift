@@ -5,16 +5,16 @@ import SwiftUI
 /// and the window (with its thumbnails) is released when it closes.
 @MainActor
 final class SettingsWindowController: NSObject, NSWindowDelegate {
-    private let model: AppModel
+    private let app: AppCoordinator
     private var window: NSWindow?
 
-    init(model: AppModel) {
-        self.model = model
+    init(app: AppCoordinator) {
+        self.app = app
     }
 
     func show() {
         if window == nil {
-            let root = SettingsView().environmentObject(model)
+            let root = SettingsView().injecting(app)
             let w = NSWindow(contentViewController: NSHostingController(rootView: root))
             w.title = String(localized: "Réglages")
             w.styleMask = [.titled, .closable, .miniaturizable, .resizable]

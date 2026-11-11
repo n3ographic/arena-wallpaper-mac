@@ -4,10 +4,13 @@ import ArenaKit
 
 /// Content of the menu bar popover: the current image, the countdown and the actions.
 struct PanelView: View {
-    @ObservedObject var model: AppModel
+    @Environment(AppCoordinator.self) private var app
+    @Environment(PlaybackStore.self) private var playback
+    @Environment(LibraryStore.self) private var library
+    @Environment(ErrorCenter.self) private var errors
     let openSettings: () -> Void
 
-    private var block: Block? { model.nowPlaying.ids.first.flatMap(model.block) }
+    private var block: Block? { playback.nowPlaying.ids.first.flatMap(library.block) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -18,16 +21,16 @@ struct PanelView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(subtitle(now: context.date)).font(.subheadline).foregroundStyle(.secondary)
                         ProgressView(value: progressValue(now: context.date))
-                            .opacity(model.nowPlaying.paused ? 0.35 : 1)
+                            .opacity(playback.nowPlaying.paused ? 0.35 : 1)
                     }
                 }
             }
             HStack(spacing: 8) {
-                Button { Task { await model.next() } } label: {
+                Button { Task { await playback.next() } } label: {
                     Label("Suivant", systemImage: "forward.end.fill").frame(maxWidth: .infinity)
                 }
-                Button { Task { await model.togglePause() } } label: {
-                    Label(model.nowPlaying.paused ? String(localized: "Reprendre") : String(localized: "Pause"), systemImage: model.nowPlaying.paused ? "play.fill" : "pause.fill")
+                Button { Task { await playback.togglePause() } } label: {
+                    Label(playback.nowPlaying.paused ? String(localized: "Reprendre") : String(localized: "Pause"), systemImage: playback.nowPlaying.paused ? "play.fill" : "pause.fill")
                         .frame(maxWidth: .infinity)
                 }
             }
@@ -35,10 +38,10 @@ struct PanelView: View {
             .buttonStyle(.bordered)
             Divider()
             HStack {
-                Button(allExcluded ? String(localized: "Remettre") : String(localized: "Retirer")) { Task { await model.toggleExcluded(model.nowPlaying.ids) } }
-                    .disabled(model.nowPlaying.ids.isEmpty)
-                Button("Are.na") { model.nowPlaying.ids.first.map(model.openOnArena) }
-                    .disabled(model.nowPlaying.ids.isEmpty)
+                Button(allExcluded ? String(localized: "Remettre") : String(localized: "Retirer")) { Task { await app.toggleExcluded(playback.nowPlaying.ids) } }
+                    .disabled(playback.nowPlaying.ids.isEmpty)
+                Button("Are.na") { playback.nowPlaying.ids.first.map(library.openOnArena) }
+                    .disabled(playback.nowPlaying.ids.isEmpty)
                     .accessibilityLabel(Text("Ouvrir sur Are.na"))
                 Spacer()
                 Button("Réglages", action: openSettings)
@@ -46,7 +49,7 @@ struct PanelView: View {
                 Button("Quitter") { NSApp.terminate(nil) }
             }
             .buttonStyle(.borderless)
-            if let error = model.lastError {
+            if let error = errors.message {
                 Text(error).font(.caption).foregroundStyle(.red)
             }
         }
@@ -55,25 +58,25 @@ struct PanelView: View {
     }
 
     private var allExcluded: Bool {
-        !model.nowPlaying.ids.isEmpty && model.nowPlaying.ids.allSatisfy(model.isExcluded)
+        !playback.nowPlaying.ids.isEmpty && playback.nowPlaying.ids.allSatisfy(library.isExcluded)
     }
 
     private var title: String {
         guard let block else { return String(localized: "Aucune image affichée") }
-        let others = Set(model.nowPlaying.ids).count - 1
+        let others = Set(playback.nowPlaying.ids).count - 1
         return shortenedTitle(block.title ?? String(localized: "Sans titre"), max: 34) + (others > 0 ? " (+\(others))" : "")
     }
 
     private func subtitle(now: Date) -> String {
-        if model.nowPlaying.paused { return String(localized: "En pause") }
-        guard let next = model.nowPlaying.nextChange else { return "" }
+        if playback.nowPlaying.paused { return String(localized: "En pause") }
+        guard let next = playback.nowPlaying.nextChange else { return "" }
         let minutes = remainingMinutes(until: next, now: now)
         return minutes == 0 ? String(localized: "Prochain changement dans moins d'une minute") : String(localized: "Prochain changement dans \(minutes) min")
     }
 
     private func progressValue(now: Date) -> Double {
-        guard let next = model.nowPlaying.nextChange else { return 0 }
-        return progress(nextChange: next, intervalMinutes: model.config.intervalMinutes, now: now)
+        guard let next = playback.nowPlaying.nextChange else { return 0 }
+        return progress(nextChange: next, intervalMinutes: library.config.intervalMinutes, now: now)
     }
 }
 

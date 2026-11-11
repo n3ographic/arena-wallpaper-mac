@@ -3,7 +3,8 @@ import ArenaKit
 
 /// Channel list on the left, images of the selected channel on the right.
 struct ChannelsView: View {
-    @EnvironmentObject private var model: AppModel
+    @Environment(LibraryStore.self) private var library
+    @Environment(ErrorCenter.self) private var errors
     @State private var input = ""
     @State private var selection: String?
 
@@ -14,23 +15,23 @@ struct ChannelsView: View {
                     .onSubmit(add)
                 Button("Ajouter", action: add)
                     .disabled(input.trimmingCharacters(in: .whitespaces).isEmpty)
-                Button("Actualiser") { Task { await model.refresh(force: true) } }
+                Button("Actualiser") { Task { await library.refresh(force: true) } }
             }
             .padding([.horizontal, .top])
             Text("Tu es responsable du contenu des channels que tu ajoutes.")
                 .font(.caption).foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding([.horizontal, .bottom])
-            if let error = model.lastError {
+            if let error = errors.message {
                 Text(error).foregroundStyle(.red).padding(.horizontal)
             }
             HStack(spacing: 0) {
                 List(selection: $selection) {
-                    ForEach(model.config.channels, id: \.slug) { channel in
+                    ForEach(library.config.channels, id: \.slug) { channel in
                         HStack {
                             Toggle("", isOn: Binding(
                                 get: { channel.enabled },
-                                set: { enabled in Task { await model.setEnabled(channel.slug, enabled) } }
+                                set: { enabled in Task { await library.setEnabled(channel.slug, enabled) } }
                             ))
                             .labelsHidden()
                             .accessibilityLabel(Text("Utiliser \(channel.slug) dans la rotation"))
@@ -40,13 +41,13 @@ struct ChannelsView: View {
                         }
                         .tag(channel.slug)
                         .contextMenu {
-                            Button("Retirer") { Task { await model.removeChannel(channel.slug) } }
+                            Button("Retirer") { Task { await library.removeChannel(channel.slug) } }
                         }
                     }
                 }
                 .frame(width: 240)
                 Divider()
-                if let channel = model.config.channels.first(where: { $0.slug == selection }) {
+                if let channel = library.config.channels.first(where: { $0.slug == selection }) {
                     GridView(channel: channel)
                 } else {
                     Text("Choisis un channel pour voir ses images.")
@@ -60,7 +61,7 @@ struct ChannelsView: View {
     private func add() {
         let text = input
         Task {
-            if await model.addChannel(text) {
+            if await library.addChannel(text) {
                 input = ""
                 selection = parseChannelSlug(text)
             }

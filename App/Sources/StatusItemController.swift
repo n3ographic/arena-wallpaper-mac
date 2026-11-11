@@ -1,5 +1,5 @@
 import AppKit
-import Combine
+import Observation
 import SwiftUI
 
 /// Menu bar icon. Left and right clicks open the same popover (a `MenuBarExtra` ignores the
@@ -8,9 +8,8 @@ import SwiftUI
 final class StatusItemController: NSObject {
     private let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
     private let popover = NSPopover()
-    private var pausedSubscription: AnyCancellable?
 
-    init<Content: View>(panel: Content, paused: AnyPublisher<Bool, Never>) {
+    init<Content: View>(panel: Content, paused: @escaping @MainActor () -> Bool) {
         super.init()
         popover.behavior = .transient
         popover.contentViewController = NSHostingController(rootView: panel)
@@ -21,9 +20,15 @@ final class StatusItemController: NSObject {
             button.action = #selector(toggle(_:))
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         }
-        pausedSubscription = paused.removeDuplicates().sink { [weak self] isPaused in
-            self?.item.button?.alphaValue = isPaused ? 0.4 : 1
-        }
+        trackPaused(paused)
+    }
+
+    /// Re-reads `paused` each time an observable it touches changes.
+    private func trackPaused(_ paused: @escaping @MainActor () -> Bool) {
+        let isPaused = withObservationTracking({ paused() }, onChange: { [weak self] in
+            Task { @MainActor in self?.trackPaused(paused) }
+        })
+        item.button?.alphaValue = isPaused ? 0.4 : 1
     }
 
     @objc private func toggle(_ sender: NSStatusBarButton) {
