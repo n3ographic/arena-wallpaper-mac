@@ -19,10 +19,8 @@ private func sampleBlock(id: Int) -> Block {
     config.intervalMinutes = 5
     config.order = .ordered
     config.screenMode = .span
-    config.fit = .contain
-    config.positionX = 0
-    config.positionY = 100
-    config.background = .color(hex: "#112233")
+    config.defaultFraming = Framing(fit: .contain, positionX: 0, positionY: 100, background: .color(hex: "#112233"))
+    config.screenFramings = ["2": Framing(fit: .center, positionX: 10, positionY: 20, background: .blur)]
     config.matchOrientation = false
     config.excluded = [7, 9]
     try store.save(config)
@@ -44,16 +42,46 @@ private func sampleBlock(id: Int) -> Block {
     try Data(#"{"schemaVersion":1,"channels":[],"intervalMinutes":12}"#.utf8).write(to: dir.appendingPathComponent("config.json"))
     let config = ConfigStore(directory: dir).load()
     #expect(config.intervalMinutes == 12)
-    #expect(config.fit == .fill)
-    #expect(config.positionX == 50)
+    #expect(config.defaultFraming == Framing())
     #expect(config.matchOrientation)
     #expect(config.excluded.isEmpty)
 }
 
-@Test func positionsAreClampedTo0Through100() throws {
-    let config = try JSONDecoder().decode(Config.self, from: Data(#"{"positionX":150,"positionY":-5}"#.utf8))
-    #expect(config.positionX == 100)
-    #expect(config.positionY == 0)
+@Test func positionsAreClamped() throws {
+    let config = try JSONDecoder().decode(Config.self, from: Data(#"{"defaultFraming":{"positionX":250,"positionY":-3}}"#.utf8))
+    #expect(config.defaultFraming.positionX == 100)
+    #expect(config.defaultFraming.positionY == 0)
+}
+
+@Test func legacyV1FileMigrates() throws {
+    let bg = String(decoding: try JSONEncoder().encode(Background.color(hex: "#112233")), as: UTF8.self)
+    let json = #"{"schemaVersion":1,"fit":"contain","positionX":0,"positionY":100,"background":\#(bg),"intervalMinutes":5,"excluded":[7],"channels":[]}"#
+    let config = try JSONDecoder().decode(Config.self, from: Data(json.utf8))
+    #expect(config.defaultFraming == Framing(fit: .contain, positionX: 0, positionY: 100, background: .color(hex: "#112233")))
+    #expect(config.screenFramings.isEmpty)
+    #expect(config.intervalMinutes == 5)
+    #expect(config.excluded == [7])
+    #expect(config.schemaVersion == 2)
+    let text = String(decoding: try JSONEncoder().encode(config), as: UTF8.self)
+    #expect(!text.contains("\"positionX\":0,\"positionY\":100,\"intervalMinutes") && text.contains("defaultFraming"))
+}
+
+@Test func v1FileWithoutFramingKeysGetsDefaults() throws {
+    let config = try JSONDecoder().decode(Config.self, from: Data(#"{"schemaVersion":1}"#.utf8))
+    #expect(config.defaultFraming == Framing())
+    #expect(config.schemaVersion == 2)
+}
+
+@Test func framingResolution() {
+    var config = Config()
+    let f = Framing(fit: .contain, positionX: 1, positionY: 2, background: .blur)
+    config.setFraming(f, for: "2")
+    #expect(config.framing(for: "2") == f)
+    #expect(config.framing(for: "1") == config.defaultFraming)
+    let g = Framing(fit: .stretch, positionX: 5, positionY: 6, background: .blur)
+    config.setFraming(g, for: nil)
+    #expect(config.defaultFraming == g)
+    #expect(config.screenFramings.isEmpty)
 }
 
 @Test func repositoryUpdatePersists() async throws {

@@ -124,3 +124,28 @@ private func config(_ channels: [Channel]) -> Config {
     _ = s.next()
     #expect(s.remainingInCycle == 4)
 }
+
+@Test func orderedContinuesAfterAJump() {
+    var s = schedulerWith([1, 2, 3, 4], .ordered)
+    s.jump(to: 2)
+    #expect(take(&s, 4) == [3, 4, 1, 2])
+}
+
+@Test func orderedJumpBackGoesFromThere() {
+    var s = schedulerWith([1, 2, 3, 4], .ordered)
+    _ = take(&s, 3)
+    s.jump(to: 1)
+    #expect(take(&s, 2) == [2, 3])
+}
+
+@Test func randomJumpDoesNotRepeatThatImage() {
+    var s = schedulerWith([1, 2, 3, 4], .random)
+    s.jump(to: 3)
+    #expect(!take(&s, 3).contains(3))
+}
+
+@Test func jumpToUnknownImageChangesNothing() {
+    var s = schedulerWith([1, 2, 3], .ordered)
+    s.jump(to: 9)
+    #expect(take(&s, 3) == [1, 2, 3])
+}

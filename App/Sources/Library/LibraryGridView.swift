@@ -1,57 +1,79 @@
-import SwiftUI
 import ArenaKit
+import SwiftUI
 
-struct GridView: View {
-    @EnvironmentObject private var model: AppModel
-    let channel: Channel
-
-    private var blocks: [Block] { channel.blocks }
+/// The images of the selection. One click selects, a double click or Return poses.
+struct LibraryGridView: View {
+    @Environment(AppCoordinator.self) private var app
+    @Environment(LibraryStore.self) private var library
+    @Environment(DisplayStore.self) private var display
+    @State private var visible: Set<Int> = []
+    let blocks: [Block]
+    /// The channel whose next page the "Charger plus" button loads, if any.
+    let channel: Channel?
+    @Binding var selected: Int?
+    /// Set by the window when the image on screen changes: the grid scrolls to it.
+    @Binding var scrollTarget: Int?
 
     var body: some View {
+        ScrollViewReader { proxy in
         ScrollView {
             if blocks.isEmpty {
-                Text("Ce channel ne contient aucune image.").foregroundStyle(.secondary).padding()
+                Text("Aucune image ici.").foregroundStyle(.secondary).padding()
             }
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: 8)], spacing: 8) {
                 ForEach(blocks, id: \.id) { block in
-                    ThumbnailView(block: block, excluded: model.isExcluded(block.id))
-                        .onTapGesture { Task { await model.apply(block) } }
-                        .accessibilityAddTraits(.isButton)
+                    ThumbnailView(block: block, excluded: library.isExcluded(block.id))
+                        .overlay {
+                            if selected == block.id {
+                                RoundedRectangle(cornerRadius: 6).strokeBorder(Color.accentColor, lineWidth: 3)
+                            }
+                        }
+                        .onAppear { visible.insert(block.id) }
+                        .onDisappear { visible.remove(block.id) }
+                        .onTapGesture(count: 2) { Task { await app.apply(block) } }
+                        .onTapGesture { selected = block.id }
+                        .accessibilityAddTraits(selected == block.id ? [.isButton, .isSelected] : .isButton)
                         .contextMenu { menu(for: block) }
                 }
             }
             .padding()
-            if channel.nextPage != nil {
-                Button("Charger plus") { Task { await model.loadMore(channel.slug) } }
-                    .disabled(model.loadingSlugs.contains(channel.slug))
+            if let channel, channel.nextPage != nil {
+                Button("Charger plus") { Task { await library.loadMore(channel.slug) } }
+                    .disabled(library.loadingSlugs.contains(channel.slug))
                     .padding(.bottom)
             }
+        }
+        .onChange(of: scrollTarget) {
+            guard let id = scrollTarget else { return }
+            // Scrolling a long lazy grid is costly: only when the image is not already visible.
+            if !visible.contains(id) { proxy.scrollTo(id, anchor: .center) }
+            scrollTarget = nil
+        }
         }
     }
 
     @ViewBuilder
     private func menu(for block: Block) -> some View {
-        let screenCount = NSScreen.screens.count
-        if model.config.screenMode == .perScreen && screenCount > 1 {
-            ForEach(0..<screenCount, id: \.self) { index in
-                Button("Écran \(index + 1)") { Task { await model.apply(block, onScreen: index) } }
+        if library.config.screenMode == .perScreen && display.screens.count > 1 {
+            ForEach(Array(display.screens.enumerated()), id: \.element.id) { index, screen in
+                Button("Écran \(index + 1)") { Task { await app.apply(block, to: .screen(screen.id)) } }
             }
-            Button("Tous les écrans") { Task { await model.apply(block) } }
+            Button("Tous les écrans") { Task { await app.apply(block, to: .all) } }
         } else {
-            Button("Appliquer") { Task { await model.apply(block) } }
+            Button("Appliquer") { Task { await app.apply(block, to: .all) } }
         }
         Divider()
-        Button(model.isExcluded(block.id) ? String(localized: "Remettre dans la rotation") : String(localized: "Retirer de la rotation")) {
-            Task { await model.toggleExcluded([block.id]) }
+        Button(library.isExcluded(block.id) ? String(localized: "Remettre dans la lecture") : String(localized: "Retirer de la lecture")) {
+            Task { await app.toggleExcluded([block.id]) }
         }
-        Button("Ouvrir sur Are.na") { model.openOnArena(block.id) }
+        Button("Ouvrir sur Are.na") { library.openOnArena(block.id) }
     }
 }
 
 /// A square cell; a GIF shows its first frame and a badge, and plays while hovered (unless
 /// Reduce Motion is on); a removed image is dimmed.
 struct ThumbnailView: View {
-    @EnvironmentObject private var model: AppModel
+    @Environment(LibraryStore.self) private var library
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let block: Block
     var excluded = false
@@ -104,7 +126,7 @@ struct ThumbnailView: View {
             playing = nil
             return
         }
-        guard let url = try? await model.cache.original(for: block),
+        guard let url = try? await library.cache.original(for: block),
               let gif = NSImage(contentsOf: url), gif.size.width > 0, gif.size.height > 0,
               !Task.isCancelled, hovering else { return }
         playing = gif

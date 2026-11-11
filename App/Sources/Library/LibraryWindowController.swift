@@ -1,35 +1,36 @@
 import AppKit
 import SwiftUI
 
-/// Settings window, managed by AppKit. The app gets a Dock icon only while it is open,
+/// Library window, managed by AppKit. The app gets a Dock icon only while it is open,
 /// and the window (with its thumbnails) is released when it closes.
 @MainActor
-final class SettingsWindowController: NSObject, NSWindowDelegate {
-    private let model: AppModel
+final class LibraryWindowController: NSObject, NSWindowDelegate {
+    private let app: AppCoordinator
     private var window: NSWindow?
 
-    init(model: AppModel) {
-        self.model = model
+    init(app: AppCoordinator) {
+        self.app = app
     }
 
     func show() {
         if window == nil {
-            let root = SettingsView().environmentObject(model)
-            let w = NSWindow(contentViewController: NSHostingController(rootView: root))
-            w.title = String(localized: "Réglages")
+            let w = NSWindow(contentViewController: NSHostingController(rootView: LibraryView().injecting(app)))
+            w.title = String(localized: "Bibliothèque")
             w.styleMask = [.titled, .closable, .miniaturizable, .resizable]
             w.isReleasedWhenClosed = false
             w.delegate = self
+            w.setContentSize(NSSize(width: 960, height: 640))
+            w.minSize = NSSize(width: 760, height: 480)
             w.center()
             window = w
+            DockPresence.opened()
         }
-        NSApp.setActivationPolicy(.regular)
         window?.makeKeyAndOrderFront(nil)
         NSApp.activate()
     }
 
     func windowWillClose(_ notification: Notification) {
-        NSApp.setActivationPolicy(.accessory)
+        DockPresence.closed()
         Thumbnails.shared.clear()
         // Drop the whole view tree so its images are freed; it is rebuilt on the next opening.
         DispatchQueue.main.async { [weak self] in

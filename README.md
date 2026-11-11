@@ -16,7 +16,7 @@ L'app est gratuite et n'est pas notarisée par Apple (pas de compte Developer pa
 
 Si le bouton « Ouvrir quand même » n'apparaît pas, ouvre le Terminal et lance : `xattr -dr com.apple.quarantine "/Applications/Arena Wallpaper.app"`.
 
-Les mises à jour : l'app indique dans Réglages > Général quand une version plus récente existe, avec un lien vers la page de la Release. Il suffit de la télécharger et de remplacer l'app.
+Les mises à jour : l'app indique dans Préférences > Général quand une version plus récente existe, avec un lien vers la page de la Release. Il suffit de la télécharger et de remplacer l'app.
 
 ## Installation (English)
 

@@ -3,36 +3,65 @@ import AppKit
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: StatusItemController?
-    private let model = AppModel()
-    private lazy var settings = SettingsWindowController(model: model)
+    private let app = AppCoordinator()
+    private lazy var library = LibraryWindowController(app: app)
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         statusItem = StatusItemController(
-            panel: PanelView(model: model, openSettings: { [weak self] in self?.showSettings() }),
-            paused: model.$nowPlaying.map(\.paused).eraseToAnyPublisher()
+            panel: PanelView(openLibrary: { [weak self] in self?.showLibrary() }, openPreferences: { [weak self] in self?.showPreferences() }).injecting(app),
+            paused: { [app] in app.playback.nowPlaying.paused }
         )
-        model.start()
-        // Screens added, removed or rearranged: render again for the new sizes.
-        NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main) { [weak self] _ in
-            Task { await self?.model.rerender() }
-        }
-        // "Reduce motion" turned on or off: start or stop the animations now.
-        NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.accessibilityDisplayOptionsDidChangeNotification, object: nil, queue: .main) { [weak self] _ in
-            Task { await self?.model.refreshAnimations() }
-        }
-        // macOS only updates the active Space: set the same files again on the new one.
-        NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.activeSpaceDidChangeNotification, object: nil, queue: .main) { [weak self] _ in
-            Task { await self?.model.reapply() }
-        }
+        installMainMenu()
+        app.start()
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         false
     }
 
-    func showSettings() {
+    func showLibrary() {
+        if case .images = app.sidebarItem {} else { app.sidebarItem = .images(.all) }
         statusItem?.closePopover()
-        settings.show()
+        library.show()
+    }
+
+    /// The preferences are pages of the library window.
+    func showPreferences() {
+        app.sidebarItem = .playback
+        statusItem?.closePopover()
+        library.show()
+    }
+
+    /// Shortcuts need a menu: a menu bar app has none by default. It shows only while a window is open.
+    private func installMainMenu() {
+        let main = NSMenu()
+        func submenu(_ title: String, _ items: [NSMenuItem]) {
+            let item = NSMenuItem(title: title, action: nil, keyEquivalent: "")
+            let menu = NSMenu(title: title)
+            items.forEach(menu.addItem)
+            item.submenu = menu
+            main.addItem(item)
+        }
+        let preferences = NSMenuItem(title: String(localized: "Préférences"), action: #selector(openPreferencesFromMenu), keyEquivalent: ",")
+        preferences.target = self
+        submenu("Arena Wallpaper", [
+            preferences, .separator(),
+            NSMenuItem(title: String(localized: "Quitter"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"),
+        ])
+        submenu(String(localized: "Édition"), [
+            NSMenuItem(title: String(localized: "Couper"), action: #selector(NSText.cut(_:)), keyEquivalent: "x"),
+            NSMenuItem(title: String(localized: "Copier"), action: #selector(NSText.copy(_:)), keyEquivalent: "c"),
+            NSMenuItem(title: String(localized: "Coller"), action: #selector(NSText.paste(_:)), keyEquivalent: "v"),
+            NSMenuItem(title: String(localized: "Tout sélectionner"), action: #selector(NSText.selectAll(_:)), keyEquivalent: "a"),
+        ])
+        submenu(String(localized: "Fenêtre"), [
+            NSMenuItem(title: String(localized: "Fermer"), action: #selector(NSWindow.performClose(_:)), keyEquivalent: "w"),
+        ])
+        NSApp.mainMenu = main
+    }
+
+    @objc private func openPreferencesFromMenu() {
+        showPreferences()
     }
 }

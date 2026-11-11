@@ -4,6 +4,36 @@
     "": {
       "shouldTranslate": false
     },
+    "%lld h": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld h"
+          }
+        }
+      }
+    },
+    "%lld j": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld d"
+          }
+        }
+      }
+    },
+    "%lld min": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld min"
+          }
+        }
+      }
+    },
     ", retirée": {
       "localizations": {
         "en": {
@@ -14,12 +44,52 @@
         }
       }
     },
+    "Abonnements": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Following"
+          }
+        }
+      }
+    },
+    "Abonnés": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Followers"
+          }
+        }
+      }
+    },
+    "Actualisation…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refreshing…"
+          }
+        }
+      }
+    },
     "Actualiser": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Refresh"
+          }
+        }
+      }
+    },
+    "Actualiser les channels": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh channels"
           }
         }
       }
@@ -114,12 +184,42 @@
         }
       }
     },
+    "Aucune image ici.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No images here."
+          }
+        }
+      }
+    },
+    "Bibliothèque": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Library"
+          }
+        }
+      }
+    },
     "Cadrage": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Framing"
+          }
+        }
+      }
+    },
+    "Cadrage de %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Framing of %@"
           }
         }
       }
@@ -184,6 +284,36 @@
         }
       }
     },
+    "Channels actifs": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active channels"
+          }
+        }
+      }
+    },
+    "Channels en réserve": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Channels on hold"
+          }
+        }
+      }
+    },
+    "Chargement du profil…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading profile…"
+          }
+        }
+      }
+    },
     "Charger plus": {
       "localizations": {
         "en": {
@@ -194,12 +324,12 @@
         }
       }
     },
-    "Choisis un channel pour voir ses images.": {
+    "Coller": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Choose a channel to see its images."
+            "value": "Paste"
           }
         }
       }
@@ -224,6 +354,26 @@
         }
       }
     },
+    "Connexion": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign-in"
+          }
+        }
+      }
+    },
+    "Connexion Are.na": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Are.na sign-in"
+          }
+        }
+      }
+    },
     "Connexion refusée.": {
       "localizations": {
         "en": {
@@ -240,6 +390,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fit"
+          }
+        }
+      }
+    },
+    "Copier": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy"
           }
         }
       }
@@ -264,12 +424,42 @@
         }
       }
     },
+    "Couper": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cut"
+          }
+        }
+      }
+    },
     "Dans l'ordre": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "In order"
+          }
+        }
+      }
+    },
+    "Depuis": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Since"
+          }
+        }
+      }
+    },
+    "Dernière actualisation": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last refresh"
           }
         }
       }
@@ -284,12 +474,42 @@
         }
       }
     },
+    "En réserve": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On hold"
+          }
+        }
+      }
+    },
     "Enregistrer le token": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Save token"
+          }
+        }
+      }
+    },
+    "Fenêtre": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Window"
+          }
+        }
+      }
+    },
+    "Fermer": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close"
           }
         }
       }
@@ -374,12 +594,62 @@
         }
       }
     },
+    "Image suivante pour l'écran %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next image for screen %lld"
+          }
+        }
+      }
+    },
     "Image trop lourde.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Image too large."
+          }
+        }
+      }
+    },
+    "Images": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Images"
+          }
+        }
+      }
+    },
+    "Images chargées": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loaded images"
+          }
+        }
+      }
+    },
+    "Images en cache": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cached images"
+          }
+        }
+      }
+    },
+    "Images retirées": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Removed images"
           }
         }
       }
@@ -414,6 +684,26 @@
         }
       }
     },
+    "Lecture": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playback"
+          }
+        }
+      }
+    },
+    "Les images seront téléchargées à nouveau quand elles seront affichées.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Images will be downloaded again when they are shown."
+          }
+        }
+      }
+    },
     "Lien ou slug de channel invalide.": {
       "localizations": {
         "en": {
@@ -430,6 +720,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Channel link or slug"
+          }
+        }
+      }
+    },
+    "Membre depuis": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Member since"
+          }
+        }
+      }
+    },
+    "Méthode": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Method"
           }
         }
       }
@@ -474,6 +784,36 @@
         }
       }
     },
+    "Poser": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set"
+          }
+        }
+      }
+    },
+    "Poser sur l'écran %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set on screen %lld"
+          }
+        }
+      }
+    },
+    "Poser sur tous les écrans": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set on all screens"
+          }
+        }
+      }
+    },
     "Position horizontale": {
       "localizations": {
         "en": {
@@ -514,6 +854,46 @@
         }
       }
     },
+    "Profil Are.na": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Are.na profile"
+          }
+        }
+      }
+    },
+    "Profil indisponible.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profile unavailable."
+          }
+        }
+      }
+    },
+    "Précédent": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previous"
+          }
+        }
+      }
+    },
+    "Préférences": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preferences"
+          }
+        }
+      }
+    },
     "Quitter": {
       "localizations": {
         "en": {
@@ -544,12 +924,12 @@
         }
       }
     },
-    "Remettre dans la rotation": {
+    "Remettre dans la lecture": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Put back in rotation"
+            "value": "Add back to playback"
           }
         }
       }
@@ -584,12 +964,12 @@
         }
       }
     },
-    "Retirer de la rotation": {
+    "Retirer de la lecture": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Remove from rotation"
+            "value": "Remove from playback"
           }
         }
       }
@@ -604,22 +984,22 @@
         }
       }
     },
-    "Rotation": {
+    "Retirées": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rotation"
+            "value": "Removed"
           }
         }
       }
     },
-    "Réglages": {
+    "Rythme": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Settings"
+            "value": "Rhythm"
           }
         }
       }
@@ -674,12 +1054,32 @@
         }
       }
     },
+    "Stockage": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storage"
+          }
+        }
+      }
+    },
     "Suivant": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Next"
+          }
+        }
+      }
+    },
+    "Sélectionne une image.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select an image."
           }
         }
       }
@@ -694,12 +1094,42 @@
         }
       }
     },
+    "Tous": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All"
+          }
+        }
+      }
+    },
     "Tous les écrans": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "All screens"
+          }
+        }
+      }
+    },
+    "Tout": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Everything"
+          }
+        }
+      }
+    },
+    "Tout sélectionner": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select All"
           }
         }
       }
@@ -754,12 +1184,22 @@
         }
       }
     },
-    "Utiliser %@ dans la rotation": {
+    "Utiliser %@ dans la lecture": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Use %@ in the rotation"
+            "value": "Use %@ in playback"
+          }
+        }
+      }
+    },
+    "Utiliser dans la lecture": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use in playback"
           }
         }
       }
@@ -780,6 +1220,56 @@
           "stringUnit": {
             "state": "translated",
             "value": "Version %@ available"
+          }
+        }
+      }
+    },
+    "Vider le cache": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear cache"
+          }
+        }
+      }
+    },
+    "Vider le cache des images ?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear the image cache?"
+          }
+        }
+      }
+    },
+    "Visibles ici, jamais choisis automatiquement.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shown here, never picked automatically."
+          }
+        }
+      }
+    },
+    "Voir sur Are.na": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View on Are.na"
+          }
+        }
+      }
+    },
+    "À l'écran": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On screen"
           }
         }
       }
@@ -810,6 +1300,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Screens"
+          }
+        }
+      }
+    },
+    "Édition": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit"
           }
         }
       }

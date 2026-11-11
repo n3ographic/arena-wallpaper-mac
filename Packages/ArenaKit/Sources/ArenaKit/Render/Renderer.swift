@@ -11,6 +11,9 @@ public enum RenderError: Error, Equatable {
 
 /// Composes the wallpaper of one screen: framing, position, blurred or colored bands.
 public enum Renderer {
+    /// Creating a context is costly and it is safe to share between threads.
+    private static let ciContext = CIContext()
+
     /// First frame of the file (the still image of a GIF), turned upright per its EXIF
     /// orientation and, with `maxPixelSize`, decoded no larger than that on its long side.
     public static func loadFirstFrame(_ url: URL, maxPixelSize: Int? = nil) throws -> CGImage {
@@ -36,7 +39,8 @@ public enum Renderer {
         return orientation >= 5 ? CGSize(width: height, height: width) : CGSize(width: width, height: height)
     }
 
-    public static func render(_ image: CGImage, canvasSize: CGSize, fit: Fit, positionX: Int, positionY: Int, background: Background) -> CGImage {
+    public static func render(_ image: CGImage, canvasSize: CGSize, framing: Framing) -> CGImage {
+        let fit = framing.fit, positionX = framing.positionX, positionY = framing.positionY, background = framing.background
         let width = max(1, Int(canvasSize.width.rounded())), height = max(1, Int(canvasSize.height.rounded()))
         let context = makeContext(width: width, height: height)
         let placement = FrameGeometry.placement(
@@ -83,10 +87,10 @@ public enum Renderer {
             context.fill(CGRect(x: 0, y: 0, width: width, height: height))
         case .blur:
             // The image filled at 1/8 of the size, blurred, then stretched back: cheap and soft.
-            let small = render(image, canvasSize: CGSize(width: max(1, width / 8), height: max(1, height / 8)), fit: .fill, positionX: 50, positionY: 50, background: .color(hex: "#000000"))
+            let small = render(image, canvasSize: CGSize(width: max(1, width / 8), height: max(1, height / 8)), framing: Framing(fit: .fill, background: .color(hex: "#000000")))
             let input = CIImage(cgImage: small)
             let blurred = input.clampedToExtent().applyingGaussianBlur(sigma: 4).cropped(to: input.extent)
-            if let result = CIContext().createCGImage(blurred, from: input.extent) {
+            if let result = ciContext.createCGImage(blurred, from: input.extent) {
                 context.draw(result, in: CGRect(x: 0, y: 0, width: width, height: height))
             }
         }

@@ -110,6 +110,33 @@ extension Network {
             }
             #expect(pageBlocks(try await client().channelPage(slug: "c", page: 1)).map(\.id) == [2])
         }
+
+        @Test func readsTheSignedInProfile() async throws {
+            StubURLProtocol.reset { _ in
+                StubURLProtocol.json(#"""
+                {"id": 7, "type": "User", "name": "Néo A", "slug": "neo-a", "username": "neo-a",
+                 "avatar": "https://img.test/a.jpg", "initials": "NA", "email": "x@y.z",
+                 "created_at": "2023-01-15T10:30:00Z", "updated_at": "2023-06-20T14:45:00Z",
+                 "bio": null, "badge": null, "tier": "free", "_links": {},
+                 "counts": {"channels": 24, "followers": 156, "following": 89, "notifications": 3}}
+                """#)
+            }
+            let profile = try await client().me()
+            #expect(profile == ArenaProfile(
+                name: "Néo A", slug: "neo-a", avatar: URL(string: "https://img.test/a.jpg"), initials: "NA",
+                channels: 24, followers: 156, following: 89,
+                memberSince: ISO8601DateFormatter().date(from: "2023-01-15T10:30:00Z")))
+            #expect(profile.profileURL == URL(string: "https://www.are.na/neo-a"))
+            let request = StubURLProtocol.requests[0]
+            #expect(request.url?.absoluteString == "https://api.test/v3/me")
+            #expect(request.value(forHTTPHeaderField: "Authorization") == "Bearer t")
+            #expect(request.value(forHTTPHeaderField: "User-Agent") == "ArenaWallpaper/0.1.0")
+        }
+
+        @Test func profileWithoutTokenIsUnauthorized() async throws {
+            StubURLProtocol.reset { _ in .init(status: 401) }
+            await #expect(throws: ArenaError.unauthorized) { try await client(token: nil).me() }
+        }
     }
 }
 

@@ -8,13 +8,13 @@ import Testing
 @Test func outputHasExactCanvasSize() {
     let image = solidImage(width: 300, height: 200)
     for fit in [Fit.fill, .contain, .stretch, .center] {
-        let out = Renderer.render(image, canvasSize: CGSize(width: 3456, height: 2234), fit: fit, positionX: 50, positionY: 50, background: .blur)
+        let out = Renderer.render(image, canvasSize: CGSize(width: 3456, height: 2234), framing: Framing(fit: fit, background: .blur))
         #expect(out.width == 3456 && out.height == 2234)
     }
 }
 
 @Test func colorBandsUseTheColor() {
-    let out = Renderer.render(solidImage(width: 100, height: 50), canvasSize: CGSize(width: 100, height: 100), fit: .contain, positionX: 50, positionY: 50, background: .color(hex: "#00ff00"))
+    let out = Renderer.render(solidImage(width: 100, height: 50), canvasSize: CGSize(width: 100, height: 100), framing: Framing(fit: .contain, background: .color(hex: "#00ff00")))
     let band = pixel(out, 0, 0)
     #expect(band.r < 20 && band.g > 235 && band.b < 20)
     let middle = pixel(out, 50, 50)
@@ -22,14 +22,14 @@ import Testing
 }
 
 @Test func blurBackgroundIsNotUniform() {
-    let out = Renderer.render(twoToneImage(width: 200, height: 100), canvasSize: CGSize(width: 100, height: 200), fit: .contain, positionX: 50, positionY: 50, background: .blur)
+    let out = Renderer.render(twoToneImage(width: 200, height: 100), canvasSize: CGSize(width: 100, height: 200), framing: Framing(fit: .contain, background: .blur))
     let left = pixel(out, 5, 5), right = pixel(out, 95, 5)
     #expect(left.r > left.b)
     #expect(right.b > right.r)
 }
 
 @Test func badHexFallsBackToBlack() {
-    let out = Renderer.render(solidImage(width: 100, height: 50), canvasSize: CGSize(width: 100, height: 100), fit: .contain, positionX: 50, positionY: 50, background: .color(hex: "#zz"))
+    let out = Renderer.render(solidImage(width: 100, height: 50), canvasSize: CGSize(width: 100, height: 100), framing: Framing(fit: .contain, background: .color(hex: "#zz")))
     let band = pixel(out, 0, 0)
     #expect(band.r < 10 && band.g < 10 && band.b < 10)
 }
@@ -65,7 +65,7 @@ func measureLargeRender() throws {
     let image = twoToneImage(width: 3000, height: 2000)
     let url = makeTempDirectory().appendingPathComponent("big.png")
     let start = Date()
-    try Renderer.writePNG(Renderer.render(image, canvasSize: CGSize(width: 3456, height: 2234), fit: .contain, positionX: 50, positionY: 50, background: .blur), to: url)
+    try Renderer.writePNG(Renderer.render(image, canvasSize: CGSize(width: 3456, height: 2234), framing: Framing(fit: .contain, background: .blur)), to: url)
     print("render + PNG 3456x2234: \(Int(Date().timeIntervalSince(start) * 1000)) ms")
 }
 

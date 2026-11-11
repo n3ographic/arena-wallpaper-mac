@@ -52,6 +52,20 @@ public actor ImageCache {
         try? FileManager.default.removeItem(at: fileURL(id))
     }
 
+    /// Bytes taken on disk by the cached originals.
+    public func diskUsage() -> Int {
+        let names = (try? FileManager.default.contentsOfDirectory(atPath: directory.path)) ?? []
+        return names.reduce(0) { total, name in
+            let size = (try? FileManager.default.attributesOfItem(atPath: directory.appendingPathComponent(name).path))?[.size] as? Int
+            return total + (size ?? 0)
+        }
+    }
+
+    /// Removes every cached original; they are downloaded again when needed.
+    public func clear() {
+        try? FileManager.default.removeItem(at: directory)
+    }
+
     private func fileURL(_ id: Int) -> URL {
         directory.appendingPathComponent(String(id))
     }
