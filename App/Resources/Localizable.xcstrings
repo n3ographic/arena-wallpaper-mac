@@ -734,6 +734,16 @@
         }
       }
     },
+    "Télécharger": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download"
+          }
+        }
+      }
+    },
     "Une image par écran": {
       "localizations": {
         "en": {
@@ -760,6 +770,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Use a personal token"
+          }
+        }
+      }
+    },
+    "Version %@ disponible": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version %@ available"
           }
         }
       }
