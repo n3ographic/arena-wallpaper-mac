@@ -4,6 +4,36 @@
     "": {
       "shouldTranslate": false
     },
+    "%lld h": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld h"
+          }
+        }
+      }
+    },
+    "%lld j": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld d"
+          }
+        }
+      }
+    },
+    "%lld min": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld min"
+          }
+        }
+      }
+    },
     ", retirée": {
       "localizations": {
         "en": {
@@ -114,12 +144,42 @@
         }
       }
     },
+    "Aucune image ici.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No images here."
+          }
+        }
+      }
+    },
+    "Bibliothèque": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Library"
+          }
+        }
+      }
+    },
     "Cadrage": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Framing"
+          }
+        }
+      }
+    },
+    "Cadrage de %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Framing of %@"
           }
         }
       }
@@ -190,16 +250,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Load more"
-          }
-        }
-      }
-    },
-    "Choisis un channel pour voir ses images.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose a channel to see its images."
           }
         }
       }
@@ -374,6 +424,16 @@
         }
       }
     },
+    "Image suivante pour l'écran %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next image for screen %lld"
+          }
+        }
+      }
+    },
     "Image trop lourde.": {
       "localizations": {
         "en": {
@@ -474,6 +534,36 @@
         }
       }
     },
+    "Poser": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set"
+          }
+        }
+      }
+    },
+    "Poser sur l'écran %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set on screen %lld"
+          }
+        }
+      }
+    },
+    "Poser sur tous les écrans": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set on all screens"
+          }
+        }
+      }
+    },
     "Position horizontale": {
       "localizations": {
         "en": {
@@ -510,6 +600,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Next change in less than a minute"
+          }
+        }
+      }
+    },
+    "Préférences": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preferences"
           }
         }
       }
@@ -604,6 +704,16 @@
         }
       }
     },
+    "Retirées": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Removed"
+          }
+        }
+      }
+    },
     "Rotation": {
       "localizations": {
         "en": {
@@ -614,12 +724,12 @@
         }
       }
     },
-    "Réglages": {
+    "Rythme": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Settings"
+            "value": "Rhythm"
           }
         }
       }
@@ -684,6 +794,16 @@
         }
       }
     },
+    "Sélectionne une image.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select an image."
+          }
+        }
+      }
+    },
     "Token personnel": {
       "localizations": {
         "en": {
@@ -694,12 +814,32 @@
         }
       }
     },
+    "Tous": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All"
+          }
+        }
+      }
+    },
     "Tous les écrans": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "All screens"
+          }
+        }
+      }
+    },
+    "Tout": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Everything"
           }
         }
       }
