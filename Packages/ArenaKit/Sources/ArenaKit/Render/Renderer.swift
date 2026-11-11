@@ -54,8 +54,8 @@ public enum Renderer {
         return context.makeImage()!
     }
 
-    public static func writePNG(_ image: CGImage, to url: URL) throws {
-        guard let destination = CGImageDestinationCreateWithURL(url as CFURL, UTType.png.identifier as CFString, 1, nil) else {
+    public static func writeTIFF(_ image: CGImage, to url: URL) throws {
+        guard let destination = CGImageDestinationCreateWithURL(url as CFURL, UTType.tiff.identifier as CFString, 1, nil) else {
             throw RenderError.writeFailed
         }
         CGImageDestinationAddImage(destination, image, nil)

@@ -20,8 +20,8 @@ private func renderedFiles(_ dir: URL) throws -> [String] {
     try await service(repository, cache, rendered, setter: setter).apply(ids: [1, 2], screens: [mainScreen, rightScreen])
     let calls = await setter.calls
     #expect(calls.map(\.screenID) == ["main", "right"])
-    #expect(calls[0].file.lastPathComponent.range(of: #"^0-1-\d+\.png$"#, options: .regularExpression) != nil)
-    #expect(calls[1].file.lastPathComponent.range(of: #"^1-2-\d+\.png$"#, options: .regularExpression) != nil)
+    #expect(calls[0].file.lastPathComponent.range(of: #"^0-1-\d+\.tiff$"#, options: .regularExpression) != nil)
+    #expect(calls[1].file.lastPathComponent.range(of: #"^1-2-\d+\.tiff$"#, options: .regularExpression) != nil)
     #expect(try renderedFiles(rendered).count == 2)
 }
 

@@ -47,14 +47,14 @@ import Testing
     #expect(throws: RenderError.unreadable) { try Renderer.loadFirstFrame(url) }
 }
 
-@Test func writePNGProducesAReadableFile() throws {
-    let url = makeTempDirectory().appendingPathComponent("out.png")
-    try Renderer.writePNG(solidImage(width: 10, height: 10), to: url)
+@Test func writeTIFFProducesAReadableFile() throws {
+    let url = makeTempDirectory().appendingPathComponent("out.tiff")
+    try Renderer.writeTIFF(solidImage(width: 10, height: 10), to: url)
     #expect(try Renderer.loadFirstFrame(url).width == 10)
 }
 
 @Test func staleKeepsNewestAndInUse() {
-    let urls = ["a", "b", "c", "d"].map { URL(fileURLWithPath: "/tmp/\($0).png") }
+    let urls = ["a", "b", "c", "d"].map { URL(fileURLWithPath: "/tmp/\($0).tiff") }
     let files = urls.enumerated().map { (url: $0.element, modified: Date(timeIntervalSince1970: Double($0.offset + 1))) }
     #expect(staleRenderedFiles(files, inUse: [urls[0]], keep: 2) == [urls[1]])
 }
@@ -63,10 +63,10 @@ import Testing
 @Test(.enabled(if: ProcessInfo.processInfo.environment["MEASURE"] != nil))
 func measureLargeRender() throws {
     let image = twoToneImage(width: 3000, height: 2000)
-    let url = makeTempDirectory().appendingPathComponent("big.png")
+    let url = makeTempDirectory().appendingPathComponent("big.tiff")
     let start = Date()
-    try Renderer.writePNG(Renderer.render(image, canvasSize: CGSize(width: 3456, height: 2234), framing: Framing(fit: .contain, background: .blur)), to: url)
-    print("render + PNG 3456x2234: \(Int(Date().timeIntervalSince(start) * 1000)) ms")
+    try Renderer.writeTIFF(Renderer.render(image, canvasSize: CGSize(width: 3456, height: 2234), framing: Framing(fit: .contain, background: .blur)), to: url)
+    print("render + TIFF 3456x2234: \(Int(Date().timeIntervalSince(start) * 1000)) ms")
 }
 
 /// A JPEG whose pixels are stored landscape but whose EXIF orientation says "rotate 90° clockwise".
