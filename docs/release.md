@@ -4,6 +4,7 @@
 2. Compiler en Release (signature ad hoc, déjà réglée dans `project.yml`) :
    `xcodegen generate && xcodebuild -project ArenaWallpaper.xcodeproj -scheme ArenaWallpaper -configuration Release -derivedDataPath build build`
    Dans Xcode : Product > Build For > Profiling, ou Product > Archive puis Distribute App > Copy App.
+   Vérifier les droits : `codesign -d --entitlements - "build/Build/Products/Release/Arena Wallpaper.app"` ne doit lister que `app-sandbox` et `network.client` (jamais `get-task-allow`).
 3. Zipper en gardant les attributs macOS :
    `cd build/Build/Products/Release && ditto -c -k --keepParent "Arena Wallpaper.app" Arena-Wallpaper.zip`
 4. Calculer l'empreinte du zip, à recopier dans les notes de la Release (l'app n'est pas signée : c'est le seul moyen pour l'utilisateur de vérifier son fichier) :
