@@ -13,6 +13,7 @@ struct SidebarView: View {
             List(selection: Binding<LibrarySelection?>(get: { selection }, set: { selection = $0 ?? .all })) {
                 Label("Tout", systemImage: "square.grid.2x2").tag(LibrarySelection.all)
                 Label("Retirées", systemImage: "eye.slash").tag(LibrarySelection.removed)
+                Label("Général", systemImage: "gearshape").tag(LibrarySelection.general)
                 Section("Channels") {
                     ForEach(library.config.channels, id: \.slug) { channel in
                         HStack {

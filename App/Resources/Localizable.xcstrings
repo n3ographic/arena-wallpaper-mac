@@ -254,6 +254,16 @@
         }
       }
     },
+    "Coller": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste"
+          }
+        }
+      }
+    },
     "Compte": {
       "localizations": {
         "en": {
@@ -294,6 +304,16 @@
         }
       }
     },
+    "Copier": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy"
+          }
+        }
+      }
+    },
     "Couleur": {
       "localizations": {
         "en": {
@@ -310,6 +330,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Background color"
+          }
+        }
+      }
+    },
+    "Couper": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cut"
           }
         }
       }
@@ -340,6 +370,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Save token"
+          }
+        }
+      }
+    },
+    "Fenêtre": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Window"
+          }
+        }
+      }
+    },
+    "Fermer": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close"
           }
         }
       }
@@ -844,6 +894,16 @@
         }
       }
     },
+    "Tout sélectionner": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select All"
+          }
+        }
+      }
+    },
     "Trousseau indisponible (%d)": {
       "localizations": {
         "en": {
@@ -950,6 +1010,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Screens"
+          }
+        }
+      }
+    },
+    "Édition": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit"
           }
         }
       }

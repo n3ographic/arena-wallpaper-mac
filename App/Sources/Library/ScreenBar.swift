@@ -14,16 +14,17 @@ struct ScreenBar: View {
     private var perScreen: Bool { library.config.screenMode == .perScreen && display.screens.count > 1 }
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: 8) {
             tile(key: "all", name: String(localized: "Tous"), index: 0, isTarget: display.target == .all, screenID: nil)
             if display.screens.count > 1 {
+                Divider().frame(height: 80)
                 ForEach(Array(display.screens.enumerated()), id: \.element.id) { index, screen in
                     tile(key: screen.id, name: String(localized: "Écran \(index + 1)"), index: index,
                          isTarget: display.target == .screen(screen.id), screenID: screen.id)
                 }
             }
-            Spacer()
         }
+        .frame(maxWidth: .infinity)
         .padding(10)
     }
 

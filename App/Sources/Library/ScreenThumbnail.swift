@@ -36,11 +36,14 @@ struct ScreenThumbnail: View {
             Button(action: action) {
                 BlockPreview(block: block, maxPixels: 300)
                     .aspectRatio(aspectRatio, contentMode: .fit)
-                    .frame(height: 54)
-                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                    .frame(height: 80)
+                    .clipShape(RoundedRectangle(cornerRadius: 2))
+                    // A dark bezel like a monitor; the target gets the accent color.
+                    .padding(3)
+                    .background(Color.black, in: RoundedRectangle(cornerRadius: 5))
                     .overlay {
-                        RoundedRectangle(cornerRadius: 6)
-                            .strokeBorder(isTarget ? Color.accentColor : Color.secondary.opacity(0.3), lineWidth: isTarget ? 3 : 1)
+                        RoundedRectangle(cornerRadius: 5)
+                            .strokeBorder(Color.accentColor, lineWidth: isTarget ? 3 : 0)
                     }
             }
             .buttonStyle(.plain)

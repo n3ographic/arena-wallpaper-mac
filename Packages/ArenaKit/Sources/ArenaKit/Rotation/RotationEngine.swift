@@ -111,7 +111,12 @@ public actor RotationEngine {
 
     /// Applies given images (a click in the grid, a re-render) and tells the observers.
     public func apply(ids: [Int], screens: [Screen]) async throws {
+        let before = await wallpaper.current
         try await wallpaper.apply(ids: ids, screens: screens)
+        // The cycle goes on from the last image that changed (a no-op after a draw of the cycle itself).
+        if let changed = ids.indices.last(where: { !before.indices.contains($0) || before[$0] != ids[$0] }) {
+            scheduler.jump(to: ids[changed])
+        }
         await publish()
     }
 

@@ -58,10 +58,7 @@ struct PanelView: View {
     }
 
     private func subtitle(now: Date) -> String {
-        if playback.nowPlaying.paused { return String(localized: "En pause") }
-        guard let next = playback.nowPlaying.nextChange else { return "" }
-        let minutes = remainingMinutes(until: next, now: now)
-        return minutes == 0 ? String(localized: "Prochain changement dans moins d'une minute") : String(localized: "Prochain changement dans \(minutes) min")
+        nextChangeText(playback.nowPlaying, now: now)
     }
 
     private func progressValue(now: Date) -> Double {
@@ -111,19 +108,24 @@ private struct PanelFooter: View {
     }
 
     var body: some View {
-        HStack {
-            Button(allExcluded ? String(localized: "Remettre") : String(localized: "Retirer")) { Task { await app.toggleExcluded(playback.nowPlaying.ids) } }
-                .disabled(playback.nowPlaying.ids.isEmpty)
-            Button("Are.na") { playback.nowPlaying.ids.first.map(library.openOnArena) }
-                .disabled(playback.nowPlaying.ids.isEmpty)
-                .accessibilityLabel(Text("Ouvrir sur Are.na"))
-            Spacer()
-            Button("Bibliothèque", action: openLibrary)
-            Button("Préférences", action: openPreferences)
-            Spacer()
-            Button("Quitter") { NSApp.terminate(nil) }
+        VStack(spacing: 8) {
+            HStack(spacing: 8) {
+                Button { openLibrary() } label: { Label("Bibliothèque", systemImage: "photo.on.rectangle").frame(maxWidth: .infinity) }
+                Button { openPreferences() } label: { Label("Préférences", systemImage: "gearshape").frame(maxWidth: .infinity) }
+            }
+            .buttonStyle(.bordered)
+            HStack {
+                Button(allExcluded ? String(localized: "Remettre") : String(localized: "Retirer")) { Task { await app.toggleExcluded(playback.nowPlaying.ids) } }
+                    .disabled(playback.nowPlaying.ids.isEmpty)
+                Button("Are.na") { playback.nowPlaying.ids.first.map(library.openOnArena) }
+                    .disabled(playback.nowPlaying.ids.isEmpty)
+                    .accessibilityLabel(Text("Ouvrir sur Are.na"))
+                Spacer()
+                Button("Quitter") { NSApp.terminate(nil) }
+            }
+            .buttonStyle(.borderless)
         }
-        .buttonStyle(.borderless)
+        .lineLimit(1)
     }
 }
 
@@ -173,4 +175,12 @@ struct PanelScreensRow: View {
             }
         }
     }
+}
+
+/// "En pause", or the time left before the next automatic change.
+func nextChangeText(_ state: NowPlaying, now: Date) -> String {
+    if state.paused { return String(localized: "En pause") }
+    guard let next = state.nextChange else { return "" }
+    let minutes = remainingMinutes(until: next, now: now)
+    return minutes == 0 ? String(localized: "Prochain changement dans moins d'une minute") : String(localized: "Prochain changement dans \(minutes) min")
 }

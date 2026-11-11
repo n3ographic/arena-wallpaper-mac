@@ -8,6 +8,5 @@ struct PreferencesView: View {
             RotationView().tabItem { Text("Rotation") }
             GeneralView().tabItem { Text("Général") }
         }
-        .frame(width: 480, height: 360)
     }
 }

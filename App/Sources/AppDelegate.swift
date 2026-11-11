@@ -14,6 +14,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             paused: { [app] in app.playback.nowPlaying.paused }
         )
         app.openPreferences = { [weak self] in self?.showPreferences() }
+        installMainMenu()
         app.start()
     }
 
@@ -29,5 +30,37 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func showPreferences() {
         statusItem?.closePopover()
         preferences.show()
+    }
+
+    /// Shortcuts need a menu: a menu bar app has none by default. It shows only while a window is open.
+    private func installMainMenu() {
+        let main = NSMenu()
+        func submenu(_ title: String, _ items: [NSMenuItem]) {
+            let item = NSMenuItem(title: title, action: nil, keyEquivalent: "")
+            let menu = NSMenu(title: title)
+            items.forEach(menu.addItem)
+            item.submenu = menu
+            main.addItem(item)
+        }
+        let preferences = NSMenuItem(title: String(localized: "Préférences"), action: #selector(openPreferencesFromMenu), keyEquivalent: ",")
+        preferences.target = self
+        submenu("Arena Wallpaper", [
+            preferences, .separator(),
+            NSMenuItem(title: String(localized: "Quitter"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"),
+        ])
+        submenu(String(localized: "Édition"), [
+            NSMenuItem(title: String(localized: "Couper"), action: #selector(NSText.cut(_:)), keyEquivalent: "x"),
+            NSMenuItem(title: String(localized: "Copier"), action: #selector(NSText.copy(_:)), keyEquivalent: "c"),
+            NSMenuItem(title: String(localized: "Coller"), action: #selector(NSText.paste(_:)), keyEquivalent: "v"),
+            NSMenuItem(title: String(localized: "Tout sélectionner"), action: #selector(NSText.selectAll(_:)), keyEquivalent: "a"),
+        ])
+        submenu(String(localized: "Fenêtre"), [
+            NSMenuItem(title: String(localized: "Fermer"), action: #selector(NSWindow.performClose(_:)), keyEquivalent: "w"),
+        ])
+        NSApp.mainMenu = main
+    }
+
+    @objc private func openPreferencesFromMenu() {
+        showPreferences()
     }
 }

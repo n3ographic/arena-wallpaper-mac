@@ -182,3 +182,13 @@ private let landscape2 = testScreen("landscape2", 192, 0, 192, 108)
     try await rotation.advance(screenIDs: [])
     #expect(await setter.calls.isEmpty)
 }
+
+@Test func manualApplyMovesTheOrderedCycle() async throws {
+    let (repository, cache, rendered) = try await fixture(ids: [1, 2, 3, 4], mode: .same)
+    try await repository.update { $0.order = .ordered }
+    let rotation = engine(repository, cache, rendered, setter: RecordingSetter(), screens: [landscape])
+    try await rotation.rotate(manual: false)
+    try await rotation.apply(ids: [3], screens: [landscape])
+    try await rotation.rotate(manual: true)
+    #expect(await rotation.nowPlaying.ids == [4])
+}

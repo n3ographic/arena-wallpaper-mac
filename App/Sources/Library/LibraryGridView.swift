@@ -6,12 +6,16 @@ struct LibraryGridView: View {
     @Environment(AppCoordinator.self) private var app
     @Environment(LibraryStore.self) private var library
     @Environment(DisplayStore.self) private var display
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let blocks: [Block]
     /// The channel whose next page the "Charger plus" button loads, if any.
     let channel: Channel?
     @Binding var selected: Int?
+    /// Set by the window when the image on screen changes: the grid scrolls to it.
+    @Binding var scrollTarget: Int?
 
     var body: some View {
+        ScrollViewReader { proxy in
         ScrollView {
             if blocks.isEmpty {
                 Text("Aucune image ici.").foregroundStyle(.secondary).padding()
@@ -36,6 +40,12 @@ struct LibraryGridView: View {
                     .disabled(library.loadingSlugs.contains(channel.slug))
                     .padding(.bottom)
             }
+        }
+        .onChange(of: scrollTarget) {
+            guard let id = scrollTarget else { return }
+            withAnimation(reduceMotion ? nil : .default) { proxy.scrollTo(id, anchor: .center) }
+            scrollTarget = nil
+        }
         }
     }
 

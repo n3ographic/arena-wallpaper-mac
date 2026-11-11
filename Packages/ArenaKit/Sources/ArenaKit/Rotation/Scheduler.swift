@@ -61,6 +61,19 @@ public struct Scheduler {
         return next()
     }
 
+    /// An image was put on screen by hand: the cycle goes on from it. In order, the next one is
+    /// the image after it; shuffled, it is not drawn again in this cycle.
+    public mutating func jump(to id: Int) {
+        guard let index = pool.firstIndex(of: id) else { return }
+        last = id
+        if order == .ordered {
+            remaining = Array(pool[(index + 1)...].reversed())
+        } else {
+            if remaining.isEmpty { refill() }
+            remaining.removeAll { $0 == id }
+        }
+    }
+
     private mutating func refill() {
         var cycle = order == .ordered ? Array(pool.reversed()) : shuffle(pool)
         // Avoid the same image twice in a row across two cycles.

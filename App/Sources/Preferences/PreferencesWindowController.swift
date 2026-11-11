@@ -13,7 +13,7 @@ final class PreferencesWindowController: NSObject, NSWindowDelegate {
 
     func show() {
         if window == nil {
-            let w = NSWindow(contentViewController: NSHostingController(rootView: PreferencesView().injecting(app)))
+            let w = NSWindow(contentViewController: NSHostingController(rootView: PreferencesView().frame(width: 480, height: 360).injecting(app)))
             w.title = String(localized: "Préférences")
             w.styleMask = [.titled, .closable, .miniaturizable]
             w.isReleasedWhenClosed = false
