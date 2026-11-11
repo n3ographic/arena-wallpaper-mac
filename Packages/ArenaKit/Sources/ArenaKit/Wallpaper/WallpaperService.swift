@@ -99,7 +99,7 @@ public actor WallpaperService {
         }
         return liveTargets(
             ids: ids, screens: screens, blocks: blocks, originals: originals, frameCounts: frameCounts, imageSizes: sizes,
-            mode: config.screenMode, reduceMotion: reduceMotion(), fit: config.fit, positionX: config.positionX, positionY: config.positionY
+            mode: config.screenMode, reduceMotion: reduceMotion(), fit: config.defaultFraming.fit, positionX: config.defaultFraming.positionX, positionY: config.defaultFraming.positionY
         )
     }
 
@@ -121,7 +121,7 @@ public actor WallpaperService {
         func image(_ id: Int, canvas: CGSize) async throws -> CGImage {
             do {
                 let url = originals[id]!
-                let needed = FrameGeometry.decodeMaxPixelSize(imageSize: try Renderer.orientedSize(url), canvasSize: canvas, fit: config.fit)
+                let needed = FrameGeometry.decodeMaxPixelSize(imageSize: try Renderer.orientedSize(url), canvasSize: canvas, fit: config.defaultFraming.fit)
                 if let cached = images[id], max(cached.width, cached.height) >= needed { return cached }
                 let loaded = try Renderer.loadFirstFrame(url, maxPixelSize: needed)
                 images[id] = loaded
@@ -133,7 +133,7 @@ public actor WallpaperService {
             }
         }
         func compose(_ id: Int, _ size: CGSize) async throws -> CGImage {
-            Renderer.render(try await image(id, canvas: size), canvasSize: size, fit: config.fit, positionX: config.positionX, positionY: config.positionY, background: config.background)
+            Renderer.render(try await image(id, canvas: size), canvasSize: size, fit: config.defaultFraming.fit, positionX: config.defaultFraming.positionX, positionY: config.defaultFraming.positionY, background: config.defaultFraming.background)
         }
 
         var big: (canvas: PixelRect, image: CGImage)?
