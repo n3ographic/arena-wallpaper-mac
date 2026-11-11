@@ -9,6 +9,8 @@ final class AppModel: ObservableObject {
     @Published private(set) var isConnected = false
     @Published private(set) var nowPlaying = NowPlaying(ids: [], nextChange: nil, paused: false)
     @Published private(set) var launchAtLogin = LaunchAtLogin.isEnabled
+    /// Channels with a page request running from the "Charger plus" button.
+    @Published private(set) var loadingSlugs: Set<String> = []
     @Published var lastError: String?
 
     let repository: ConfigRepository
@@ -23,7 +25,7 @@ final class AppModel: ObservableObject {
 
     nonisolated static var userAgent: String {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0"
-        return "ArenaWallpaper/\(version)"
+        return arenaUserAgent(version: version, contact: AppInfo.contactEmail)
     }
 
     init() {
@@ -34,8 +36,10 @@ final class AppModel: ObservableObject {
         self.secrets = secrets
         repository = ConfigRepository(store: ConfigStore(directory: support))
         cache = ImageCache(directory: caches.appendingPathComponent("originals"))
+        // One gate for every client: they are recreated at each call to read the current token.
+        let gate = RequestGate()
         library = LibraryService(repository: repository) {
-            ArenaClient(token: secrets.token(), userAgent: AppModel.userAgent)
+            ArenaClient(token: secrets.token(), userAgent: AppModel.userAgent, gate: gate)
         }
         wallpaper = WallpaperService(
             repository: repository, cache: cache, renderedDirectory: support.appendingPathComponent("rendered"),
@@ -52,7 +56,7 @@ final class AppModel: ObservableObject {
         let clock = RotationClock(
             engine: engine,
             onError: { [weak self] error in self?.lastError = Self.message(for: error) },
-            onDailyRefresh: { [weak self] in await self?.refresh() }
+            onRotated: { [weak self] in await self?.refresh(force: false) }
         )
         self.clock = clock
         Task {
@@ -62,8 +66,10 @@ final class AppModel: ObservableObject {
             }
         }
         Task {
-            if isConnected { await refresh() }
+            // Public channels are readable without an account, so this does not wait for a sign-in.
+            await engine.setOnLowPool { [weak self] in await self?.growLibrary() }
             clock.start(rotateNow: true)
+            await refresh(force: false)
         }
     }
 
@@ -91,7 +97,6 @@ final class AppModel: ObservableObject {
             try secrets.setToken(try await exchangeCode(code, pkce: pkce, config: oauth))
             isConnected = true
             lastError = nil
-            await refresh()
         } catch let error as ASWebAuthenticationSessionError where error.code == .canceledLogin {
             return
         } catch {
@@ -107,7 +112,6 @@ final class AppModel: ObservableObject {
             try secrets.setToken(token)
             isConnected = true
             lastError = nil
-            await refresh()
         } catch {
             lastError = Self.message(for: error)
         }
@@ -132,8 +136,10 @@ final class AppModel: ObservableObject {
         }
     }
 
-    func refresh() async {
-        let failures = await library.refreshAll()
+    /// Revalidates the channels: all of them with `force` (the "Actualiser" button), otherwise
+    /// only those not checked for a day.
+    func refresh(force: Bool) async {
+        let failures = await library.refreshAll(force: force)
         if failures.values.contains(.unauthorized) {
             // The token no longer works: back to signed out, so "Sign in" is offered.
             disconnect()
@@ -141,6 +147,29 @@ final class AppModel: ObservableObject {
         } else if let (slug, error) = failures.first {
             lastError = "\(slug) : \(Self.message(for: error))"
         }
+        await reloadConfig()
+    }
+
+    /// "Charger plus": the next page of a channel.
+    func loadMore(_ slug: String) async {
+        loadingSlugs.insert(slug)
+        do {
+            try await library.loadMore(slug: slug)
+            lastError = nil
+        } catch ArenaError.unauthorized {
+            disconnect()
+            lastError = String(localized: "Reconnecte-toi à Are.na.")
+        } catch {
+            lastError = Self.message(for: error)
+        }
+        await reloadConfig()
+        loadingSlugs.remove(slug)
+    }
+
+    /// Asked by the rotation when few images are left: one more page, silently.
+    private func growLibrary() async {
+        guard let slug = await library.channelToGrow() else { return }
+        _ = try? await library.loadMore(slug: slug)
         await reloadConfig()
     }
 

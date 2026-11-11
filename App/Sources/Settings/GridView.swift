@@ -3,7 +3,9 @@ import ArenaKit
 
 struct GridView: View {
     @EnvironmentObject private var model: AppModel
-    let blocks: [Block]
+    let channel: Channel
+
+    private var blocks: [Block] { channel.blocks }
 
     var body: some View {
         ScrollView {
@@ -19,6 +21,11 @@ struct GridView: View {
                 }
             }
             .padding()
+            if channel.nextPage != nil {
+                Button("Charger plus") { Task { await model.loadMore(channel.slug) } }
+                    .disabled(model.loadingSlugs.contains(channel.slug))
+                    .padding(.bottom)
+            }
         }
     }
 
@@ -34,14 +41,14 @@ struct GridView: View {
             Button("Appliquer") { Task { await model.apply(block) } }
         }
         Divider()
-        Button(model.isExcluded(block.id) ? String(localized: "Réinclure dans la rotation") : String(localized: "Exclure de la rotation")) {
+        Button(model.isExcluded(block.id) ? String(localized: "Remettre dans la rotation") : String(localized: "Retirer de la rotation")) {
             Task { await model.toggleExcluded([block.id]) }
         }
         Button("Ouvrir sur Are.na") { model.openOnArena(block.id) }
     }
 }
 
-/// A square cell; a GIF shows its first frame and a badge; an excluded image is dimmed.
+/// A square cell; a GIF shows its first frame and a badge; a removed image is dimmed.
 struct ThumbnailView: View {
     let block: Block
     var excluded = false
@@ -59,7 +66,7 @@ struct ThumbnailView: View {
             .clipShape(RoundedRectangle(cornerRadius: 6))
             .overlay(alignment: .bottomLeading) {
                 if excluded {
-                    Text("Exclue")
+                    Text("Retirée")
                         .font(.caption2)
                         .padding(.horizontal, 5)
                         .background(.background, in: RoundedRectangle(cornerRadius: 4))
@@ -77,7 +84,7 @@ struct ThumbnailView: View {
                 }
             }
             .accessibilityElement()
-            .accessibilityLabel(Text(verbatim: block.title ?? String(localized: "Image sans titre")) + Text(excluded ? ", exclue" : ""))
+            .accessibilityLabel(Text(verbatim: block.title ?? String(localized: "Image sans titre")) + Text(excluded ? ", retirée" : ""))
             .task(id: block.id) { image = await Thumbnails.shared.image(for: block) }
     }
 }
