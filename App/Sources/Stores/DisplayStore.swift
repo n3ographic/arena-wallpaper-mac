@@ -33,11 +33,11 @@ final class DisplayStore {
         target = validTarget(newTarget, mode: await repository.config.screenMode, screens: screens)
     }
 
-    /// This image on the target: every screen, or one screen with the others kept.
-    func apply(_ block: Block) async {
+    /// This image on the target (or on `override`): every screen, or one screen with the others kept.
+    func apply(_ block: Block, to override: PoseTarget? = nil) async {
         let screens = await provider.screens()
         let current = await engine.nowPlaying.ids
-        await apply(ids: idsToApply(block.id, target: target, current: current, screens: screens), screens: screens)
+        await apply(ids: idsToApply(block.id, target: override ?? target, current: current, screens: screens), screens: screens)
     }
 
     /// `nil` screen is "Tous": the default framing for every screen.

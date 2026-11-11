@@ -72,8 +72,8 @@ final class AppCoordinator {
     }
 
     /// Pose an image on the target, then a new full wait.
-    func apply(_ block: Block) async {
-        await display.apply(block)
+    func apply(_ block: Block, to target: PoseTarget? = nil) async {
+        await display.apply(block, to: target)
         playback.restartClock()
     }
 

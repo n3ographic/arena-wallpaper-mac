@@ -1,28 +1,37 @@
-import SwiftUI
 import ArenaKit
+import SwiftUI
 
-struct GridView: View {
+/// The images of the selection. One click selects, a double click or Return poses.
+struct LibraryGridView: View {
     @Environment(AppCoordinator.self) private var app
     @Environment(LibraryStore.self) private var library
-    let channel: Channel
-
-    private var blocks: [Block] { channel.blocks }
+    @Environment(DisplayStore.self) private var display
+    let blocks: [Block]
+    /// The channel whose next page the "Charger plus" button loads, if any.
+    let channel: Channel?
+    @Binding var selected: Int?
 
     var body: some View {
         ScrollView {
             if blocks.isEmpty {
-                Text("Ce channel ne contient aucune image.").foregroundStyle(.secondary).padding()
+                Text("Aucune image ici.").foregroundStyle(.secondary).padding()
             }
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: 8)], spacing: 8) {
                 ForEach(blocks, id: \.id) { block in
                     ThumbnailView(block: block, excluded: library.isExcluded(block.id))
-                        .onTapGesture { Task { await app.apply(block) } }
-                        .accessibilityAddTraits(.isButton)
+                        .overlay {
+                            if selected == block.id {
+                                RoundedRectangle(cornerRadius: 6).strokeBorder(Color.accentColor, lineWidth: 3)
+                            }
+                        }
+                        .onTapGesture(count: 2) { Task { await app.apply(block) } }
+                        .onTapGesture { selected = block.id }
+                        .accessibilityAddTraits(selected == block.id ? [.isButton, .isSelected] : .isButton)
                         .contextMenu { menu(for: block) }
                 }
             }
             .padding()
-            if channel.nextPage != nil {
+            if let channel, channel.nextPage != nil {
                 Button("Charger plus") { Task { await library.loadMore(channel.slug) } }
                     .disabled(library.loadingSlugs.contains(channel.slug))
                     .padding(.bottom)
@@ -32,7 +41,14 @@ struct GridView: View {
 
     @ViewBuilder
     private func menu(for block: Block) -> some View {
-        Button("Appliquer") { Task { await app.apply(block) } }
+        if library.config.screenMode == .perScreen && display.screens.count > 1 {
+            ForEach(Array(display.screens.enumerated()), id: \.element.id) { index, screen in
+                Button("Écran \(index + 1)") { Task { await app.apply(block, to: .screen(screen.id)) } }
+            }
+            Button("Tous les écrans") { Task { await app.apply(block, to: .all) } }
+        } else {
+            Button("Appliquer") { Task { await app.apply(block, to: .all) } }
+        }
         Divider()
         Button(library.isExcluded(block.id) ? String(localized: "Remettre dans la rotation") : String(localized: "Retirer de la rotation")) {
             Task { await app.toggleExcluded([block.id]) }

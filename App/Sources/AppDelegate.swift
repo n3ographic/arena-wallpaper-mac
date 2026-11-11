@@ -4,12 +4,12 @@ import AppKit
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: StatusItemController?
     private let app = AppCoordinator()
-    private lazy var settings = SettingsWindowController(app: app)
+    private lazy var library = LibraryWindowController(app: app)
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         statusItem = StatusItemController(
-            panel: PanelView(openSettings: { [weak self] in self?.showSettings() }).injecting(app),
+            panel: PanelView(openLibrary: { [weak self] in self?.showLibrary() }).injecting(app),
             paused: { [app] in app.playback.nowPlaying.paused }
         )
         app.start()
@@ -19,8 +19,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         false
     }
 
-    func showSettings() {
+    func showLibrary() {
         statusItem?.closePopover()
-        settings.show()
+        library.show()
     }
 }

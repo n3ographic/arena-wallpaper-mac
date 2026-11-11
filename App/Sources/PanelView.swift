@@ -8,7 +8,7 @@ struct PanelView: View {
     @Environment(PlaybackStore.self) private var playback
     @Environment(LibraryStore.self) private var library
     @Environment(ErrorCenter.self) private var errors
-    let openSettings: () -> Void
+    let openLibrary: () -> Void
 
     private var block: Block? { playback.nowPlaying.ids.first.flatMap(library.block) }
 
@@ -44,7 +44,7 @@ struct PanelView: View {
                     .disabled(playback.nowPlaying.ids.isEmpty)
                     .accessibilityLabel(Text("Ouvrir sur Are.na"))
                 Spacer()
-                Button("Réglages", action: openSettings)
+                Button("Bibliothèque", action: openLibrary)
                 Spacer()
                 Button("Quitter") { NSApp.terminate(nil) }
             }
