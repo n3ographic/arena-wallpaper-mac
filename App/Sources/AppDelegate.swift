@@ -5,7 +5,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: StatusItemController?
     private let app = AppCoordinator()
     private lazy var library = LibraryWindowController(app: app)
-    private lazy var preferences = PreferencesWindowController(app: app)
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -13,7 +12,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             panel: PanelView(openLibrary: { [weak self] in self?.showLibrary() }, openPreferences: { [weak self] in self?.showPreferences() }).injecting(app),
             paused: { [app] in app.playback.nowPlaying.paused }
         )
-        app.openPreferences = { [weak self] in self?.showPreferences() }
         installMainMenu()
         app.start()
     }
@@ -23,13 +21,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func showLibrary() {
+        if case .images = app.sidebarItem {} else { app.sidebarItem = .images(.all) }
         statusItem?.closePopover()
         library.show()
     }
 
+    /// The preferences are pages of the library window.
     func showPreferences() {
+        app.sidebarItem = .playback
         statusItem?.closePopover()
-        preferences.show()
+        library.show()
     }
 
     /// Shortcuts need a menu: a menu bar app has none by default. It shows only while a window is open.

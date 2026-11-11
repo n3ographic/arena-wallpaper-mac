@@ -13,8 +13,8 @@ final class AppCoordinator {
     let playback: PlaybackStore
     let display: DisplayStore
 
-    /// Opens the preferences window (set by the app delegate).
-    @ObservationIgnored var openPreferences: () -> Void = {}
+    /// What the library window shows; kept here so the menu bar can open it on a given page.
+    var sidebarItem: SidebarItem = .images(.all)
 
     init() {
         // Inside the sandbox these are the app's own container folders.

@@ -8,11 +8,11 @@ struct LibraryView: View {
     @Environment(PlaybackStore.self) private var playback
     @Environment(LibraryStore.self) private var library
     @Environment(DisplayStore.self) private var display
-    @State private var item: SidebarItem = .images(.all)
     @State private var selectedID: Int?
     @State private var scrollTarget: Int?
     @FocusState private var focused: Bool
 
+    private var item: SidebarItem { app.sidebarItem }
     private var selection: LibrarySelection {
         if case .images(let selection) = item { return selection }
         return .all
@@ -37,7 +37,7 @@ struct LibraryView: View {
         // Computed once per update: the list can hold thousands of images.
         let shown = self.shown
         return NavigationSplitView {
-            SidebarView(item: $item)
+            SidebarView(item: Binding(get: { app.sidebarItem }, set: { app.sidebarItem = $0 }))
                 .navigationSplitViewColumnWidth(min: 220, ideal: 250, max: 320)
         } detail: {
             switch item {
