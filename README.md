@@ -4,6 +4,10 @@ Une app macOS qui met les images de tes channels [Are.na](https://www.are.na) en
 
 *A macOS app that turns the images of your [Are.na](https://www.are.na) channels into your wallpaper: rotation, multiple screens, framing, animated GIFs.*
 
+Projet indépendant, non affilié à Are.na. Are.na est une marque de When It Changed, Inc.
+
+*Independent project, not affiliated with Are.na. Are.na is a trademark of When It Changed, Inc.*
+
 ## Installation
 
 L'app est gratuite et n'est pas notarisée par Apple (pas de compte Developer payant). macOS la bloque donc au premier lancement : c'est normal.

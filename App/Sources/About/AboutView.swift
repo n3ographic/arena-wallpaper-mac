@@ -31,6 +31,9 @@ struct AboutView: View {
                 Link("Signaler un problème", destination: UpdateChecker.repository.appendingPathComponent("issues/new"))
             }
             .font(.callout)
+            Text("Projet indépendant, non affilié à Are.na.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
         .padding(24)
         .frame(width: 360)

@@ -964,6 +964,16 @@
         }
       }
     },
+    "Projet indépendant, non affilié à Are.na.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Independent project, not affiliated with Are.na."
+          }
+        }
+      }
+    },
     "Précédent": {
       "localizations": {
         "en": {
