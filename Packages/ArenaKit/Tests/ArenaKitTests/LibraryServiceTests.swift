@@ -4,7 +4,7 @@ import Testing
 
 private func library(_ repository: ConfigRepository) -> LibraryService {
     LibraryService(repository: repository) {
-        ArenaClient(token: "t", userAgent: "ArenaWallpaper/0.1.0", baseURL: URL(string: "https://api.test")!, session: StubURLProtocol.session())
+        ArenaClient(token: "t", userAgent: "ArenaWallpaper/0.1.0", gate: RequestGate(minInterval: 0), baseURL: URL(string: "https://api.test")!, session: StubURLProtocol.session())
     }
 }
 

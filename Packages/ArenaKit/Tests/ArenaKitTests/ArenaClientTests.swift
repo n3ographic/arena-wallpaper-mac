@@ -3,30 +3,58 @@ import Testing
 @testable import ArenaKit
 
 private func client(token: String? = "t") -> ArenaClient {
-    ArenaClient(token: token, userAgent: "ArenaWallpaper/0.1.0", baseURL: URL(string: "https://api.test")!, session: StubURLProtocol.session())
+    ArenaClient(token: token, userAgent: "ArenaWallpaper/0.1.0", gate: RequestGate(minInterval: 0), baseURL: URL(string: "https://api.test")!, session: StubURLProtocol.session())
 }
 
 extension Network {
     @Suite struct ArenaClientTests {
-        @Test func followsPagination() async throws {
-            StubURLProtocol.reset { request in
-                request.url!.query!.contains("page=1")
-                    ? StubURLProtocol.json(pageJSON([imageJSON(id: 1), imageJSON(id: 2)], more: true))
-                    : StubURLProtocol.json(pageJSON([imageJSON(id: 3)], more: false))
+        /// Blocks of a 200 result, failing the test on anything else.
+        private func pageBlocks(_ result: PageResult) -> [Block] {
+            if case .page(let blocks, _, _) = result { return blocks }
+            Issue.record("expected a page")
+            return []
+        }
+
+        @Test func readsOnePage() async throws {
+            StubURLProtocol.reset { _ in
+                StubURLProtocol.Reply(
+                    status: 200, headers: ["Content-Type": "application/json", "ETag": #"W/"abc""#],
+                    body: Data(pageJSON([imageJSON(id: 1), imageJSON(id: 2)], more: true).utf8))
             }
-            let blocks = try await client().channelBlocks(slug: "mon-channel")
-            #expect(blocks.map(\.id) == [1, 2, 3])
+            let result = try await client().channelPage(slug: "mon-channel", page: 2)
+            guard case .page(let blocks, let hasMore, let etag) = result else { Issue.record("expected a page"); return }
+            #expect(blocks.map(\.id) == [1, 2])
+            #expect(hasMore)
+            #expect(etag == #"W/"abc""#)
             #expect(StubURLProtocol.requests.map { $0.url!.absoluteString } == [
-                "https://api.test/v3/channels/mon-channel/contents?per=100&page=1",
-                "https://api.test/v3/channels/mon-channel/contents?per=100&page=2",
+                "https://api.test/v3/channels/mon-channel/contents?per=50&page=2&sort=created_at_desc",
             ])
+        }
+
+        @Test func sendsIfNoneMatchAndReadsNotModified() async throws {
+            StubURLProtocol.reset { _ in .init(status: 304) }
+            let result = try await client().channelPage(slug: "c", page: 1, etag: #"W/"abc""#)
+            #expect(result == .notModified)
+            #expect(StubURLProtocol.requests[0].value(forHTTPHeaderField: "If-None-Match") == #"W/"abc""#)
+        }
+
+        @Test func bypassesTheURLCache() async throws {
+            StubURLProtocol.reset { _ in StubURLProtocol.json(pageJSON([], more: false)) }
+            _ = try await client().channelPage(slug: "c", page: 1)
+            #expect(StubURLProtocol.requests[0].cachePolicy == .reloadIgnoringLocalCacheData)
+        }
+
+        @Test func rateLimitedIsNotRetried() async {
+            StubURLProtocol.reset { _ in .init(status: 429, headers: ["Retry-After": "30"]) }
+            await #expect(throws: ArenaError.rateLimited(retryAfterSeconds: 60)) { try await client().channelPage(slug: "c", page: 1) }
+            #expect(StubURLProtocol.requests.count == 1)
         }
 
         @Test func keepsOnlyImageBlocks() async throws {
             StubURLProtocol.reset { _ in
                 StubURLProtocol.json(pageJSON([imageJSON(id: 1), #"{"id": 9, "type": "Link", "title": null}"#, #"{"id": 10, "type": "Text"}"#], more: false))
             }
-            #expect(try await client().channelBlocks(slug: "c").map(\.id) == [1])
+            #expect(pageBlocks(try await client().channelPage(slug: "c", page: 1)).map(\.id) == [1])
         }
 
         @Test func readsImageVariantsAndContentType() async throws {
@@ -36,7 +64,7 @@ extension Network {
                     imageJSON(id: 2, width: nil, height: nil, fileSize: nil, smallWidth: nil, mediumWidth: nil, largeWidth: nil),
                 ], more: false))
             }
-            let blocks = try await client().channelBlocks(slug: "c")
+            let blocks = pageBlocks(try await client().channelPage(slug: "c", page: 1))
             #expect(blocks[0].thumbURL.absoluteString == "https://img/1-medium.jpg")
             #expect(blocks[0].previewURL.absoluteString == "https://img/1-large.jpg")
             #expect(blocks[0].fullURL.absoluteString == "https://img/1.jpg")
@@ -48,8 +76,8 @@ extension Network {
 
         @Test func sendsUserAgentAndBearer() async throws {
             StubURLProtocol.reset { _ in StubURLProtocol.json(pageJSON([], more: false)) }
-            _ = try await client().channelBlocks(slug: "c")
-            _ = try await client(token: nil).channelBlocks(slug: "c")
+            _ = try await client().channelPage(slug: "c", page: 1)
+            _ = try await client(token: nil).channelPage(slug: "c", page: 1)
             let withToken = StubURLProtocol.requests[0]
             #expect(withToken.value(forHTTPHeaderField: "User-Agent")?.hasPrefix("ArenaWallpaper/") == true)
             #expect(withToken.value(forHTTPHeaderField: "Authorization") == "Bearer t")
@@ -61,26 +89,26 @@ extension Network {
                 (.init(status: 401), .unauthorized),
                 (.init(status: 403), .unauthorized),
                 (.init(status: 404), .notFound),
-                (.init(status: 429, headers: ["Retry-After": "30"]), .rateLimited(retryAfterSeconds: 30)),
+                (.init(status: 429, headers: ["Retry-After": "90"]), .rateLimited(retryAfterSeconds: 90)),
                 (.init(status: 429), .rateLimited(retryAfterSeconds: 60)),
                 (.init(status: 500), .network("HTTP 500")),
             ]
             for (reply, expected) in cases {
                 StubURLProtocol.reset { _ in reply }
-                await #expect(throws: expected) { try await client().channelBlocks(slug: "c") }
+                await #expect(throws: expected) { try await client().channelPage(slug: "c", page: 1) }
             }
         }
 
         @Test func emptyChannelReturnsEmpty() async throws {
             StubURLProtocol.reset { _ in StubURLProtocol.json(pageJSON([], more: false)) }
-            #expect(try await client().channelBlocks(slug: "c").isEmpty)
+            #expect(pageBlocks(try await client().channelPage(slug: "c", page: 1)).isEmpty)
         }
 
         @Test func unusableImagesAreDropped() async throws {
             StubURLProtocol.reset { _ in
                 StubURLProtocol.json(pageJSON([imageJSON(id: 1, fileSize: 52_428_801), imageJSON(id: 2)], more: false))
             }
-            #expect(try await client().channelBlocks(slug: "c").map(\.id) == [2])
+            #expect(pageBlocks(try await client().channelPage(slug: "c", page: 1)).map(\.id) == [2])
         }
     }
 }
@@ -103,4 +131,10 @@ extension Network {
     #expect(isUsable(block(1920, 1080, size: 52_428_800)))
     #expect(!isUsable(block(12000, 10000)))
     #expect(isUsable(block(nil, nil)))
+}
+
+@Test func userAgentWithAndWithoutContact() {
+    #expect(arenaUserAgent(version: "1.0", contact: "") == "ArenaWallpaper/1.0")
+    #expect(arenaUserAgent(version: "1.0", contact: "  ") == "ArenaWallpaper/1.0")
+    #expect(arenaUserAgent(version: "1.0", contact: "a@b.c") == "ArenaWallpaper/1.0 (+a@b.c)")
 }

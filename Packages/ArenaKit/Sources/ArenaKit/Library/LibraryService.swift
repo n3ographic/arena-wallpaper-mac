@@ -16,7 +16,7 @@ public actor LibraryService {
     public func addChannel(input: String) async throws -> Channel {
         guard let slug = parseChannelSlug(input) else { throw LibraryError.invalidChannel }
         guard await !repository.config.channels.contains(where: { $0.slug == slug }) else { throw LibraryError.alreadyAdded }
-        let channel = Channel(slug: slug, enabled: true, blocks: try await client().channelBlocks(slug: slug))
+        let channel = Channel(slug: slug, enabled: true, blocks: try await firstPageBlocks(slug))
         try await repository.update { $0.channels.append(channel) }
         return channel
     }
@@ -26,7 +26,7 @@ public actor LibraryService {
         var failures: [String: ArenaError] = [:]
         for slug in await repository.config.channels.map(\.slug) {
             do {
-                let blocks = try await client().channelBlocks(slug: slug)
+                let blocks = try await firstPageBlocks(slug)
                 try await repository.update { config in
                     if let index = config.channels.firstIndex(where: { $0.slug == slug }) {
                         config.channels[index].blocks = blocks
@@ -39,6 +39,12 @@ public actor LibraryService {
             }
         }
         return failures
+    }
+
+    /// Provisional, replaced by the paged logic in the next tasks.
+    private func firstPageBlocks(_ slug: String) async throws -> [Block] {
+        if case .page(let blocks, _, _) = try await client().channelPage(slug: slug, page: 1) { return blocks }
+        return []
     }
 
     public func removeChannel(slug: String) async throws {
