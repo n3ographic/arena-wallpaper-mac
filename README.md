@@ -35,3 +35,7 @@ Updates: Settings > General shows when a newer version exists, with a link to th
 ## Développement
 
 Voir `docs/release.md` pour produire une Release. Tests : `cd Packages/ArenaKit && swift test`.
+
+## Licence
+
+MIT, voir `LICENSE`.
