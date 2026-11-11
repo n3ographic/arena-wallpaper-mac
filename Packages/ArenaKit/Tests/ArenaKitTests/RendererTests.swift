@@ -1,5 +1,7 @@
 import CoreGraphics
 import Foundation
+import ImageIO
+import UniformTypeIdentifiers
 import Testing
 @testable import ArenaKit
 
@@ -65,4 +67,47 @@ func measureLargeRender() throws {
     let start = Date()
     try Renderer.writePNG(Renderer.render(image, canvasSize: CGSize(width: 3456, height: 2234), fit: .contain, positionX: 50, positionY: 50, background: .blur), to: url)
     print("render + PNG 3456x2234: \(Int(Date().timeIntervalSince(start) * 1000)) ms")
+}
+
+/// A JPEG whose pixels are stored landscape but whose EXIF orientation says "rotate 90° clockwise".
+private func rotatedJPEG(width: Int, height: Int) -> Data {
+    let data = NSMutableData()
+    let destination = CGImageDestinationCreateWithData(data, UTType.jpeg.identifier as CFString, 1, nil)!
+    CGImageDestinationAddImage(destination, twoToneImage(width: width, height: height), [kCGImagePropertyOrientation: 6] as CFDictionary)
+    CGImageDestinationFinalize(destination)
+    return data as Data
+}
+
+@Test func exifOrientationIsApplied() throws {
+    let url = makeTempDirectory().appendingPathComponent("photo")
+    try rotatedJPEG(width: 400, height: 200).write(to: url)
+    let image = try Renderer.loadFirstFrame(url)
+    #expect(image.width == 200 && image.height == 400)
+    // Stored left half red: once turned clockwise, red is on top.
+    let top = pixel(image, 100, 50), bottom = pixel(image, 100, 350)
+    #expect(top.r > 200 && top.b < 60)
+    #expect(bottom.b > 200 && bottom.r < 60)
+    #expect(try Renderer.orientedSize(url) == CGSize(width: 200, height: 400))
+}
+
+@Test func largeImageIsDecodedAtTheNeededSize() throws {
+    let url = makeTempDirectory().appendingPathComponent("big")
+    try encoded([solidImage(width: 4000, height: 2000)], type: .png).write(to: url)
+    let image = try Renderer.loadFirstFrame(url, maxPixelSize: 400)
+    #expect(max(image.width, image.height) <= 400)
+    #expect(image.width == 2 * image.height)
+}
+
+@Test func decodeSizeFollowsTheFraming() {
+    let image = CGSize(width: 4000, height: 2000), canvas = CGSize(width: 400, height: 400)
+    // Fill: the short side must cover 400 px, so the long side needs 800.
+    #expect(FrameGeometry.decodeMaxPixelSize(imageSize: image, canvasSize: canvas, fit: .fill) == 800)
+    #expect(FrameGeometry.decodeMaxPixelSize(imageSize: image, canvasSize: canvas, fit: .contain) == 400)
+    #expect(FrameGeometry.decodeMaxPixelSize(imageSize: image, canvasSize: canvas, fit: .center) == 400)
+    #expect(FrameGeometry.decodeMaxPixelSize(imageSize: image, canvasSize: canvas, fit: .stretch) == 800)
+    // Never larger than the image itself.
+    let small = CGSize(width: 300, height: 200)
+    for fit in [Fit.fill, .contain, .center, .stretch] {
+        #expect(FrameGeometry.decodeMaxPixelSize(imageSize: small, canvasSize: CGSize(width: 3456, height: 2234), fit: fit) == 300)
+    }
 }
