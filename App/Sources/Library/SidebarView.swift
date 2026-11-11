@@ -7,7 +7,7 @@ enum SidebarItem: Hashable {
     case general, playback, account
 }
 
-/// "Général", the images, the channels (active and on hold), the preferences, and the field
+/// The images, the channels (active and on hold), the preferences, and the field
 /// to add a channel.
 struct SidebarView: View {
     @Environment(LibraryStore.self) private var library
@@ -18,7 +18,6 @@ struct SidebarView: View {
     var body: some View {
         VStack(spacing: 0) {
             List(selection: Binding<SidebarItem?>(get: { item }, set: { item = $0 ?? .images(.all) })) {
-                Label("Général", systemImage: "gearshape").tag(SidebarItem.general)
                 Section("Images") {
                     Label("Tout", systemImage: "square.grid.2x2").tag(SidebarItem.images(.all))
                     Label("Retirées", systemImage: "eye.slash").tag(SidebarItem.images(.removed))
@@ -31,6 +30,7 @@ struct SidebarView: View {
                         Spacer()
                         RefreshButton()
                     }
+                    .padding(.trailing, 8)
                 }
                 let onHold = library.config.channels.filter { !$0.enabled }
                 if !onHold.isEmpty {
@@ -46,6 +46,7 @@ struct SidebarView: View {
                 Section("Préférences") {
                     Label("Lecture", systemImage: "play.rectangle").tag(SidebarItem.playback)
                     Label("Compte", systemImage: "person.crop.circle").tag(SidebarItem.account)
+                    Label("Général", systemImage: "gearshape").tag(SidebarItem.general)
                 }
             }
             VStack(alignment: .leading, spacing: 6) {
