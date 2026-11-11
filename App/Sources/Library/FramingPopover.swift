@@ -66,7 +66,7 @@ struct FramingPopover: View {
         }
         .task(id: block?.id) {
             source = nil
-            guard let block, let (data, _) = try? await URLSession.shared.data(from: block.previewURL),
+            guard let block, let data = try? await downloadImage(block.previewURL),
                   let image = Thumbnails.downscale(data, maxPixels: 600),
                   let cg = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return }
             source = cg

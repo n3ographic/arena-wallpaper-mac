@@ -47,3 +47,12 @@ extension Network {
         }
     }
 }
+
+@Test func downloadRefusesNonHTTPS() async throws {
+    await #expect(throws: ImageCacheError.download("not https")) {
+        try await downloadImage(URL(string: "http://img/x.png")!)
+    }
+    await #expect(throws: ImageCacheError.download("not https")) {
+        try await downloadImage(URL(fileURLWithPath: "/etc/hosts"))
+    }
+}

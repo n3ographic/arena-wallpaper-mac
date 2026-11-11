@@ -11,7 +11,7 @@ final class Thumbnails {
 
     func image(for block: Block) async -> NSImage? {
         if let cached = cache.object(forKey: block.id as NSNumber) { return cached }
-        guard let (data, _) = try? await URLSession.shared.data(from: block.thumbURL),
+        guard let data = try? await downloadImage(block.thumbURL),
               let image = Self.downscale(data, maxPixels: 400) else { return nil }
         cache.setObject(image, forKey: block.id as NSNumber)
         return image
