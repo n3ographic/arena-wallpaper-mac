@@ -145,7 +145,7 @@ public actor WallpaperService {
                 let url = originals[id]!
                 let needed = FrameGeometry.decodeMaxPixelSize(imageSize: try Renderer.orientedSize(url), canvasSize: canvas, framing: framing)
                 if let cached = images[id], max(cached.width, cached.height) >= needed { return cached }
-                let loaded = try Renderer.loadFirstFrame(url, maxPixelSize: needed)
+                let loaded = try await timed("  decode") { try Renderer.loadFirstFrame(url, maxPixelSize: needed) }
                 images[id] = loaded
                 return loaded
             } catch {
@@ -188,11 +188,11 @@ public actor WallpaperService {
                         output = spanCanvasImage.image.cropping(to: CGRect(x: crop.x, y: crop.y, width: crop.width, height: crop.height)) ?? spanCanvasImage.image
                     } else {
                         let size = CGSize(width: job.screen.frame.width, height: job.screen.frame.height)
-                        output = Renderer.render(job.source!, canvasSize: size, framing: job.framing)
+                        output = await timed("  compose") { Renderer.render(job.source!, canvasSize: size, framing: job.framing) }
                     }
                     // A unique name, so the system does not keep showing a cached older picture.
-                    let file = directory.appendingPathComponent("\(job.index)-\(job.id)-\(stamp).png")
-                    try Renderer.writePNG(output, to: file)
+                    let file = directory.appendingPathComponent("\(job.index)-\(job.id)-\(stamp).tiff")
+                    try await timed("  writeTIFF") { try Renderer.writeTIFF(output, to: file) }
                     return (job.index, file)
                 }
             }
