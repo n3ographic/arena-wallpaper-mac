@@ -223,3 +223,14 @@ private let greenBands = Framing(fit: .contain, background: .color(hex: "#00ff00
     try await service(repository, cache, rendered, setter: setter).rerender(screenID: "main")
     #expect(await setter.calls.isEmpty)
 }
+
+@Test func reapplySetsRequestedScreenFirst() async throws {
+    let (repository, cache, rendered) = try await fixture(ids: [1, 2], mode: .perScreen)
+    let setter = RecordingSetter()
+    let wallpaper = service(repository, cache, rendered, setter: setter)
+    try await wallpaper.apply(ids: [1, 2], screens: [mainScreen, rightScreen])
+    await wallpaper.reapply(first: "right")
+    #expect(await setter.calls.map(\.screenID) == ["main", "right", "right", "main"])
+    await wallpaper.reapply()
+    #expect(await setter.calls.map(\.screenID).suffix(2) == ["main", "right"])
+}

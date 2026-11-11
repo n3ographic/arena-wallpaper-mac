@@ -105,8 +105,10 @@ public actor WallpaperService {
 
     /// Sets the current files again: after a Space change, the system may still show an older
     /// picture on the newly active Space.
-    public func reapply() async {
-        for (screenID, file) in currentFiles {
+    /// `first` is the screen the user is looking at: it is set before the others.
+    public func reapply(first screenID: String? = nil) async {
+        let files = currentFiles.filter { $0.screenID == screenID } + currentFiles.filter { $0.screenID != screenID }
+        for (screenID, file) in files {
             try? await setter.setWallpaper(file, screenID: screenID)
         }
     }

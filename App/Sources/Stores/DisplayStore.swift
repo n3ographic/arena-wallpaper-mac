@@ -76,8 +76,9 @@ final class DisplayStore {
     }
 
     /// After a Space change: the same files, set again.
-    func reapply() async {
-        await wallpaper.reapply()
+    /// The screen the user is looking at goes first.
+    func reapply(first screenID: String? = nil) async {
+        await wallpaper.reapply(first: screenID)
     }
 
     private func apply(ids: [Int], screens: [Screen]) async {
