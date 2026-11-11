@@ -4,7 +4,7 @@ import SwiftUI
 /// What the library window shows: a list of images, or one page of settings.
 enum SidebarItem: Hashable {
     case images(LibrarySelection)
-    case general, playback, account
+    case playback, account
 }
 
 /// The images, the channels (active and on hold), the preferences, and the field
@@ -46,7 +46,6 @@ struct SidebarView: View {
                 Section("Préférences") {
                     Label("Lecture", systemImage: "play.rectangle").tag(SidebarItem.playback)
                     Label("Compte", systemImage: "person.crop.circle").tag(SidebarItem.account)
-                    Label("Général", systemImage: "gearshape").tag(SidebarItem.general)
                 }
             }
             VStack(alignment: .leading, spacing: 6) {

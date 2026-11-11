@@ -10,6 +10,7 @@ struct PanelView: View {
     @Environment(ErrorCenter.self) private var errors
     let openLibrary: () -> Void
     let openPreferences: () -> Void
+    let openAbout: () -> Void
 
     private var block: Block? { playback.nowPlaying.ids.first.flatMap(library.block) }
     private var showsScreenRow: Bool { library.config.screenMode == .perScreen && display.screens.count > 1 }
@@ -42,7 +43,7 @@ struct PanelView: View {
             }
             .pickerStyle(.menu)
             Divider()
-            PanelFooter(openLibrary: openLibrary, openPreferences: openPreferences)
+            PanelFooter(openLibrary: openLibrary, openPreferences: openPreferences, openAbout: openAbout)
             if let error = errors.message {
                 Text(error).font(.caption).foregroundStyle(.red)
             }
@@ -102,6 +103,7 @@ private struct PanelFooter: View {
     @Environment(LibraryStore.self) private var library
     let openLibrary: () -> Void
     let openPreferences: () -> Void
+    let openAbout: () -> Void
 
     private var allExcluded: Bool {
         !playback.nowPlaying.ids.isEmpty && playback.nowPlaying.ids.allSatisfy(library.isExcluded)
@@ -121,6 +123,9 @@ private struct PanelFooter: View {
                     .disabled(playback.nowPlaying.ids.isEmpty)
                     .accessibilityLabel(Text("Ouvrir sur Are.na"))
                 Spacer()
+                Button { openAbout() } label: { Image(systemName: "info.circle") }
+                    .help(Text("À propos d'Arena Wallpaper"))
+                    .accessibilityLabel(Text("À propos d'Arena Wallpaper"))
                 Button("Quitter") { NSApp.terminate(nil) }
             }
             .buttonStyle(.borderless)
