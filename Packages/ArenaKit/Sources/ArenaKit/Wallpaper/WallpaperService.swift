@@ -99,7 +99,7 @@ public actor WallpaperService {
         }
         return liveTargets(
             ids: ids, screens: screens, blocks: blocks, originals: originals, frameCounts: frameCounts, imageSizes: sizes,
-            mode: config.screenMode, reduceMotion: reduceMotion(), fit: config.defaultFraming.fit, positionX: config.defaultFraming.positionX, positionY: config.defaultFraming.positionY
+            mode: config.screenMode, reduceMotion: reduceMotion(), framing: { config.framing(for: $0) }
         )
     }
 
@@ -111,6 +111,28 @@ public actor WallpaperService {
         }
     }
 
+    /// Draws and sets one screen again with the image it shows, after its framing changed.
+    /// The other screens, `current` and their files stay as they are.
+    public func rerender(screenID: String) async throws {
+        guard let applied = lastApplied, let index = applied.screens.firstIndex(where: { $0.id == screenID }) else { return }
+        let config = await repository.config
+        if config.screenMode == .span {
+            try await apply(ids: applied.ids, screens: applied.screens)
+            return
+        }
+        generation += 1
+        let mine = generation
+        let screen = applied.screens[index]
+        let files = try await render(ids: [applied.ids[index]], screens: [screen], originals: applied.originals, config: config)
+        guard mine == generation else { return }
+        try await setter.setWallpaper(files[0], screenID: screenID)
+        if let at = currentFiles.firstIndex(where: { $0.screenID == screenID }) {
+            currentFiles[at] = (screenID, files[0])
+        }
+        removeStaleFiles(keeping: currentFiles.map(\.file), keep: 3 * applied.screens.count)
+        await player.show(animatedTargets(ids: applied.ids, screens: applied.screens, originals: applied.originals, config: config))
+    }
+
     // MARK: Rendering
 
     private func render(ids: [Int], screens: [Screen], originals: [Int: URL], config: Config) async throws -> [URL] {
@@ -118,10 +140,10 @@ public actor WallpaperService {
         let stamp = Int(now().timeIntervalSince1970 * 1000)
         // Decoded once per image, at the largest size a screen needs.
         var images: [Int: CGImage] = [:]
-        func image(_ id: Int, canvas: CGSize) async throws -> CGImage {
+        func image(_ id: Int, canvas: CGSize, framing: Framing) async throws -> CGImage {
             do {
                 let url = originals[id]!
-                let needed = FrameGeometry.decodeMaxPixelSize(imageSize: try Renderer.orientedSize(url), canvasSize: canvas, fit: config.defaultFraming.fit)
+                let needed = FrameGeometry.decodeMaxPixelSize(imageSize: try Renderer.orientedSize(url), canvasSize: canvas, framing: framing)
                 if let cached = images[id], max(cached.width, cached.height) >= needed { return cached }
                 let loaded = try Renderer.loadFirstFrame(url, maxPixelSize: needed)
                 images[id] = loaded
@@ -132,14 +154,15 @@ public actor WallpaperService {
                 throw error
             }
         }
-        func compose(_ id: Int, _ size: CGSize) async throws -> CGImage {
-            Renderer.render(try await image(id, canvas: size), canvasSize: size, fit: config.defaultFraming.fit, positionX: config.defaultFraming.positionX, positionY: config.defaultFraming.positionY, background: config.defaultFraming.background)
+        func compose(_ id: Int, _ size: CGSize, _ framing: Framing) async throws -> CGImage {
+            Renderer.render(try await image(id, canvas: size, framing: framing), canvasSize: size, framing: framing)
         }
 
         var big: (canvas: PixelRect, image: CGImage)?
         if config.screenMode == .span {
             let canvas = spanCanvas(screens)
-            big = (canvas, try await compose(ids[0], CGSize(width: canvas.width, height: canvas.height)))
+            // One image over every screen: only the default framing applies.
+            big = (canvas, try await compose(ids[0], CGSize(width: canvas.width, height: canvas.height), config.defaultFraming))
         }
         var files: [URL] = []
         for (index, (screen, id)) in zip(screens, ids).enumerated() {
@@ -148,7 +171,7 @@ public actor WallpaperService {
                 let crop = cropInCanvas(big.canvas, screen)
                 output = big.image.cropping(to: CGRect(x: crop.x, y: crop.y, width: crop.width, height: crop.height)) ?? big.image
             } else {
-                output = try await compose(id, CGSize(width: screen.frame.width, height: screen.frame.height))
+                output = try await compose(id, CGSize(width: screen.frame.width, height: screen.frame.height), config.framing(for: screen.id))
             }
             // A unique name, so the system does not keep showing a cached older picture.
             let file = renderedDirectory.appendingPathComponent("\(index)-\(id)-\(stamp).png")

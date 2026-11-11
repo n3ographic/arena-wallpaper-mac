@@ -167,3 +167,59 @@ private actor GateSetter: WallpaperSetter {
     try await older.value
     #expect(await wallpaper.current == [2])
 }
+
+// MARK: Per-screen framing
+
+private let greenBands = Framing(fit: .contain, background: .color(hex: "#00ff00"))
+
+@Test func perScreenFramingIsUsed() async throws {
+    let (repository, cache, rendered) = try await fixture(ids: [1, 2], mode: .perScreen)
+    try await repository.update { $0.setFraming(greenBands, for: "right") }
+    let setter = RecordingSetter()
+    try await service(repository, cache, rendered, setter: setter).apply(ids: [1, 2], screens: [mainScreen, rightScreen])
+    let files = await setter.calls.map(\.file)
+    let a = try Renderer.loadFirstFrame(files[0]), b = try Renderer.loadFirstFrame(files[1])
+    #expect(pixel(a, 0, 0).r > 235)
+    let band = pixel(b, 64, 0)
+    #expect(band.g > 235 && band.r < 20)
+}
+
+@Test func spanUsesDefaultFraming() async throws {
+    let (repository, cache, rendered) = try await fixture(ids: [1], mode: .span)
+    try await repository.update { $0.setFraming(greenBands, for: "main") }
+    let setter = RecordingSetter()
+    let left = testScreen("left", -128, 0, 128, 102)
+    try await service(repository, cache, rendered, setter: setter).apply(ids: [1, 1], screens: [mainScreen, left])
+    let main = try Renderer.loadFirstFrame(await setter.calls[0].file)
+    #expect(pixel(main, 0, 0).r > 235)
+}
+
+@Test func framingOfUnpluggedScreenIsIgnored() async throws {
+    let (repository, cache, rendered) = try await fixture(ids: [1, 2], mode: .perScreen)
+    try await repository.update { $0.setFraming(greenBands, for: "gone") }
+    let setter = RecordingSetter()
+    try await service(repository, cache, rendered, setter: setter).apply(ids: [1, 2], screens: [mainScreen, rightScreen])
+    let files = await setter.calls.map(\.file)
+    #expect(pixel(try Renderer.loadFirstFrame(files[0]), 0, 0).r > 235)
+    #expect(pixel(try Renderer.loadFirstFrame(files[1]), 64, 0).r > 235)
+}
+
+@Test func rerenderTouchesOnlyThatScreen() async throws {
+    let (repository, cache, rendered) = try await fixture(ids: [1, 2], mode: .perScreen)
+    let setter = RecordingSetter()
+    let wallpaper = service(repository, cache, rendered, setter: setter)
+    try await wallpaper.apply(ids: [1, 2], screens: [mainScreen, rightScreen])
+    try await repository.update { $0.setFraming(greenBands, for: "right") }
+    try await wallpaper.rerender(screenID: "right")
+    let calls = await setter.calls
+    #expect(calls.map(\.screenID) == ["main", "right", "right"])
+    #expect(pixel(try Renderer.loadFirstFrame(calls[2].file), 64, 0).g > 235)
+    #expect(await wallpaper.current == [1, 2])
+}
+
+@Test func rerenderWithoutApplyDoesNothing() async throws {
+    let (repository, cache, rendered) = try await fixture(ids: [1])
+    let setter = RecordingSetter()
+    try await service(repository, cache, rendered, setter: setter).rerender(screenID: "main")
+    #expect(await setter.calls.isEmpty)
+}

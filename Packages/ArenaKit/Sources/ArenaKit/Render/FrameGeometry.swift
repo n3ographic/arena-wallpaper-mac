@@ -34,6 +34,14 @@ public enum FrameGeometry {
         }
     }
 
+    public static func placement(imageSize: CGSize, canvasSize: CGSize, framing: Framing) -> Placement {
+        placement(imageSize: imageSize, canvasSize: canvasSize, fit: framing.fit, positionX: framing.positionX, positionY: framing.positionY)
+    }
+
+    public static func decodeMaxPixelSize(imageSize: CGSize, canvasSize: CGSize, framing: Framing) -> Int {
+        decodeMaxPixelSize(imageSize: imageSize, canvasSize: canvasSize, fit: framing.fit)
+    }
+
     /// Long side to decode the image at so the framing never scales it up: the scale the
     /// framing applies (the larger axis for fill and stretch), capped at 1.
     public static func decodeMaxPixelSize(imageSize: CGSize, canvasSize: CGSize, fit: Fit) -> Int {

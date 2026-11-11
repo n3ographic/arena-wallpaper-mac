@@ -7,7 +7,7 @@ import Foundation
 public func liveTargets(
     ids: [Int], screens: [Screen], blocks: [Int: Block], originals: [Int: URL],
     frameCounts: [Int: Int], imageSizes: [Int: CGSize],
-    mode: ScreenMode, reduceMotion: Bool, fit: Fit, positionX: Int, positionY: Int
+    mode: ScreenMode, reduceMotion: Bool, framing: (String) -> Framing
 ) -> [LiveTarget] {
     guard mode != .span, !reduceMotion else { return [] }
     return zip(screens, ids).compactMap { screen, id in
@@ -15,7 +15,7 @@ public func liveTargets(
               let gif = originals[id], let size = imageSizes[id] else { return nil }
         let placement = FrameGeometry.placement(
             imageSize: size, canvasSize: CGSize(width: screen.frame.width, height: screen.frame.height),
-            fit: fit, positionX: positionX, positionY: positionY
+            framing: framing(screen.id)
         )
         let d = placement.destination, s = placement.source
         // The whole GIF at the scale that maps the source crop onto the window.
