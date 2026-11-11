@@ -82,6 +82,33 @@ public actor RotationEngine {
         if let firstError { throw firstError }
     }
 
+    /// Changes the image of the given screens only (manual draw). In "one image per screen"
+    /// mode each listed screen gets its own new image; otherwise one draw covers everything.
+    public func advance(screenIDs: [String]) async throws {
+        guard !screenIDs.isEmpty else { return }
+        let screens = await screenProvider.screens()
+        let config = await repository.config
+        guard config.screenMode == .perScreen else {
+            try await rotate(manual: true)
+            return
+        }
+        let pool = enabledPool(config)
+        scheduler.sync(pool: pool, order: config.order)
+        let blocks = Dictionary(config.channels.flatMap(\.blocks).map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
+        var ids = currentFor(await wallpaper.current, screenCount: screens.count) ?? []
+        // Nothing on screen yet: a full draw is the only sensible answer.
+        guard ids.count == screens.count else { return try await rotate(manual: true) }
+        for (index, screen) in screens.enumerated() where screenIDs.contains(screen.id) {
+            let next = { self.scheduler.nextManual() }
+            let picked = config.matchOrientation
+                ? pickCompatible(next: next, ok: { orientationOK(blocks[$0], screen) }, maxDraws: pool.count)
+                : next()
+            if let picked { ids = withScreen(ids, screenCount: screens.count, index: index, id: picked) }
+        }
+        try await apply(ids: ids, screens: screens)
+        askForMoreIfLow()
+    }
+
     /// Applies given images (a click in the grid, a re-render) and tells the observers.
     public func apply(ids: [Int], screens: [Screen]) async throws {
         try await wallpaper.apply(ids: ids, screens: screens)

@@ -101,3 +101,10 @@ private func drawing(_ ids: [Int]) -> () -> Int? {
     #expect(withScreen([], screenCount: 2, index: 0, id: 9) == [9, 9])
     #expect(withScreen([1, 2], screenCount: 2, index: 5, id: 9) == [1, 2])
 }
+
+@Test func screensToAdvanceFindsExcludedScreens() {
+    #expect(screensToAdvance(afterExcluding: [2], current: [1, 2], screens: twoScreens) == ["left"])
+    #expect(screensToAdvance(afterExcluding: [1, 2], current: [1, 2], screens: twoScreens) == ["main", "left"])
+    #expect(screensToAdvance(afterExcluding: [9], current: [1, 2], screens: twoScreens).isEmpty)
+    #expect(screensToAdvance(afterExcluding: [1], current: [1], screens: twoScreens).isEmpty)
+}

@@ -153,3 +153,32 @@ private actor LowPoolProbe {
     for _ in 0..<50 { await Task.yield() }
     #expect(await probe.calls == 0)
 }
+
+private let landscape2 = testScreen("landscape2", 192, 0, 192, 108)
+
+@Test func advanceOneScreenKeepsTheOther() async throws {
+    let (repository, cache, rendered) = try await fixture(ids: [1, 2, 3], mode: .perScreen)
+    try await repository.update { $0.order = .ordered }
+    let rotation = engine(repository, cache, rendered, setter: RecordingSetter(), screens: [landscape, landscape2])
+    try await rotation.rotate(manual: false)
+    #expect(await rotation.nowPlaying.ids == [1, 2])
+    try await rotation.advance(screenIDs: ["landscape2"])
+    #expect(await rotation.nowPlaying.ids == [1, 3])
+}
+
+@Test func advanceInSameModeRotatesOnce() async throws {
+    let (repository, cache, rendered) = try await fixture(ids: [1, 2, 3], mode: .same)
+    try await repository.update { $0.order = .ordered }
+    let rotation = engine(repository, cache, rendered, setter: RecordingSetter(), screens: [landscape, landscape2])
+    try await rotation.rotate(manual: false)
+    try await rotation.advance(screenIDs: ["landscape", "landscape2"])
+    #expect(await rotation.nowPlaying.ids == [2, 2])
+}
+
+@Test func advanceWithEmptyListDoesNothing() async throws {
+    let (repository, cache, rendered) = try await fixture(ids: [1, 2])
+    let setter = RecordingSetter()
+    let rotation = engine(repository, cache, rendered, setter: setter)
+    try await rotation.advance(screenIDs: [])
+    #expect(await setter.calls.isEmpty)
+}

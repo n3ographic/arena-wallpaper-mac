@@ -57,3 +57,10 @@ public func withScreen(_ current: [Int], screenCount: Int, index: Int, id: Int) 
     if ids.indices.contains(index) { ids[index] = id }
     return ids
 }
+
+/// Ids of the screens showing one of the `excluded` images, in the order of `screens`.
+/// `current` has one id per screen; any other length gives nothing.
+public func screensToAdvance(afterExcluding excluded: Set<Int>, current: [Int], screens: [Screen]) -> [String] {
+    guard current.count == screens.count else { return [] }
+    return zip(screens, current).filter { excluded.contains($1) }.map(\.0.id)
+}
