@@ -8,11 +8,15 @@ struct LibraryView: View {
     @Environment(PlaybackStore.self) private var playback
     @Environment(LibraryStore.self) private var library
     @Environment(DisplayStore.self) private var display
-    @State private var selection: LibrarySelection = .all
+    @State private var item: SidebarItem = .images(.all)
     @State private var selectedID: Int?
     @State private var scrollTarget: Int?
     @FocusState private var focused: Bool
 
+    private var selection: LibrarySelection {
+        if case .images(let selection) = item { return selection }
+        return .all
+    }
     private var shown: [Block] { blocks(for: selection, in: library.config) }
     private var channel: Channel? {
         guard case .channel(let slug) = selection else { return nil }
@@ -33,12 +37,17 @@ struct LibraryView: View {
         // Computed once per update: the list can hold thousands of images.
         let shown = self.shown
         return NavigationSplitView {
-            SidebarView(selection: $selection)
+            SidebarView(item: $item)
                 .navigationSplitViewColumnWidth(min: 220, ideal: 250, max: 320)
         } detail: {
-            if selection == .general {
-                PreferencesView().frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
+            switch item {
+            case .general:
+                GeneralView().frame(maxWidth: .infinity, maxHeight: .infinity)
+            case .playback:
+                RotationView().frame(maxWidth: .infinity, maxHeight: .infinity)
+            case .account:
+                AccountView().frame(maxWidth: .infinity, maxHeight: .infinity)
+            case .images:
                 VStack(spacing: 0) {
                     ScreenBar()
                     Divider()
@@ -48,7 +57,7 @@ struct LibraryView: View {
                 }
             }
         }
-        .onChange(of: selection) { selectedID = nil }
+        .onChange(of: item) { selectedID = nil }
         // The blue selection follows the image on screen, and the grid scrolls to it.
         .onChange(of: currentID) {
             guard let id = currentID, shown.contains(where: { $0.id == id }) else { return }

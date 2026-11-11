@@ -1,19 +1,28 @@
 import ArenaKit
 import SwiftUI
 
-/// "Tout", "Retirées", the channels, and the field to add one.
+/// What the library window shows: a list of images, or one page of settings.
+enum SidebarItem: Hashable {
+    case images(LibrarySelection)
+    case general, playback, account
+}
+
+/// "Général", the images, the channels (active and on hold), the preferences, and the field
+/// to add a channel.
 struct SidebarView: View {
     @Environment(LibraryStore.self) private var library
     @Environment(ErrorCenter.self) private var errors
-    @Binding var selection: LibrarySelection
+    @Binding var item: SidebarItem
     @State private var input = ""
 
     var body: some View {
         VStack(spacing: 0) {
-            List(selection: Binding<LibrarySelection?>(get: { selection }, set: { selection = $0 ?? .all })) {
-                Label("Tout", systemImage: "square.grid.2x2").tag(LibrarySelection.all)
-                Label("Retirées", systemImage: "eye.slash").tag(LibrarySelection.removed)
-                Label("Général", systemImage: "gearshape").tag(LibrarySelection.general)
+            List(selection: Binding<SidebarItem?>(get: { item }, set: { item = $0 ?? .images(.all) })) {
+                Label("Général", systemImage: "gearshape").tag(SidebarItem.general)
+                Section("Images") {
+                    Label("Tout", systemImage: "square.grid.2x2").tag(SidebarItem.images(.all))
+                    Label("Retirées", systemImage: "eye.slash").tag(SidebarItem.images(.removed))
+                }
                 Section {
                     ForEach(library.config.channels.filter(\.enabled), id: \.slug, content: row)
                 } header: {
@@ -33,6 +42,10 @@ struct SidebarView: View {
                             Text("Visibles ici, jamais choisis automatiquement.").font(.caption2).textCase(nil)
                         }
                     }
+                }
+                Section("Préférences") {
+                    Label("Lecture", systemImage: "play.rectangle").tag(SidebarItem.playback)
+                    Label("Compte", systemImage: "person.crop.circle").tag(SidebarItem.account)
                 }
             }
             VStack(alignment: .leading, spacing: 6) {
@@ -67,10 +80,10 @@ struct SidebarView: View {
             Text(verbatim: "\(channel.blocks.count)" + (channel.nextPage != nil ? "+" : ""))
                 .foregroundStyle(.secondary)
         }
-        .tag(LibrarySelection.channel(channel.slug))
+        .tag(SidebarItem.images(.channel(channel.slug)))
         .contextMenu {
             Button("Retirer") {
-                if selection == .channel(channel.slug) { selection = .all }
+                if item == .images(.channel(channel.slug)) { item = .images(.all) }
                 Task { await library.removeChannel(channel.slug) }
             }
         }
@@ -81,7 +94,7 @@ struct SidebarView: View {
         Task {
             if await library.addChannel(text) {
                 input = ""
-                if let slug = parseChannelSlug(text) { selection = .channel(slug) }
+                if let slug = parseChannelSlug(text) { item = .images(.channel(slug)) }
             }
         }
     }

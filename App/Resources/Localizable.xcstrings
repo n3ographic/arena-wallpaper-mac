@@ -254,16 +254,6 @@
         }
       }
     },
-    "Channels": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Channels"
-          }
-        }
-      }
-    },
     "Channels actifs": {
       "localizations": {
         "en": {
@@ -530,6 +520,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Image too large."
+          }
+        }
+      }
+    },
+    "Images": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Images"
           }
         }
       }
