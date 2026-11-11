@@ -15,6 +15,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         )
         installMainMenu()
         app.start()
+        // First launch (or library erased): open the library on its welcome page.
+        Task {
+            await app.library.reloadConfig()
+            if app.library.config.channels.isEmpty { showLibrary() }
+        }
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {

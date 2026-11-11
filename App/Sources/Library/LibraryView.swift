@@ -45,6 +45,8 @@ struct LibraryView: View {
                 RotationView().frame(maxWidth: .infinity, maxHeight: .infinity)
             case .account:
                 AccountView().frame(maxWidth: .infinity, maxHeight: .infinity)
+            case .images where library.config.channels.isEmpty:
+                WelcomeView()
             case .images:
                 VStack(spacing: 0) {
                     ScreenBar()

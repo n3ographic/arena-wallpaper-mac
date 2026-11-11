@@ -204,6 +204,16 @@
         }
       }
     },
+    "Bienvenue dans Arena Wallpaper": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Welcome to Arena Wallpaper"
+          }
+        }
+      }
+    },
     "Cadrage": {
       "localizations": {
         "en": {
@@ -360,6 +370,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Account"
+          }
+        }
+      }
+    },
+    "Connecte ton compte Are.na pour utiliser tes channels, même privés.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect your Are.na account to use your channels, private ones included."
           }
         }
       }
@@ -1124,6 +1144,16 @@
         }
       }
     },
+    "Sans compte, les channels publics marchent aussi : colle leur lien dans le champ en bas de la barre latérale.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Public channels work without an account too: paste their link in the field at the bottom of the sidebar."
+          }
+        }
+      }
+    },
     "Sans titre": {
       "localizations": {
         "en": {
@@ -1290,6 +1320,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "You have the latest version."
+          }
+        }
+      }
+    },
+    "Tu es connecté. Ajoute un channel avec le champ en bas de la barre latérale : colle son lien ou son slug.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You're signed in. Add a channel with the field at the bottom of the sidebar: paste its link or slug."
           }
         }
       }
