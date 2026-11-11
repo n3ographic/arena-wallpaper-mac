@@ -8,6 +8,7 @@ struct AccountView: View {
     @Environment(ErrorCenter.self) private var errors
     @State private var showsTokenField = false
     @State private var token = ""
+    @State private var confirmsSignOut = false
 
     var body: some View {
         Form {
@@ -18,7 +19,16 @@ struct AccountView: View {
                     if let since = account.connectedSince {
                         LabeledContent("Depuis") { Text(since, format: .dateTime.day().month(.wide).year()) }
                     }
-                    Button("Se déconnecter", role: .destructive) { account.disconnect() }
+                    Button("Se déconnecter", role: .destructive) { confirmsSignOut = true }
+                        .confirmationDialog("Se déconnecter d'Are.na ?", isPresented: $confirmsSignOut) {
+                            Button("Se déconnecter") { account.disconnect() }
+                            Button("Se déconnecter et effacer la bibliothèque", role: .destructive) {
+                                account.disconnect()
+                                Task { await library.erase() }
+                            }
+                        } message: {
+                            Text("Effacer la bibliothèque retire tes channels et les images téléchargées de ce Mac. Le fond d'écran affiché reste en place.")
+                        }
                 }
             } else {
                 Section("Connexion") {

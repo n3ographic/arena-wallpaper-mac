@@ -484,6 +484,16 @@
         }
       }
     },
+    "Effacer la bibliothèque retire tes channels et les images téléchargées de ce Mac. Le fond d'écran affiché reste en place.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erasing the library removes your channels and downloaded images from this Mac. The current wallpaper stays."
+          }
+        }
+      }
+    },
     "En pause": {
       "localizations": {
         "en": {
@@ -1140,6 +1150,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sign out"
+          }
+        }
+      }
+    },
+    "Se déconnecter d'Are.na ?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign out of Are.na?"
+          }
+        }
+      }
+    },
+    "Se déconnecter et effacer la bibliothèque": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign Out and Erase Library"
           }
         }
       }
