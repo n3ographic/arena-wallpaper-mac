@@ -18,6 +18,8 @@ public struct NowPlaying: Equatable, Sendable {
 /// are used, and an error is reported only when nothing could be applied.
 public actor RotationEngine {
     private static let maxAttempts = 5
+    /// When fewer images than this are left in the cycle, the app is asked to load a page.
+    public static let lowPoolThreshold = 10
 
     private let repository: ConfigRepository
     private let wallpaper: WallpaperService
@@ -27,6 +29,8 @@ public actor RotationEngine {
     private var scheduler = Scheduler(order: .random)
     private var nextChange: Date?
     private var observers: [UUID: AsyncStream<NowPlaying>.Continuation] = [:]
+    private var onLowPool: (@Sendable () async -> Void)?
+    private var lowPoolRunning = false
 
     public init(
         repository: ConfigRepository, wallpaper: WallpaperService, screens: ScreenProvider, cache: ImageCache,
@@ -56,6 +60,7 @@ public actor RotationEngine {
             guard let ids = pickIDs(screens: screens, config: config, poolSize: pool.count, manual: manual) else { return }
             do {
                 try await apply(ids: ids, screens: screens)
+                askForMoreIfLow()
                 return
             } catch {
                 if firstError == nil { firstError = error }
@@ -70,6 +75,7 @@ public actor RotationEngine {
         if let id = cached.randomElement() {
             do {
                 try await apply(ids: Array(repeating: id, count: screens.count), screens: screens)
+                askForMoreIfLow()
                 return
             } catch {}
         }
@@ -80,6 +86,11 @@ public actor RotationEngine {
     public func apply(ids: [Int], screens: [Screen]) async throws {
         try await wallpaper.apply(ids: ids, screens: screens)
         await publish()
+    }
+
+    /// The app's way to load one more page; called in the background, one call at a time.
+    public func setOnLowPool(_ handler: @escaping @Sendable () async -> Void) {
+        onLowPool = handler
     }
 
     public func setPaused(_ paused: Bool) async {
@@ -119,6 +130,19 @@ public actor RotationEngine {
             guard byOrientation else { return next() }
             return pickCompatible(next: next, ok: { orientationOK(blocks[$0], screen) }, maxDraws: poolSize)
         }
+    }
+
+    private func askForMoreIfLow() {
+        guard scheduler.remainingInCycle < Self.lowPoolThreshold, let handler = onLowPool, !lowPoolRunning else { return }
+        lowPoolRunning = true
+        Task {
+            await handler()
+            self.lowPoolDone()
+        }
+    }
+
+    private func lowPoolDone() {
+        lowPoolRunning = false
     }
 
     private func publish() async {
