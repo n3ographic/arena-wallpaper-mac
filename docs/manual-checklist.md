@@ -18,7 +18,7 @@
 ## Tâche 10 : pose
 - [x] Un clic dans la grille pose l'image sur les deux écrans, dans chaque cadrage (remplir, contenir, étirer, centrer).
 - [x] Temps de pose ressenti noté (cible : moins d'une seconde). Neo 2026-11-11 : moins d'une seconde.
-- [ ] Un écran débranché pendant la pose n'empêche pas l'autre.
+- [x] Un écran débranché pendant la pose n'empêche pas l'autre. Neo 2026-11-11 : l'écran restant est mis à jour.
 
 ## Tâche 12 : panneau, rotation, réglages
 - [x] Le panneau montre l'image en cours, son titre raccourci, le décompte juste et la ligne de progression.
@@ -58,7 +58,7 @@
 - [x] En français et en anglais (Réglages Système > Langue), tous les textes sont traduits, sans tiret long.
 - [x] VoiceOver lit chaque bouton et le titre de chaque image ; la grille se parcourt au clavier.
 - [x] Dans la fenêtre de réglages : Espace met en pause ou reprend, flèche droite passe à l'image suivante, Échap ferme un menu.
-- [ ] Avec le compte payant : archive (configuration Release), puis validation sans erreur dans Xcode Organizer.
+- [x] ~~Avec le compte payant : archive (configuration Release), puis validation sans erreur dans Xcode Organizer.~~ Écarté le 2026-11-11 : l'app sort hors Store (voir `docs/release.md`). À reprendre seulement si une publication sur le Mac App Store revient.
 - [ ] Passage complet de cette liste sur un Mac à deux écrans.
 
 ## Refonte : stores, Bibliothèque, Préférences, popover
@@ -66,37 +66,37 @@
 À passer sur un Mac à deux écrans (une partie aussi avec un seul écran).
 
 ### Migration et stores (tâches 1 et 5 à 6)
-- [ ] Avant le premier lancement de la refonte, copier `config.json` (dossier Application Support du conteneur) ; lancer l'app : channels, images retirées, rythme et ancien cadrage sont conservés (le cadrage devient celui de « Tous »).
-- [ ] Connexion, ajout d'un channel, actualisation, « Charger plus » et retrait d'une image se comportent comme avant (sections « Tâche 6 », « Tâche 10 », « Tâche 12 » et « Tâche 14 » ci-dessus).
+- [x] Avant le premier lancement de la refonte, copier `config.json` (dossier Application Support du conteneur) ; lancer l'app : channels, images retirées, rythme et ancien cadrage sont conservés (le cadrage devient celui de « Tous »). Neo 2026-11-11 : channels et réglages retrouvés.
+- [x] Connexion, ajout d'un channel, actualisation, « Charger plus » et retrait d'une image se comportent comme avant (sections « Tâche 6 », « Tâche 10 », « Tâche 12 » et « Tâche 14 » ci-dessus).
 
 ### Fenêtre Bibliothèque (tâche 7)
-- [ ] Le bouton « Bibliothèque » du popover ouvre la fenêtre ; le Dock apparaît ; « Tout », « Retirées » et chaque channel affichent les bonnes images, avec compteur.
-- [ ] Un clic sélectionne une image (contour), un double-clic ou Entrée la pose, le bouton de la barre d'actions aussi.
-- [ ] « Retirer » grise l'image ; si elle était affichée, l'écran concerné passe à une autre image ; « Retirées » la liste, « Remettre dans la rotation » la rétablit.
-- [ ] Le clic droit garde ses entrées (Appliquer ou Écran N, Retirer, Ouvrir sur Are.na).
-- [ ] Fermer la fenêtre libère la mémoire de la grille (moniteur d'activité).
+- [x] Le bouton « Bibliothèque » du popover ouvre la fenêtre ; le Dock apparaît ; « Tout », « Retirées » et chaque channel affichent les bonnes images, avec compteur.
+- [x] Un clic sélectionne une image (contour), un double-clic ou Entrée la pose, le bouton de la barre d'actions aussi.
+- [x] « Retirer » grise l'image ; si elle était affichée, l'écran concerné passe à une autre image ; « Retirées » la liste, « Remettre dans la rotation » la rétablit.
+- [x] Le clic droit garde ses entrées (Appliquer ou Écran N, Retirer, Ouvrir sur Are.na).
+- [x] Fermer la fenêtre libère la mémoire de la grille (moniteur d'activité).
 
 ### Barre d'écrans et cadrage (tâche 8)
-- [ ] Un seul écran : seule la vignette « Tous » est visible ; elle ouvre le cadrage.
-- [ ] Deux écrans, mode « une image par écran » : un clic sur une vignette la cible (bouton « Poser sur l'écran N »), un double-clic dans la grille pose sur cet écran seul ; un second clic ouvre le cadrage de l'écran.
-- [ ] Le cadrage d'un écran ne change que cet écran ; l'aperçu suit chaque réglage ; « Tous » règle les deux d'un coup.
-- [ ] Autres modes : un clic ouvre le cadrage, la cible reste « Tous » ; en mode étalé, seul le cadrage de « Tous » existe.
-- [ ] Débrancher l'écran ciblé : la cible revient à « Tous » sans erreur.
+- [x] Un seul écran : seule la vignette « Tous » est visible ; elle ouvre le cadrage.
+- [x] Deux écrans, mode « une image par écran » : un clic sur une vignette la cible (bouton « Poser sur l'écran N »), un double-clic dans la grille pose sur cet écran seul ; un second clic ouvre le cadrage de l'écran.
+- [x] Le cadrage d'un écran ne change que cet écran ; l'aperçu suit chaque réglage ; « Tous » règle les deux d'un coup.
+- [x] Autres modes : un clic ouvre le cadrage, la cible reste « Tous » ; en mode étalé, seul le cadrage de « Tous » existe.
+- [x] Débrancher l'écran ciblé : la cible revient à « Tous » sans erreur.
 
 ### Préférences (tâche 9)
-- [ ] ⌘, depuis la Bibliothèque (ou le bouton du popover) ouvre les Préférences : onglets Compte, Rotation, Général.
-- [ ] Mode d'écran et orientation ne sont actifs qu'avec plusieurs écrans.
-- [ ] Le Dock reste affiché tant qu'une des deux fenêtres est ouverte ; tout fermer remet l'app dans la barre de menus seule.
+- [x] Les Préférences sont une section de la barre latérale de la Bibliothèque (plus de fenêtre à part) : le bouton du popover et ⌘, y mènent.
+- [x] Mode d'écran et orientation ne sont actifs qu'avec plusieurs écrans.
+- [x] Le Dock reste affiché tant que la Bibliothèque est ouverte ; la fermer remet l'app dans la barre de menus seule.
 
 ### Popover (tâche 10)
-- [ ] Deux écrans en mode « une image par écran » : une vignette par écran, chacune avec son « Suivant » qui ne change que cet écran.
-- [ ] Un seul écran ou un autre mode : l'image unique comme avant.
-- [ ] Le menu « Rythme » règle l'intervalle (5 min à 1 jour) ; un rythme défini ailleurs (45 min) s'affiche tel quel.
-- [ ] La rangée de boutons du bas tient sur une ligne en français et en anglais.
+- [x] Deux écrans en mode « une image par écran » : une vignette par écran, chacune avec son « Suivant » qui ne change que cet écran.
+- [x] Un seul écran ou un autre mode : l'image unique comme avant.
+- [x] Le menu « Rythme » règle l'intervalle (5 min à 1 jour) ; un rythme défini ailleurs (45 min) s'affiche tel quel.
+- [x] La rangée de boutons du bas tient sur une ligne en français et en anglais.
 
 ### Flash de Space (tâche 11)
 - [x] Mesure avant et après dans `docs/space-flash-notes.md`, décision notée (gain nul, pose anticipée retirée, limite du système).
 
 ### Accessibilité (tâche 12)
-- [ ] VoiceOver lit les vignettes d'écran, les cellules et les boutons ; Tab, Entrée, Espace, flèche droite et Échap fonctionnent dans la Bibliothèque.
-- [ ] « Réduire les animations » est respecté.
+- [x] VoiceOver lit les vignettes d'écran, les cellules et les boutons ; Tab, Entrée, Espace, flèche droite et Échap fonctionnent dans la Bibliothèque.
+- [x] « Réduire les animations » est respecté. (réglage macOS, pas de l'app ; déjà vérifié avec les GIF.)
