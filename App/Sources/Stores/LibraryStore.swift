@@ -38,6 +38,16 @@ final class LibraryStore {
         return dates.count == config.channels.count ? dates.min() : nil
     }
 
+    /// Bytes taken by the downloaded originals.
+    func cacheSize() async -> Int {
+        await cache.diskUsage()
+    }
+
+    /// Drops the downloaded originals; they come back when an image is shown again.
+    func clearCache() async {
+        await cache.clear()
+    }
+
     func block(_ id: Int) -> Block? {
         config.channels.lazy.flatMap(\.blocks).first { $0.id == id }
     }

@@ -27,9 +27,8 @@ final class AppCoordinator {
         let gate = RequestGate()
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0"
         let userAgent = arenaUserAgent(version: version, contact: AppInfo.contactEmail)
-        let service = LibraryService(repository: repository) {
-            ArenaClient(token: secrets.token(), userAgent: userAgent, gate: gate)
-        }
+        let makeClient: @Sendable () -> ArenaClient = { ArenaClient(token: secrets.token(), userAgent: userAgent, gate: gate) }
+        let service = LibraryService(repository: repository, client: makeClient)
         let wallpaper = WallpaperService(
             repository: repository, cache: cache, renderedDirectory: support.appendingPathComponent("rendered"),
             setter: WorkspaceWallpaper(), player: DesktopGIFPlayer(),
@@ -39,7 +38,7 @@ final class AppCoordinator {
         let engine = RotationEngine(repository: repository, wallpaper: wallpaper, screens: screens, cache: cache)
 
         let errors = ErrorCenter()
-        let account = AccountStore(secrets: secrets, auth: WebAuth(), errors: errors)
+        let account = AccountStore(secrets: secrets, auth: WebAuth(), errors: errors, makeClient: makeClient)
         let library = LibraryStore(repository: repository, library: service, cache: cache, errors: errors, account: account)
         let clock = RotationClock(
             engine: engine,

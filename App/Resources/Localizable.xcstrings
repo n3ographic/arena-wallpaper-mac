@@ -44,6 +44,26 @@
         }
       }
     },
+    "Abonnements": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Following"
+          }
+        }
+      }
+    },
+    "Abonnés": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Followers"
+          }
+        }
+      }
+    },
     "Actualisation…": {
       "localizations": {
         "en": {
@@ -254,12 +274,42 @@
         }
       }
     },
+    "Channels": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Channels"
+          }
+        }
+      }
+    },
     "Channels actifs": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Active channels"
+          }
+        }
+      }
+    },
+    "Channels en réserve": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Channels on hold"
+          }
+        }
+      }
+    },
+    "Chargement du profil…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading profile…"
           }
         }
       }
@@ -300,6 +350,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Connected"
+          }
+        }
+      }
+    },
+    "Connexion": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign-in"
+          }
+        }
+      }
+    },
+    "Connexion Are.na": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Are.na sign-in"
           }
         }
       }
@@ -370,6 +440,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "In order"
+          }
+        }
+      }
+    },
+    "Depuis": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Since"
+          }
+        }
+      }
+    },
+    "Dernière actualisation": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last refresh"
           }
         }
       }
@@ -534,6 +624,36 @@
         }
       }
     },
+    "Images chargées": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loaded images"
+          }
+        }
+      }
+    },
+    "Images en cache": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cached images"
+          }
+        }
+      }
+    },
+    "Images retirées": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Removed images"
+          }
+        }
+      }
+    },
     "La connexion Are.na n'est pas encore configurée : utilise un token personnel.": {
       "localizations": {
         "en": {
@@ -574,6 +694,16 @@
         }
       }
     },
+    "Les images seront téléchargées à nouveau quand elles seront affichées.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Images will be downloaded again when they are shown."
+          }
+        }
+      }
+    },
     "Lien ou slug de channel invalide.": {
       "localizations": {
         "en": {
@@ -590,6 +720,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Channel link or slug"
+          }
+        }
+      }
+    },
+    "Membre depuis": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Member since"
+          }
+        }
+      }
+    },
+    "Méthode": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Method"
           }
         }
       }
@@ -700,6 +850,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Next change in less than a minute"
+          }
+        }
+      }
+    },
+    "Profil Are.na": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Are.na profile"
+          }
+        }
+      }
+    },
+    "Profil indisponible.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profile unavailable."
           }
         }
       }
@@ -884,6 +1054,16 @@
         }
       }
     },
+    "Stockage": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storage"
+          }
+        }
+      }
+    },
     "Suivant": {
       "localizations": {
         "en": {
@@ -1044,12 +1224,42 @@
         }
       }
     },
+    "Vider le cache": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear cache"
+          }
+        }
+      }
+    },
+    "Vider le cache des images ?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear the image cache?"
+          }
+        }
+      }
+    },
     "Visibles ici, jamais choisis automatiquement.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Shown here, never picked automatically."
+          }
+        }
+      }
+    },
+    "Voir sur Are.na": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View on Are.na"
           }
         }
       }

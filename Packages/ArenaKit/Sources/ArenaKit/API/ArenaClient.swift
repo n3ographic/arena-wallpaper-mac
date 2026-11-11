@@ -50,13 +50,46 @@ public struct ArenaClient: Sendable {
         ]
         // The URL cache would answer a 304 by itself and hide it from the app.
         var request = URLRequest(url: components.url!, cachePolicy: .reloadIgnoringLocalCacheData)
+        if let etag {
+            request.setValue(etag, forHTTPHeaderField: "If-None-Match")
+        }
+        let (data, http) = try await send(request)
+        if http.statusCode == 304 { return .notModified }
+        do {
+            let body = try JSONDecoder().decode(Page.self, from: data)
+            return .page(
+                blocks: body.data.compactMap(\.block).filter(isUsable),
+                hasMore: body.meta.has_more_pages,
+                etag: http.value(forHTTPHeaderField: "ETag"))
+        } catch {
+            throw ArenaError.decoding
+        }
+    }
+}
+
+extension ArenaClient {
+    /// The signed-in user (`GET /v3/me`); needs a token.
+    public func me() async throws -> ArenaProfile {
+        var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false)!
+        components.path = "/v3/me"
+        let (data, _) = try await send(URLRequest(url: components.url!, cachePolicy: .reloadIgnoringLocalCacheData))
+        do {
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            return try decoder.decode(RawMe.self, from: data).profile
+        } catch {
+            throw ArenaError.decoding
+        }
+    }
+
+    /// Identifies the app, adds the token, waits for the gate, and turns error statuses into errors.
+    /// A 304 comes back as a response: only the caller knows what it means.
+    fileprivate func send(_ request: URLRequest) async throws -> (Data, HTTPURLResponse) {
+        var request = request
         // Are.na asks API clients to identify themselves; the image CDN never gets this header.
         request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
         if let token {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        }
-        if let etag {
-            request.setValue(etag, forHTTPHeaderField: "If-None-Match")
         }
         await gate.wait()
         let data: Data
@@ -69,8 +102,6 @@ public struct ArenaClient: Sendable {
         guard let http = response as? HTTPURLResponse else { throw ArenaError.network("no response") }
         let pause = await gate.record(http)
         switch http.statusCode {
-        case 304:
-            return .notModified
         case 401, 403:
             throw ArenaError.unauthorized
         case 404:
@@ -80,17 +111,48 @@ public struct ArenaClient: Sendable {
         case let status where status >= 400:
             throw ArenaError.network("HTTP \(status)")
         default:
-            break
+            return (data, http)
         }
-        do {
-            let body = try JSONDecoder().decode(Page.self, from: data)
-            return .page(
-                blocks: body.data.compactMap(\.block).filter(isUsable),
-                hasMore: body.meta.has_more_pages,
-                etag: http.value(forHTTPHeaderField: "ETag"))
-        } catch {
-            throw ArenaError.decoding
-        }
+    }
+}
+
+/// The signed-in Are.na user, as shown on the account page.
+public struct ArenaProfile: Equatable, Sendable {
+    public let name: String
+    public let slug: String
+    public let avatar: URL?
+    public let initials: String
+    public let channels: Int
+    public let followers: Int
+    public let following: Int
+    public let memberSince: Date?
+
+    public init(name: String, slug: String, avatar: URL?, initials: String, channels: Int, followers: Int, following: Int, memberSince: Date?) {
+        self.name = name
+        self.slug = slug
+        self.avatar = avatar
+        self.initials = initials
+        self.channels = channels
+        self.followers = followers
+        self.following = following
+        self.memberSince = memberSince
+    }
+
+    public var profileURL: URL { URL(string: "https://www.are.na/\(slug)")! }
+}
+
+private struct RawMe: Decodable {
+    let name: String
+    let slug: String
+    let avatar: URL?
+    let initials: String
+    let created_at: Date?
+    let counts: Counts
+    struct Counts: Decodable { let channels: Int; let followers: Int; let following: Int }
+
+    var profile: ArenaProfile {
+        ArenaProfile(name: name, slug: slug, avatar: avatar, initials: initials, channels: counts.channels,
+                     followers: counts.followers, following: counts.following, memberSince: created_at)
     }
 }
 
