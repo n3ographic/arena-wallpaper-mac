@@ -59,7 +59,15 @@ public actor LibraryService {
     public func refresh(slug: String, force: Bool) async throws {
         guard let channel = await repository.config.channels.first(where: { $0.slug == slug }) else { return }
         if !force, let last = channel.lastRefresh, now().timeIntervalSince(last) < Self.refreshInterval { return }
-        let result = try await client().channelPage(slug: slug, page: 1, etag: channel.etag)
+        let result: PageResult
+        do {
+            result = try await client().channelPage(slug: slug, page: 1, etag: channel.etag)
+        } catch {
+            // A failed try also waits a day (unless the user asks), except a sign-in problem,
+            // which the user fixes by signing in again.
+            if (error as? ArenaError) != .unauthorized { try? await touch(slug) }
+            throw error
+        }
         let stamp = now()
         try await repository.update { config in
             guard let index = config.channels.firstIndex(where: { $0.slug == slug }) else { return }
@@ -82,6 +90,8 @@ public actor LibraryService {
                 try await refresh(slug: slug, force: force)
             } catch let error as ArenaError {
                 failures[slug] = error
+                // The pause is for every channel: do not queue more requests behind it.
+                if case .rateLimited = error { break }
             } catch {
                 failures[slug] = .network(error.localizedDescription)
             }
@@ -90,8 +100,17 @@ public actor LibraryService {
     }
 
     /// First enabled channel, in list order, that still has a next page.
-    public func channelToGrow() async -> String? {
-        await repository.config.channels.first { $0.enabled && $0.nextPage != nil }?.slug
+    public func channelToGrow(excluding skipped: Set<String> = []) async -> String? {
+        await repository.config.channels.first { $0.enabled && $0.nextPage != nil && !skipped.contains($0.slug) }?.slug
+    }
+
+    private func touch(_ slug: String) async throws {
+        let stamp = now()
+        try await repository.update { config in
+            if let index = config.channels.firstIndex(where: { $0.slug == slug }) {
+                config.channels[index].lastRefresh = stamp
+            }
+        }
     }
 
     public func removeChannel(slug: String) async throws {

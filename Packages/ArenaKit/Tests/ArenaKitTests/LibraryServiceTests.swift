@@ -140,6 +140,40 @@ extension Network {
             #expect(await repository.config.channels[0].blocks.map(\.id) == [1])
         }
 
+        @Test func refreshAllStopsAtTheFirstRateLimit() async throws {
+            StubURLProtocol.reset { _ in .init(status: 429) }
+            let repository = try await repositoryWith([Channel(slug: "a"), Channel(slug: "b")])
+            let failures = await library(repository).refreshAll(force: true)
+            #expect(failures == ["a": .rateLimited(retryAfterSeconds: 60)])
+            #expect(StubURLProtocol.requests.count == 1)
+        }
+
+        @Test func failedRefreshAlsoWaitsADay() async throws {
+            for status in [404, 500, 429] {
+                StubURLProtocol.reset { _ in .init(status: status) }
+                let repository = try await repositoryWith([Channel(slug: "a", blocks: [testBlock(1)])])
+                let service = library(repository)
+                await #expect(throws: ArenaError.self) { try await service.refresh(slug: "a", force: false) }
+                #expect(await repository.config.channels[0].lastRefresh == fixedNow)
+                try await service.refresh(slug: "a", force: false)
+                #expect(StubURLProtocol.requests.count == 1, "status \(status)")
+            }
+        }
+
+        @Test func unauthorizedRefreshCanBeRetriedAfterSigningIn() async throws {
+            StubURLProtocol.reset { _ in .init(status: 401) }
+            let repository = try await repositoryWith([Channel(slug: "a")])
+            await #expect(throws: ArenaError.unauthorized) { try await library(repository).refresh(slug: "a", force: false) }
+            #expect(await repository.config.channels[0].lastRefresh == nil)
+        }
+
+        @Test func channelToGrowCanSkipChannels() async throws {
+            let repository = try await repositoryWith([Channel(slug: "a", nextPage: 2), Channel(slug: "b", nextPage: 2)])
+            let service = library(repository)
+            #expect(await service.channelToGrow(excluding: ["a"]) == "b")
+            #expect(await service.channelToGrow(excluding: ["a", "b"]) == nil)
+        }
+
         @Test func channelToGrowSkipsDisabledAndFinished() async throws {
             let repository = try await repositoryWith([
                 Channel(slug: "a", enabled: false, nextPage: 2), Channel(slug: "b"), Channel(slug: "c", nextPage: 3),

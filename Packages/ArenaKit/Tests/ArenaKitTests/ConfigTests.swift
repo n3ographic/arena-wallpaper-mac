@@ -90,3 +90,13 @@ private func sampleBlock(id: Int) -> Block {
     let decoded = try JSONDecoder().decode(Channel.self, from: JSONEncoder().encode(channel))
     #expect(decoded == channel)
 }
+
+@Test func legacyChannelsWithoutLastRefreshAreStampedOnLoad() async throws {
+    let dir = makeTempDirectory()
+    try Data(#"{"channels":[{"slug":"a","enabled":true,"blocks":[]}]}"#.utf8).write(to: dir.appendingPathComponent("config.json"))
+    let stamp = Date(timeIntervalSince1970: 3_000_000)
+    let repository = ConfigRepository(store: ConfigStore(directory: dir), now: { stamp })
+    #expect(await repository.config.channels[0].lastRefresh == stamp)
+    // Saved, so the next launch does not stamp it again.
+    #expect(ConfigStore(directory: dir).load().channels[0].lastRefresh == stamp)
+}

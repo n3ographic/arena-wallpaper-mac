@@ -34,8 +34,16 @@ public actor RequestGate {
     public func wait() async {
         let slot = max(now(), nextSlot, pausedUntil ?? .distantPast)
         nextSlot = slot.addingTimeInterval(minInterval)
-        let delay = slot.timeIntervalSince(now())
-        if delay > 0 { await sleep(delay) }
+        var until = slot
+        var delay = slot.timeIntervalSince(now())
+        while delay > 0 {
+            await sleep(delay)
+            // A 429 may have come in while this caller slept: wait for the new end too.
+            guard let end = pausedUntil, end > until else { return }
+            until = end
+            nextSlot = max(nextSlot, end.addingTimeInterval(minInterval))
+            delay = end.timeIntervalSince(now())
+        }
     }
 
     /// Reads a response. Returns the pause in seconds when it is a 429, nil otherwise.

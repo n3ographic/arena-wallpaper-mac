@@ -82,3 +82,25 @@ private func ms(_ values: [TimeInterval]) -> [Int] { values.map { Int(($0 * 1000
     await gate.record(clock.response(304))
     #expect(await gate.record(clock.response(429)) == 60)
 }
+
+@Test func pauseSetWhileSleepingIsWaitedOut() async {
+    let clock = ManualClock()
+    final class Box: @unchecked Sendable { var gate: RequestGate? }
+    let box = Box()
+    let first = Box2()
+    let gate = RequestGate(minInterval: 0.3, now: { clock.now() }, sleep: { seconds in
+        clock.sleep(seconds)
+        // A 429 arrives from another request while this one sleeps.
+        if await first.take() { await box.gate?.record(clock.response(429)) }
+    })
+    box.gate = gate
+    let reset = String(Int(clock.now().addingTimeInterval(10).timeIntervalSince1970))
+    await gate.record(clock.response(200, ["X-RateLimit-Remaining": "0", "X-RateLimit-Reset": reset]))
+    await gate.wait()
+    #expect(ms(clock.sleeps) == [10_000, 60_000])
+}
+
+private actor Box2 {
+    private var done = false
+    func take() -> Bool { defer { done = true }; return !done }
+}
