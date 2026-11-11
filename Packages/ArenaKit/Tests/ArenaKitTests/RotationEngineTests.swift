@@ -192,3 +192,25 @@ private let landscape2 = testScreen("landscape2", 192, 0, 192, 108)
     try await rotation.rotate(manual: true)
     #expect(await rotation.nowPlaying.ids == [4])
 }
+
+@Test func goBackShowsThePreviousImages() async throws {
+    let (repository, cache, rendered) = try await fixture(ids: [1, 2, 3], mode: .same)
+    try await repository.update { $0.order = .ordered }
+    let rotation = engine(repository, cache, rendered, setter: RecordingSetter(), screens: [landscape])
+    try await rotation.rotate(manual: true)
+    try await rotation.rotate(manual: true)
+    try await rotation.rotate(manual: true)
+    #expect(await rotation.nowPlaying.ids == [3])
+    try await rotation.goBack()
+    #expect(await rotation.nowPlaying.ids == [2])
+    try await rotation.goBack()
+    #expect(await rotation.nowPlaying.ids == [1])
+    // Going forward again continues from there.
+    try await rotation.rotate(manual: true)
+    #expect(await rotation.nowPlaying.ids == [2])
+    // Nothing before the first image: no change.
+    try await rotation.goBack()
+    try await rotation.goBack()
+    try await rotation.goBack()
+    #expect(await rotation.nowPlaying.ids == [1])
+}

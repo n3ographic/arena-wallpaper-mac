@@ -52,16 +52,16 @@ public actor WallpaperService {
             guard let block = config.channels.lazy.flatMap(\.blocks).first(where: { $0.id == id }) else {
                 throw ApplyError.unknownImage(id)
             }
-            originals[id] = try await cache.original(for: block)
+            originals[id] = try await timed("original (cache or download)") { try await cache.original(for: block) }
         }
-        let files = try await render(ids: ids, screens: screens, originals: originals, config: config)
+        let files = try await timed("render") { try await render(ids: ids, screens: screens, originals: originals, config: config) }
         guard mine == generation else { return }
 
         var errors: [String] = []
         for (screen, file) in zip(screens, files) {
             guard mine == generation else { return }
             do {
-                try await setter.setWallpaper(file, screenID: screen.id)
+                try await timed("setWallpaper") { try await setter.setWallpaper(file, screenID: screen.id) }
             } catch {
                 errors.append(error.localizedDescription)
             }
@@ -74,7 +74,7 @@ public actor WallpaperService {
         current = ids
         currentFiles = zip(screens, files).map { ($0.id, $1) }
         lastApplied = (ids, screens, originals)
-        await player.show(animatedTargets(ids: ids, screens: screens, originals: originals, config: config))
+        await timed("player.show") { await player.show(animatedTargets(ids: ids, screens: screens, originals: originals, config: config)) }
     }
 
     /// Recomputes the animations of what is on screen (for example after "Reduce motion" changed).
@@ -166,20 +166,41 @@ public actor WallpaperService {
             // One image over every screen: only the default framing applies.
             big = (canvas, try await compose(ids[0], CGSize(width: canvas.width, height: canvas.height), config.defaultFraming))
         }
-        var files: [URL] = []
+        // Decoding shares what it can between screens (one image, several screens), so it is
+        // sequential; composing and encoding the files is the slow part and runs in parallel.
+        var jobs: [(index: Int, screen: Screen, id: Int, framing: Framing, source: CGImage?)] = []
         for (index, (screen, id)) in zip(screens, ids).enumerated() {
-            let output: CGImage
-            if let big {
-                let crop = cropInCanvas(big.canvas, screen)
-                output = big.image.cropping(to: CGRect(x: crop.x, y: crop.y, width: crop.width, height: crop.height)) ?? big.image
+            if big != nil {
+                jobs.append((index, screen, id, config.defaultFraming, nil))
             } else {
-                output = try await compose(id, CGSize(width: screen.frame.width, height: screen.frame.height), config.framing(for: screen.id))
+                let size = CGSize(width: screen.frame.width, height: screen.frame.height)
+                let framing = config.framing(for: screen.id)
+                jobs.append((index, screen, id, framing, try await image(id, canvas: size, framing: framing)))
             }
-            // A unique name, so the system does not keep showing a cached older picture.
-            let file = renderedDirectory.appendingPathComponent("\(index)-\(id)-\(stamp).png")
-            try Renderer.writePNG(output, to: file)
-            files.append(file)
         }
+        let directory = renderedDirectory
+        let spanCanvasImage = big
+        var written = [URL?](repeating: nil, count: jobs.count)
+        try await withThrowingTaskGroup(of: (Int, URL).self) { group in
+            for job in jobs {
+                group.addTask {
+                    let output: CGImage
+                    if let spanCanvasImage {
+                        let crop = cropInCanvas(spanCanvasImage.canvas, job.screen)
+                        output = spanCanvasImage.image.cropping(to: CGRect(x: crop.x, y: crop.y, width: crop.width, height: crop.height)) ?? spanCanvasImage.image
+                    } else {
+                        let size = CGSize(width: job.screen.frame.width, height: job.screen.frame.height)
+                        output = Renderer.render(job.source!, canvasSize: size, framing: job.framing)
+                    }
+                    // A unique name, so the system does not keep showing a cached older picture.
+                    let file = directory.appendingPathComponent("\(job.index)-\(job.id)-\(stamp).png")
+                    try Renderer.writePNG(output, to: file)
+                    return (job.index, file)
+                }
+            }
+            for try await (index, file) in group { written[index] = file }
+        }
+        let files = written.compactMap { $0 }
         return files
     }
 

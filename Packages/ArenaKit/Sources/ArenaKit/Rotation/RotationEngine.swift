@@ -31,6 +31,9 @@ public actor RotationEngine {
     private var observers: [UUID: AsyncStream<NowPlaying>.Continuation] = [:]
     private var onLowPool: (@Sendable () async -> Void)?
     private var lowPoolRunning = false
+    /// What was on screen before each change, most recent last, to go back.
+    private var history: [[Int]] = []
+    private var isGoingBack = false
 
     public init(
         repository: ConfigRepository, wallpaper: WallpaperService, screens: ScreenProvider, cache: ImageCache,
@@ -82,6 +85,17 @@ public actor RotationEngine {
         if let firstError { throw firstError }
     }
 
+    /// Puts back what was on screen before the last change. Nothing before: no change.
+    public func goBack() async throws {
+        guard let previous = history.last else { return }
+        let screens = await screenProvider.screens()
+        guard let ids = currentFor(previous, screenCount: screens.count) else { return }
+        isGoingBack = true
+        defer { isGoingBack = false }
+        try await apply(ids: ids, screens: screens)
+        history.removeLast()
+    }
+
     /// Changes the image of the given screens only (manual draw). In "one image per screen"
     /// mode each listed screen gets its own new image; otherwise one draw covers everything.
     public func advance(screenIDs: [String]) async throws {
@@ -113,6 +127,10 @@ public actor RotationEngine {
     public func apply(ids: [Int], screens: [Screen]) async throws {
         let before = await wallpaper.current
         try await wallpaper.apply(ids: ids, screens: screens)
+        if !isGoingBack, !before.isEmpty, before != ids {
+            history.append(before)
+            if history.count > 50 { history.removeFirst() }
+        }
         // The cycle goes on from the last image that changed (a no-op after a draw of the cycle itself).
         if let changed = ids.indices.last(where: { !before.indices.contains($0) || before[$0] != ids[$0] }) {
             scheduler.jump(to: ids[changed])

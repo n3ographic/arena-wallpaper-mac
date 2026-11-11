@@ -654,6 +654,16 @@
         }
       }
     },
+    "Précédent": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previous"
+          }
+        }
+      }
+    },
     "Préférences": {
       "localizations": {
         "en": {

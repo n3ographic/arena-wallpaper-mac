@@ -14,7 +14,6 @@ struct LibraryView: View {
     @FocusState private var focused: Bool
 
     private var shown: [Block] { blocks(for: selection, in: library.config) }
-    private var selectedBlock: Block? { shown.first { $0.id == selectedID } }
     private var channel: Channel? {
         guard case .channel(let slug) = selection else { return nil }
         return library.config.channels.first { $0.slug == slug }
@@ -31,7 +30,9 @@ struct LibraryView: View {
     }
 
     var body: some View {
-        NavigationSplitView {
+        // Computed once per update: the list can hold thousands of images.
+        let shown = self.shown
+        return NavigationSplitView {
             SidebarView(selection: $selection)
                 .navigationSplitViewColumnWidth(min: 220, ideal: 250, max: 320)
         } detail: {
@@ -43,7 +44,7 @@ struct LibraryView: View {
                     Divider()
                     LibraryGridView(blocks: shown, channel: channel, selected: $selectedID, scrollTarget: $scrollTarget)
                     Divider()
-                    ActionBar(block: selectedBlock)
+                    ActionBar(block: shown.first { $0.id == selectedID })
                 }
             }
         }
@@ -55,6 +56,9 @@ struct LibraryView: View {
                 Button { Task { await playback.togglePause() } } label: {
                     Label(playback.nowPlaying.paused ? String(localized: "Reprendre") : String(localized: "Pause"),
                           systemImage: playback.nowPlaying.paused ? "play.fill" : "pause.fill")
+                }
+                Button { Task { await playback.previous() } } label: {
+                    Label("Précédent", systemImage: "backward.end.fill")
                 }
                 Button { Task { await playback.next() } } label: {
                     Label("Suivant", systemImage: "forward.end.fill")
@@ -80,6 +84,10 @@ struct LibraryView: View {
         // Escape closes the window.
         .onKeyPress(.space) {
             Task { await playback.togglePause() }
+            return .handled
+        }
+        .onKeyPress(.leftArrow) {
+            Task { await playback.previous() }
             return .handled
         }
         .onKeyPress(.rightArrow) {

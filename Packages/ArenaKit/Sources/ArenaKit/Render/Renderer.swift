@@ -11,6 +11,9 @@ public enum RenderError: Error, Equatable {
 
 /// Composes the wallpaper of one screen: framing, position, blurred or colored bands.
 public enum Renderer {
+    /// Creating a context is costly and it is safe to share between threads.
+    private static let ciContext = CIContext()
+
     /// First frame of the file (the still image of a GIF), turned upright per its EXIF
     /// orientation and, with `maxPixelSize`, decoded no larger than that on its long side.
     public static func loadFirstFrame(_ url: URL, maxPixelSize: Int? = nil) throws -> CGImage {
@@ -87,7 +90,7 @@ public enum Renderer {
             let small = render(image, canvasSize: CGSize(width: max(1, width / 8), height: max(1, height / 8)), framing: Framing(fit: .fill, background: .color(hex: "#000000")))
             let input = CIImage(cgImage: small)
             let blurred = input.clampedToExtent().applyingGaussianBlur(sigma: 4).cropped(to: input.extent)
-            if let result = CIContext().createCGImage(blurred, from: input.extent) {
+            if let result = ciContext.createCGImage(blurred, from: input.extent) {
                 context.draw(result, in: CGRect(x: 0, y: 0, width: width, height: height))
             }
         }

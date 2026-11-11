@@ -6,7 +6,7 @@ struct LibraryGridView: View {
     @Environment(AppCoordinator.self) private var app
     @Environment(LibraryStore.self) private var library
     @Environment(DisplayStore.self) private var display
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var visible: Set<Int> = []
     let blocks: [Block]
     /// The channel whose next page the "Charger plus" button loads, if any.
     let channel: Channel?
@@ -28,6 +28,8 @@ struct LibraryGridView: View {
                                 RoundedRectangle(cornerRadius: 6).strokeBorder(Color.accentColor, lineWidth: 3)
                             }
                         }
+                        .onAppear { visible.insert(block.id) }
+                        .onDisappear { visible.remove(block.id) }
                         .onTapGesture(count: 2) { Task { await app.apply(block) } }
                         .onTapGesture { selected = block.id }
                         .accessibilityAddTraits(selected == block.id ? [.isButton, .isSelected] : .isButton)
@@ -43,7 +45,8 @@ struct LibraryGridView: View {
         }
         .onChange(of: scrollTarget) {
             guard let id = scrollTarget else { return }
-            withAnimation(reduceMotion ? nil : .default) { proxy.scrollTo(id, anchor: .center) }
+            // Scrolling a long lazy grid is costly: only when the image is not already visible.
+            if !visible.contains(id) { proxy.scrollTo(id, anchor: .center) }
             scrollTarget = nil
         }
         }

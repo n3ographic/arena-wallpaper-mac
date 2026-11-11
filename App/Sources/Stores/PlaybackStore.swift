@@ -1,11 +1,13 @@
 import ArenaKit
 import Observation
+import os
 
 /// What is playing and when it changes: next, pause, rhythm, order, and the clock.
 @MainActor @Observable
 final class PlaybackStore {
     private(set) var nowPlaying = NowPlaying(ids: [], nextChange: nil, paused: false)
 
+    @ObservationIgnored private static let log = Logger(subsystem: "com.n3ographic.arenawallpaper.mac", category: "perf")
     @ObservationIgnored private let engine: RotationEngine
     @ObservationIgnored private let clock: RotationClock
     @ObservationIgnored private let repository: ConfigRepository
@@ -24,6 +26,7 @@ final class PlaybackStore {
     func start() {
         Task {
             for await state in await engine.observe() {
+                Self.log.info("nowPlaying received by the UI")
                 nowPlaying = state
             }
         }
@@ -37,7 +40,14 @@ final class PlaybackStore {
     }
 
     func next() async {
+        let start = ContinuousClock.now
         await run { try await engine.rotate(manual: true) }
+        Self.log.info("next (key to rotate done): \(start.duration(to: .now).description, privacy: .public)")
+    }
+
+    /// Back to what was on screen before the last change.
+    func previous() async {
+        await run { try await engine.goBack() }
     }
 
     /// One screen only (the thumbnails of the menu bar panel).
