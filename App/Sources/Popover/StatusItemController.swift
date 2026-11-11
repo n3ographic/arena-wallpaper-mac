@@ -14,8 +14,7 @@ final class StatusItemController: NSObject {
         popover.behavior = .transient
         popover.contentViewController = NSHostingController(rootView: panel)
         if let button = item.button {
-            button.image = NSImage(systemSymbolName: "photo", accessibilityDescription: "Arena Wallpaper")
-            button.image?.isTemplate = true
+            button.image = Self.icon
             button.target = self
             button.action = #selector(toggle(_:))
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
@@ -30,6 +29,33 @@ final class StatusItemController: NSObject {
         })
         item.button?.alphaValue = isPaused ? 0.4 : 1
     }
+
+    /// The app's mark (frame and asterisk) as a template image: macOS tints it for light and dark bars.
+    private static let icon: NSImage = {
+        let image = NSImage(size: NSSize(width: 18, height: 18), flipped: true) { _ in
+            // Drawn in a 24 unit box, like an SF Symbol.
+            let scale = NSAffineTransform()
+            scale.scale(by: 18.0 / 24.0)
+            scale.concat()
+            NSColor.black.set()
+            let frame = NSBezierPath(roundedRect: NSRect(x: 3, y: 5, width: 18, height: 14), xRadius: 2, yRadius: 2)
+            frame.lineWidth = 2
+            frame.stroke()
+            let star = NSBezierPath()
+            star.lineWidth = 2
+            star.lineCapStyle = .round
+            for degrees in [90.0, 30.0, -30.0] {
+                let a = degrees * .pi / 180, arm = 3.5
+                star.move(to: NSPoint(x: 12 - arm * cos(a), y: 12 - arm * sin(a)))
+                star.line(to: NSPoint(x: 12 + arm * cos(a), y: 12 + arm * sin(a)))
+            }
+            star.stroke()
+            return true
+        }
+        image.isTemplate = true
+        image.accessibilityDescription = "Arena Wallpaper"
+        return image
+    }()
 
     @objc private func toggle(_ sender: NSStatusBarButton) {
         if popover.isShown {
