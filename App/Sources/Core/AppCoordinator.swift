@@ -69,7 +69,7 @@ final class AppCoordinator {
         }
         // macOS only updates the active Space: set the same files again on the new one.
         NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.activeSpaceDidChangeNotification, object: nil, queue: .main) { [weak self] _ in
-            Task { await self?.display.reapply(first: NSScreen.main?.screenID) }
+            Task { await self?.display.reapply() }
         }
     }
 
