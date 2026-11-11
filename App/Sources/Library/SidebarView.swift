@@ -37,15 +37,10 @@ struct SidebarView: View {
                         }
                     }
                 } header: {
-                    HStack {
+                    HStack(spacing: 6) {
                         Text("Channels")
                         Spacer()
-                        Button { Task { await library.refresh(force: true) } } label: {
-                            Image(systemName: "arrow.clockwise")
-                        }
-                        .buttonStyle(.borderless)
-                        .help(Text("Actualiser les channels"))
-                        .accessibilityLabel(Text("Actualiser"))
+                        RefreshButton()
                     }
                 }
             }
@@ -73,5 +68,34 @@ struct SidebarView: View {
                 if let slug = parseChannelSlug(text) { selection = .channel(slug) }
             }
         }
+    }
+}
+
+/// Refreshes every channel: a spinner while it runs, and when it last happened.
+private struct RefreshButton: View {
+    @Environment(LibraryStore.self) private var library
+
+    var body: some View {
+        HStack(spacing: 4) {
+            if library.isRefreshing {
+                Text("Actualisation…").font(.caption).foregroundStyle(.secondary)
+                ProgressView().controlSize(.mini)
+            } else {
+                if let date = library.lastRefresh {
+                    TimelineView(.periodic(from: .now, by: 60)) { _ in
+                        Text(date, format: .relative(presentation: .named)).font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                Button { Task { await library.refresh(force: true) } } label: {
+                    Image(systemName: "arrow.clockwise").font(.caption.weight(.semibold))
+                        .frame(width: 20, height: 20)
+                        .background(.quaternary, in: Circle())
+                }
+                .buttonStyle(.plain)
+                .help(Text("Actualiser les channels"))
+                .accessibilityLabel(Text("Actualiser les channels"))
+            }
+        }
+        .textCase(nil)
     }
 }

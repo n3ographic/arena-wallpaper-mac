@@ -19,22 +19,60 @@ struct ActionBar: View {
         .background(.bar)
     }
 
-    /// What plays: previous, pause, next, and when the next automatic change happens.
+    /// What plays: the image on screen, previous / pause / next, and the time to the next change.
     private var playbackRow: some View {
-        HStack(spacing: 8) {
-            Button { Task { await playback.previous() } } label: { Label("Précédent", systemImage: "backward.end.fill") }
-            Button { Task { await playback.togglePause() } } label: {
-                Label(playback.nowPlaying.paused ? String(localized: "Reprendre") : String(localized: "Pause"),
-                      systemImage: playback.nowPlaying.paused ? "play.fill" : "pause.fill")
+        let ids = playback.nowPlaying.ids
+        let current = ids.first.flatMap(library.block)
+        return HStack(spacing: 16) {
+            HStack(spacing: 10) {
+                BlockPreview(block: current, maxPixels: 120)
+                    .frame(width: 40, height: 40)
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(verbatim: current.map { shortenedTitle($0.title ?? String(localized: "Sans titre"), max: 32) } ?? String(localized: "Aucune image affichée"))
+                        .font(.callout.weight(.medium)).lineLimit(1)
+                    Text("À l'écran").font(.caption).foregroundStyle(.secondary)
+                }
             }
-            Button { Task { await playback.next() } } label: { Label("Suivant", systemImage: "forward.end.fill") }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            HStack(spacing: 14) {
+                Button { Task { await playback.previous() } } label: {
+                    Image(systemName: "backward.fill").font(.title3)
+                }
+                .help(Text("Précédent"))
+                .accessibilityLabel(Text("Précédent"))
+                Button { Task { await playback.togglePause() } } label: {
+                    Image(systemName: playback.nowPlaying.paused ? "play.fill" : "pause.fill")
+                        .font(.title3)
+                        .foregroundStyle(.white)
+                        .frame(width: 36, height: 36)
+                        .background(Color.accentColor, in: Circle())
+                }
+                .help(playback.nowPlaying.paused ? Text("Reprendre") : Text("Pause"))
+                .accessibilityLabel(playback.nowPlaying.paused ? Text("Reprendre") : Text("Pause"))
+                Button { Task { await playback.next() } } label: {
+                    Image(systemName: "forward.fill").font(.title3)
+                }
+                .help(Text("Suivant"))
+                .accessibilityLabel(Text("Suivant"))
+            }
+            .buttonStyle(.plain)
+
             TimelineView(.periodic(from: .now, by: 15)) { context in
-                Text(nextChangeText(playback.nowPlaying, now: context.date)).foregroundStyle(.secondary)
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text(nextChangeText(playback.nowPlaying, now: context.date))
+                        .font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                    ProgressView(value: playback.nowPlaying.nextChange.map {
+                        progress(nextChange: $0, intervalMinutes: library.config.intervalMinutes, now: context.date)
+                    } ?? 0)
+                    .frame(width: 160)
+                    .opacity(playback.nowPlaying.paused ? 0.35 : 1)
+                }
             }
-            Spacer()
+            .frame(maxWidth: .infinity, alignment: .trailing)
         }
-        .labelStyle(.iconOnly)
-        .buttonStyle(.borderless)
     }
 
     /// The selected image and what can be done with it.

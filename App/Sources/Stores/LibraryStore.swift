@@ -9,6 +9,8 @@ final class LibraryStore {
     private(set) var config = Config()
     /// Channels with a page request running from the "Charger plus" button.
     private(set) var loadingSlugs: Set<String> = []
+    /// A revalidation of the channels is running.
+    private(set) var isRefreshing = false
 
     @ObservationIgnored let cache: ImageCache
     @ObservationIgnored private let repository: ConfigRepository
@@ -30,6 +32,12 @@ final class LibraryStore {
         config = await repository.config
     }
 
+    /// When every channel was last checked (the oldest check), nil before the first one.
+    var lastRefresh: Date? {
+        let dates = config.channels.compactMap(\.lastRefresh)
+        return dates.count == config.channels.count ? dates.min() : nil
+    }
+
     func block(_ id: Int) -> Block? {
         config.channels.lazy.flatMap(\.blocks).first { $0.id == id }
     }
@@ -49,6 +57,9 @@ final class LibraryStore {
     /// Revalidates the channels: all of them with `force` (the "Actualiser" button), otherwise
     /// only those not checked for a day.
     func refresh(force: Bool) async {
+        guard !isRefreshing else { return }
+        isRefreshing = true
+        defer { isRefreshing = false }
         let failures = await library.refreshAll(force: force)
         if failures.values.contains(.unauthorized) {
             signedOut()

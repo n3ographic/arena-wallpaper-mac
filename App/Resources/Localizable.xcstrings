@@ -44,6 +44,16 @@
         }
       }
     },
+    "Actualisation…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refreshing…"
+          }
+        }
+      }
+    },
     "Actualiser": {
       "localizations": {
         "en": {
@@ -1000,6 +1010,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Version %@ available"
+          }
+        }
+      }
+    },
+    "À l'écran": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On screen"
           }
         }
       }
