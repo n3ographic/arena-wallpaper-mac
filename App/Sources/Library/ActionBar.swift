@@ -85,7 +85,7 @@ struct ActionBar: View {
                 Button(poseLabel) { Task { await app.apply(block) } }
                     .buttonStyle(.borderedProminent)
                     .keyboardShortcut(.return, modifiers: [])
-                Button(library.isExcluded(block.id) ? String(localized: "Remettre dans la rotation") : String(localized: "Retirer")) {
+                Button(library.isExcluded(block.id) ? String(localized: "Remettre dans la lecture") : String(localized: "Retirer")) {
                     Task { await app.toggleExcluded([block.id]) }
                 }
                 Button("Ouvrir sur Are.na") { library.openOnArena(block.id) }

@@ -264,6 +264,16 @@
         }
       }
     },
+    "Channels actifs": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active channels"
+          }
+        }
+      }
+    },
     "Charger plus": {
       "localizations": {
         "en": {
@@ -380,6 +390,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Paused"
+          }
+        }
+      }
+    },
+    "En réserve": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On hold"
           }
         }
       }
@@ -540,6 +560,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "The system refused the wallpaper (%@)."
+          }
+        }
+      }
+    },
+    "Lecture": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playback"
           }
         }
       }
@@ -724,12 +754,12 @@
         }
       }
     },
-    "Remettre dans la rotation": {
+    "Remettre dans la lecture": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Put back in rotation"
+            "value": "Add back to playback"
           }
         }
       }
@@ -764,12 +794,12 @@
         }
       }
     },
-    "Retirer de la rotation": {
+    "Retirer de la lecture": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Remove from rotation"
+            "value": "Remove from playback"
           }
         }
       }
@@ -790,16 +820,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Removed"
-          }
-        }
-      }
-    },
-    "Rotation": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rotation"
           }
         }
       }
@@ -984,12 +1004,22 @@
         }
       }
     },
-    "Utiliser %@ dans la rotation": {
+    "Utiliser %@ dans la lecture": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Use %@ in the rotation"
+            "value": "Use %@ in playback"
+          }
+        }
+      }
+    },
+    "Utiliser dans la lecture": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use in playback"
           }
         }
       }
@@ -1010,6 +1040,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Version %@ available"
+          }
+        }
+      }
+    },
+    "Visibles ici, jamais choisis automatiquement.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shown here, never picked automatically."
           }
         }
       }

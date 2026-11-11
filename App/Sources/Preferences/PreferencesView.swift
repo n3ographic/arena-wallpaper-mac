@@ -5,7 +5,7 @@ struct PreferencesView: View {
     var body: some View {
         TabView {
             AccountView().tabItem { Text("Compte") }
-            RotationView().tabItem { Text("Rotation") }
+            RotationView().tabItem { Text("Lecture") }
             GeneralView().tabItem { Text("Général") }
         }
     }

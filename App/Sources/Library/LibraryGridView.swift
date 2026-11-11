@@ -63,7 +63,7 @@ struct LibraryGridView: View {
             Button("Appliquer") { Task { await app.apply(block, to: .all) } }
         }
         Divider()
-        Button(library.isExcluded(block.id) ? String(localized: "Remettre dans la rotation") : String(localized: "Retirer de la rotation")) {
+        Button(library.isExcluded(block.id) ? String(localized: "Remettre dans la lecture") : String(localized: "Retirer de la lecture")) {
             Task { await app.toggleExcluded([block.id]) }
         }
         Button("Ouvrir sur Are.na") { library.openOnArena(block.id) }

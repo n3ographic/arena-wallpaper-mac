@@ -15,32 +15,23 @@ struct SidebarView: View {
                 Label("Retirées", systemImage: "eye.slash").tag(LibrarySelection.removed)
                 Label("Général", systemImage: "gearshape").tag(LibrarySelection.general)
                 Section {
-                    ForEach(library.config.channels, id: \.slug) { channel in
-                        HStack {
-                            Toggle("", isOn: Binding(
-                                get: { channel.enabled },
-                                set: { enabled in Task { await library.setEnabled(channel.slug, enabled) } }
-                            ))
-                            .labelsHidden()
-                            .accessibilityLabel(Text("Utiliser \(channel.slug) dans la rotation"))
-                            Text(verbatim: channel.slug).lineLimit(1)
-                            Spacer()
-                            Text(verbatim: "\(channel.blocks.count)" + (channel.nextPage != nil ? "+" : ""))
-                                .foregroundStyle(.secondary)
-                        }
-                        .tag(LibrarySelection.channel(channel.slug))
-                        .contextMenu {
-                            Button("Retirer") {
-                                if selection == .channel(channel.slug) { selection = .all }
-                                Task { await library.removeChannel(channel.slug) }
-                            }
-                        }
-                    }
+                    ForEach(library.config.channels.filter(\.enabled), id: \.slug, content: row)
                 } header: {
                     HStack(spacing: 6) {
-                        Text("Channels")
+                        Text("Channels actifs")
                         Spacer()
                         RefreshButton()
+                    }
+                }
+                let onHold = library.config.channels.filter { !$0.enabled }
+                if !onHold.isEmpty {
+                    Section {
+                        ForEach(onHold, id: \.slug, content: row)
+                    } header: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("En réserve")
+                            Text("Visibles ici, jamais choisis automatiquement.").font(.caption2).textCase(nil)
+                        }
                     }
                 }
             }
@@ -57,6 +48,31 @@ struct SidebarView: View {
                 }
             }
             .padding(10)
+        }
+    }
+
+    /// One channel: its check box moves it between "actifs" and "en réserve".
+    private func row(_ channel: Channel) -> some View {
+        HStack {
+            Toggle("", isOn: Binding(
+                get: { channel.enabled },
+                set: { enabled in Task { await library.setEnabled(channel.slug, enabled) } }
+            ))
+            .labelsHidden()
+            .help(Text("Utiliser dans la lecture"))
+            .accessibilityLabel(Text("Utiliser \(channel.slug) dans la lecture"))
+            Text(verbatim: channel.slug).lineLimit(1)
+                .foregroundStyle(channel.enabled ? .primary : .secondary)
+            Spacer()
+            Text(verbatim: "\(channel.blocks.count)" + (channel.nextPage != nil ? "+" : ""))
+                .foregroundStyle(.secondary)
+        }
+        .tag(LibrarySelection.channel(channel.slug))
+        .contextMenu {
+            Button("Retirer") {
+                if selection == .channel(channel.slug) { selection = .all }
+                Task { await library.removeChannel(channel.slug) }
+            }
         }
     }
 
