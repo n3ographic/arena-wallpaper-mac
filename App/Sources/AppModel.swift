@@ -22,6 +22,8 @@ final class AppModel: ObservableObject {
     private let secrets: SecretStore
     private let auth: WebAuthenticator
     private var clock: RotationClock?
+    /// Channels whose page load asked by the rotation failed: left alone until the next launch.
+    private var failedGrowSlugs: Set<String> = []
 
     nonisolated static var userAgent: String {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0"
@@ -65,7 +67,8 @@ final class AppModel: ObservableObject {
                 nowPlaying = state
             }
         }
-        Task {
+        Task { [weak self] in
+            guard let self else { return }
             // Public channels are readable without an account, so this does not wait for a sign-in.
             await engine.setOnLowPool { [weak self] in await self?.growLibrary() }
             clock.start(rotateNow: true)
@@ -168,8 +171,16 @@ final class AppModel: ObservableObject {
 
     /// Asked by the rotation when few images are left: one more page, silently.
     private func growLibrary() async {
-        guard let slug = await library.channelToGrow() else { return }
-        _ = try? await library.loadMore(slug: slug)
+        guard let slug = await library.channelToGrow(excluding: failedGrowSlugs) else { return }
+        do {
+            try await library.loadMore(slug: slug)
+        } catch ArenaError.unauthorized {
+            disconnect()
+            lastError = String(localized: "Reconnecte-toi à Are.na.")
+        } catch {
+            // Silent (the rotation goes on with what is loaded), and not tried again this session.
+            failedGrowSlugs.insert(slug)
+        }
         await reloadConfig()
     }
 

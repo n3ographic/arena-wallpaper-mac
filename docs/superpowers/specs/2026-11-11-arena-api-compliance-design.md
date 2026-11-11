@@ -150,6 +150,10 @@ Dans `ArenaKit`, avec le faux `URLProtocol` existant et une horloge injectée :
 
 - Un bloc supprimé sur Are.na au-delà de la page 1 reste dans la rotation tant que son original est en cache.
 - Sans adresse de contact, le User-Agent n'a pas de contact ; c'est bloquant pour la soumission, pas pour le développement.
+- La pagination suit les positions au moment du chargement : si des blocs sont retirés ou ajoutés sur Are.na entre deux pages, certains glissent d'une page et peuvent ne jamais être chargés (les doublons, eux, sont filtrés). Plus de 50 ajouts entre deux revalidations laissent aussi des blocs hors de la page 1.
+- Deux `refreshAll` simultanés (« Actualiser » pendant un rafraîchissement automatique) envoient chacun la page 1 des channels périmés. Les requêtes restent espacées par la porte et les écritures sont atomiques.
+- « Charger plus » ne fait rien, sans message, si la rotation charge déjà ce channel.
+- Un ajout très rapide du même channel deux fois peut passer la vérification « déjà ajouté » avant la fin de la première requête.
 - Le cache des originaux reste sans limite de taille (point déjà ouvert, hors de cette spec).
 
 ## Hors périmètre

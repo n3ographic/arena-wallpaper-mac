@@ -26,7 +26,10 @@ final class RotationClock {
                 try? await Task.sleep(for: .seconds(max(0, next.timeIntervalSinceNow)))
                 if Task.isCancelled { return }
                 await self.rotate()
-                await self.onRotated()
+                // Its own task: a refresh never delays the next draw, and restarting the clock
+                // (which cancels this one) never cancels a refresh in progress.
+                let onRotated = self.onRotated
+                Task { await onRotated() }
             }
         }
     }
