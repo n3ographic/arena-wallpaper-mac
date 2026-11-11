@@ -1,15 +1,13 @@
 import ArenaKit
 import SwiftUI
 
-/// The Are.na account, the library at a glance, and the disk space it takes.
+/// The Are.na account, the library at a glance, the app's language and disk space.
 struct AccountView: View {
     @Environment(AccountStore.self) private var account
     @Environment(LibraryStore.self) private var library
     @Environment(ErrorCenter.self) private var errors
     @State private var showsTokenField = false
     @State private var token = ""
-    @State private var cacheSize: Int?
-    @State private var confirmsClear = false
 
     var body: some View {
         Form {
@@ -38,14 +36,14 @@ struct AccountView: View {
                 }
             }
             librarySection
-            storageSection
+            LanguageSection()
+            StorageSection()
             if let error = errors.message {
                 Text(error).foregroundStyle(.red)
             }
         }
         .formStyle(.grouped)
         .task(id: account.isConnected) { await account.loadProfile() }
-        .task { cacheSize = await library.cacheSize() }
     }
 
     @ViewBuilder
@@ -96,30 +94,6 @@ struct AccountView: View {
             if let date = library.lastRefresh {
                 LabeledContent("Dernière actualisation") { Text(date, format: .relative(presentation: .named)) }
             }
-        }
-    }
-
-    private var storageSection: some View {
-        Section("Stockage") {
-            LabeledContent("Images en cache") {
-                if let cacheSize {
-                    Text(cacheSize.formatted(.byteCount(style: .file)))
-                } else {
-                    ProgressView().controlSize(.small)
-                }
-            }
-            Button("Vider le cache") { confirmsClear = true }
-                .disabled((cacheSize ?? 0) == 0)
-                .confirmationDialog("Vider le cache des images ?", isPresented: $confirmsClear) {
-                    Button("Vider le cache", role: .destructive) {
-                        Task {
-                            await library.clearCache()
-                            cacheSize = await library.cacheSize()
-                        }
-                    }
-                } message: {
-                    Text("Les images seront téléchargées à nouveau quand elles seront affichées.")
-                }
         }
     }
 

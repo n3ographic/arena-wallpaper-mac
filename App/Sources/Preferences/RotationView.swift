@@ -34,6 +34,7 @@ struct RotationView: View {
                 set: { match in Task { await display.setMatchOrientation(match) } }
             ))
             .disabled(!severalScreens || library.config.screenMode != .perScreen)
+            LaunchAtLoginToggle()
         }
         .formStyle(.grouped)
     }

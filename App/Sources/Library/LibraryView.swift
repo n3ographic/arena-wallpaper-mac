@@ -41,8 +41,6 @@ struct LibraryView: View {
                 .navigationSplitViewColumnWidth(min: 220, ideal: 250, max: 320)
         } detail: {
             switch item {
-            case .general:
-                GeneralView().frame(maxWidth: .infinity, maxHeight: .infinity)
             case .playback:
                 RotationView().frame(maxWidth: .infinity, maxHeight: .infinity)
             case .account:

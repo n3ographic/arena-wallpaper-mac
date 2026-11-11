@@ -5,11 +5,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: StatusItemController?
     private let app = AppCoordinator()
     private lazy var library = LibraryWindowController(app: app)
+    private let about = AboutWindowController()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         statusItem = StatusItemController(
-            panel: PanelView(openLibrary: { [weak self] in self?.showLibrary() }, openPreferences: { [weak self] in self?.showPreferences() }).injecting(app),
+            panel: PanelView(openLibrary: { [weak self] in self?.showLibrary() }, openPreferences: { [weak self] in self?.showPreferences() }, openAbout: { [weak self] in self?.showAbout() }).injecting(app),
             paused: { [app] in app.playback.nowPlaying.paused }
         )
         installMainMenu()
@@ -33,6 +34,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         library.show()
     }
 
+    func showAbout() {
+        statusItem?.closePopover()
+        about.show()
+    }
+
     /// Shortcuts need a menu: a menu bar app has none by default. It shows only while a window is open.
     private func installMainMenu() {
         let main = NSMenu()
@@ -45,7 +51,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         let preferences = NSMenuItem(title: String(localized: "Préférences"), action: #selector(openPreferencesFromMenu), keyEquivalent: ",")
         preferences.target = self
+        let aboutItem = NSMenuItem(title: String(localized: "À propos d'Arena Wallpaper"), action: #selector(openAboutFromMenu), keyEquivalent: "")
+        aboutItem.target = self
+        let reportItem = NSMenuItem(title: String(localized: "Signaler un problème…"), action: #selector(reportProblem), keyEquivalent: "")
+        reportItem.target = self
         submenu("Arena Wallpaper", [
+            aboutItem, reportItem, .separator(),
             preferences, .separator(),
             NSMenuItem(title: String(localized: "Quitter"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"),
         ])
@@ -59,6 +70,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             NSMenuItem(title: String(localized: "Fermer"), action: #selector(NSWindow.performClose(_:)), keyEquivalent: "w"),
         ])
         NSApp.mainMenu = main
+    }
+
+    @objc private func reportProblem() {
+        NSWorkspace.shared.open(UpdateChecker.repository.appendingPathComponent("issues/new"))
+    }
+
+    @objc private func openAboutFromMenu() {
+        showAbout()
     }
 
     @objc private func openPreferencesFromMenu() {

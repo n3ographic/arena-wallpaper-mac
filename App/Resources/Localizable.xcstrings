@@ -244,6 +244,16 @@
         }
       }
     },
+    "Celle du système": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System language"
+          }
+        }
+      }
+    },
     "Centrer": {
       "localizations": {
         "en": {
@@ -320,6 +330,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Load more"
+          }
+        }
+      }
+    },
+    "Code source sur GitHub": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source code on GitHub"
           }
         }
       }
@@ -654,6 +674,16 @@
         }
       }
     },
+    "Impossible de joindre GitHub.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not reach GitHub."
+          }
+        }
+      }
+    },
     "La connexion Are.na n'est pas encore configurée : utilise un token personnel.": {
       "localizations": {
         "en": {
@@ -664,12 +694,42 @@
         }
       }
     },
+    "La langue change au prochain lancement.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The language changes at the next launch."
+          }
+        }
+      }
+    },
     "Lancer au démarrage": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Open at login"
+          }
+        }
+      }
+    },
+    "Langue": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Language"
+          }
+        }
+      }
+    },
+    "Langue de l'app": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App language"
           }
         }
       }
@@ -904,12 +964,42 @@
         }
       }
     },
+    "Recherche en cours…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checking…"
+          }
+        }
+      }
+    },
+    "Rechercher une mise à jour": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check for Updates"
+          }
+        }
+      }
+    },
     "Reconnecte-toi à Are.na.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Sign in to Are.na again."
+          }
+        }
+      }
+    },
+    "Relancer": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relaunch"
           }
         }
       }
@@ -1054,6 +1144,26 @@
         }
       }
     },
+    "Signaler un problème": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Report a problem"
+          }
+        }
+      }
+    },
+    "Signaler un problème…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Report a Problem…"
+          }
+        }
+      }
+    },
     "Stockage": {
       "localizations": {
         "en": {
@@ -1144,6 +1254,16 @@
         }
       }
     },
+    "Tu as la dernière version.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You have the latest version."
+          }
+        }
+      }
+    },
     "Tu es responsable du contenu des channels que tu ajoutes.": {
       "localizations": {
         "en": {
@@ -1214,6 +1334,16 @@
         }
       }
     },
+    "Version %@ (%@)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version %1$@ (%2$@)"
+          }
+        }
+      }
+    },
     "Version %@ disponible": {
       "localizations": {
         "en": {
@@ -1270,6 +1400,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "On screen"
+          }
+        }
+      }
+    },
+    "À propos": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About"
+          }
+        }
+      }
+    },
+    "À propos d'Arena Wallpaper": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About Arena Wallpaper"
           }
         }
       }
