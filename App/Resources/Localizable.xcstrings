@@ -204,6 +204,16 @@
         }
       }
     },
+    "Bienvenue dans Arena Wallpaper": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Welcome to Arena Wallpaper"
+          }
+        }
+      }
+    },
     "Cadrage": {
       "localizations": {
         "en": {
@@ -364,6 +374,16 @@
         }
       }
     },
+    "Connecte ton compte Are.na pour utiliser tes channels, même privés.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect your Are.na account to use your channels, private ones included."
+          }
+        }
+      }
+    },
     "Connecté": {
       "localizations": {
         "en": {
@@ -480,6 +500,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Last refresh"
+          }
+        }
+      }
+    },
+    "Effacer la bibliothèque retire tes channels et les images téléchargées de ce Mac. Le fond d'écran affiché reste en place.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erasing the library removes your channels and downloaded images from this Mac. The current wallpaper stays."
           }
         }
       }
@@ -1114,6 +1144,16 @@
         }
       }
     },
+    "Sans compte, les channels publics marchent aussi : colle leur lien dans le champ en bas de la barre latérale.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Public channels work without an account too: paste their link in the field at the bottom of the sidebar."
+          }
+        }
+      }
+    },
     "Sans titre": {
       "localizations": {
         "en": {
@@ -1140,6 +1180,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sign out"
+          }
+        }
+      }
+    },
+    "Se déconnecter d'Are.na ?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign out of Are.na?"
+          }
+        }
+      }
+    },
+    "Se déconnecter et effacer la bibliothèque": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign Out and Erase Library"
           }
         }
       }
@@ -1260,6 +1320,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "You have the latest version."
+          }
+        }
+      }
+    },
+    "Tu es connecté. Ajoute un channel avec le champ en bas de la barre latérale : colle son lien ou son slug.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You're signed in. Add a channel with the field at the bottom of the sidebar: paste its link or slug."
           }
         }
       }

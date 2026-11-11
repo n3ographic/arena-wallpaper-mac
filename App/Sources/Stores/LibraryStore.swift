@@ -48,6 +48,22 @@ final class LibraryStore {
         await cache.clear()
     }
 
+    /// Forgets every channel, the images removed from the rotation and the downloaded originals,
+    /// for a sign-out that leaves nothing of the account on this Mac. Settings stay.
+    func erase() async {
+        do {
+            try await repository.update { config in
+                config.channels = []
+                config.excluded = []
+            }
+        } catch {
+            errors.report(error)
+        }
+        await reloadConfig()
+        await cache.clear()
+        Thumbnails.shared.clear()
+    }
+
     func block(_ id: Int) -> Block? {
         config.channels.lazy.flatMap(\.blocks).first { $0.id == id }
     }
