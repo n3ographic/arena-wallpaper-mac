@@ -10,7 +10,7 @@
 >
 > Animated GIFs: when the current image is an animated GIF, the app shows it in a borderless, click-through window placed just above the desktop picture (window level desktopWindow + 1), using public AppKit APIs only. The animation pauses whenever the window is fully hidden (occlusion state), stops in "spread across screens" mode, and never runs when Reduce Motion is on. The still first frame is always set as the regular desktop picture underneath.
 >
-> Content: images come only from the channels the user adds. To avoid unwanted content, the app checks each image on the device with the SensitiveContentAnalysis framework when the user has turned on Sensitive Content Warning, never shows a flagged image without the user's choice, lets the user exclude any image from the rotation, and links every image to its page on Are.na, where it can be reported or its author blocked. Contact: see the support URL.
+> Content: images come only from the Are.na channels the user chooses to add, and the app tells the user, when adding a channel, that they are responsible for that content. Any image can be removed from the rotation, and every image links to its page on Are.na, where it can be reported or its author blocked. The app reads the Are.na API page by page, on demand, caches what it fetched and revalidates each channel at most once a day. Contact: see the support URL.
 >
 > No data leaves the device except the requests to the Are.na API and image CDN. No analytics, no tracking.
 

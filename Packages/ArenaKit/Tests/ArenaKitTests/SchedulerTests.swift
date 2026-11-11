@@ -89,10 +89,38 @@ private func config(_ channels: [Channel]) -> Config {
     #expect(enabledPool(config([])).isEmpty)
 }
 
-@Test func enabledPoolSkipsExcludedAndFlaggedImages() {
+@Test func enabledPoolSkipsOnlyExcludedImages() {
     var c = config([channel("a", true, [1, 2, 3, 4])])
     c.excluded = [2]
-    c.sensitiveVerdicts = [3: true, 4: true]
-    c.sensitiveAllowed = [4]
-    #expect(enabledPool(c) == [1, 4])
+    #expect(enabledPool(c) == [1, 3, 4])
+}
+
+@Test func growingPoolKeepsTheCycle() {
+    var s = schedulerWith([1, 2, 3], .ordered)
+    #expect(take(&s, 2) == [1, 2])
+    s.sync(pool: [1, 2, 3, 4, 5], order: .ordered)
+    #expect(take(&s, 3) == [3, 4, 5])
+}
+
+@Test func growingRandomPoolDrawsNewIdsAfterTheRest() {
+    var s = Scheduler(order: .random, shuffle: { $0 })
+    s.sync(pool: [1, 2, 3], order: .random)
+    _ = s.next()
+    s.sync(pool: [1, 2, 3, 4], order: .random)
+    let rest = take(&s, 3)
+    #expect(rest.last == 4 && Set(rest).count == 3)
+}
+
+@Test func shrinkingPoolRestartsTheCycle() {
+    var s = schedulerWith([1, 2, 3], .ordered)
+    _ = take(&s, 2)
+    s.sync(pool: [1, 3, 4], order: .ordered)
+    #expect(s.next() == 1)
+}
+
+@Test func remainingInCycleCounts() {
+    var s = schedulerWith([1, 2, 3, 4, 5], .random)
+    #expect(s.remainingInCycle == 0)
+    _ = s.next()
+    #expect(s.remainingInCycle == 4)
 }

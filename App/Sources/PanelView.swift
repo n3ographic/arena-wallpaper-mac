@@ -35,7 +35,7 @@ struct PanelView: View {
             .buttonStyle(.bordered)
             Divider()
             HStack {
-                Button(allExcluded ? String(localized: "Réinclure") : String(localized: "Exclure")) { Task { await model.toggleExcluded(model.nowPlaying.ids) } }
+                Button(allExcluded ? String(localized: "Remettre") : String(localized: "Retirer")) { Task { await model.toggleExcluded(model.nowPlaying.ids) } }
                     .disabled(model.nowPlaying.ids.isEmpty)
                 Button("Are.na") { model.nowPlaying.ids.first.map(model.openOnArena) }
                     .disabled(model.nowPlaying.ids.isEmpty)

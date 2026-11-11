@@ -25,9 +25,6 @@ private func sampleBlock(id: Int) -> Block {
     config.background = .color(hex: "#112233")
     config.matchOrientation = false
     config.excluded = [7, 9]
-    config.hideSensitive = false
-    config.sensitiveVerdicts = [3: true]
-    config.sensitiveAllowed = [3]
     try store.save(config)
     #expect(store.load() == config)
 }
@@ -50,7 +47,6 @@ private func sampleBlock(id: Int) -> Block {
     #expect(config.fit == .fill)
     #expect(config.positionX == 50)
     #expect(config.matchOrientation)
-    #expect(config.hideSensitive)
     #expect(config.excluded.isEmpty)
 }
 
@@ -74,4 +70,33 @@ private func sampleBlock(id: Int) -> Block {
     #expect(!block.isGIF)
     block.contentType = "image/gif"
     #expect(block.isGIF)
+}
+
+@Test func legacyConfigDropsSensitiveKeys() throws {
+    let json = #"{"channels": [], "excluded": [4], "hideSensitive": false, "sensitiveVerdicts": {"3": true}, "sensitiveAllowed": [3]}"#
+    let config = try JSONDecoder().decode(Config.self, from: Data(json.utf8))
+    #expect(config.excluded == [4])
+    let text = String(decoding: try JSONEncoder().encode(config), as: UTF8.self)
+    #expect(!text.contains("sensitive"))
+}
+
+@Test func legacyChannelHasNoNextPage() throws {
+    let channel = try JSONDecoder().decode(Channel.self, from: Data(#"{"slug": "a", "enabled": true, "blocks": []}"#.utf8))
+    #expect(channel.nextPage == nil && channel.etag == nil && channel.lastRefresh == nil)
+}
+
+@Test func channelPagingRoundTrips() throws {
+    let channel = Channel(slug: "a", nextPage: 3, etag: "x", lastRefresh: Date(timeIntervalSince1970: 1_000_000))
+    let decoded = try JSONDecoder().decode(Channel.self, from: JSONEncoder().encode(channel))
+    #expect(decoded == channel)
+}
+
+@Test func legacyChannelsWithoutLastRefreshAreStampedOnLoad() async throws {
+    let dir = makeTempDirectory()
+    try Data(#"{"channels":[{"slug":"a","enabled":true,"blocks":[]}]}"#.utf8).write(to: dir.appendingPathComponent("config.json"))
+    let stamp = Date(timeIntervalSince1970: 3_000_000)
+    let repository = ConfigRepository(store: ConfigStore(directory: dir), now: { stamp })
+    #expect(await repository.config.channels[0].lastRefresh == stamp)
+    // Saved, so the next launch does not stamp it again.
+    #expect(ConfigStore(directory: dir).load().channels[0].lastRefresh == stamp)
 }

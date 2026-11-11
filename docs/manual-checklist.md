@@ -39,20 +39,24 @@
 - [ ] Avec « Réduire les animations » (Réglages Système > Accessibilité > Affichage), aucun GIF n'est animé.
 - [ ] Le GIF reste présent en changeant de Space.
 
-## Tâche 14 : exclusion et menu contextuel
+## Tâche 14 : retrait de la rotation et menu contextuel
 - [ ] Clic droit sur une image : Appliquer ; en mode « une image par écran » avec deux écrans : Écran 1, Écran 2, Tous les écrans.
-- [ ] Exclure grise l'image avec l'étiquette « Exclue » ; la rotation ne la choisit plus ; Réinclure la rétablit.
+- [ ] « Retirer de la rotation » grise l'image avec l'étiquette « Retirée » ; la rotation ne la choisit plus ; « Remettre dans la rotation » la rétablit.
 - [ ] Ouvrir sur Are.na ouvre la bonne page dans le navigateur.
-- [ ] Panneau : Exclure ou Réinclure agit sur l'image en cours ; Are.na ouvre sa page.
+- [ ] Panneau : Retirer ou Remettre agit sur l'image en cours ; Are.na ouvre sa page.
 
-## Tâche 15 : contenu sensible
-- [ ] Sans compte payant : l'onglet « Contenu sensible » indique « Inactive » avec le bouton vers Réglages Système, et l'app pose les images normalement.
-- [ ] Avec le compte payant (configuration Release-Signed, équipe renseignée dans Xcode) et l'avertissement de contenu sensible activé : l'onglet indique « Active ».
-- [ ] Avec le profil de test d'Apple (« Testing your app's response to sensitive media ») : une image détectée n'est jamais posée, apparaît floutée avec « À vérifier », et « Garder cette image » la remet dans la rotation.
+## API Are.na
+- [ ] Ajouter un gros channel : une seule requête à l'API, compteur « 50+ ».
+- [ ] « Charger plus » : 50 images de plus, bouton grisé pendant le chargement, absent quand Are.na n'a plus de page.
+- [ ] Rotation longue : une page se charge quand le cycle s'épuise, sans revenir à la première image en ordre fixe.
+- [ ] Relancer l'app dans les 24 h : aucune requête à l'API.
+- [ ] « Actualiser » envoie une requête par channel et ne recharge pas les images.
+- [ ] La phrase « Tu es responsable du contenu des channels que tu ajoutes. » est visible sous le champ d'ajout.
+- [ ] Les libellés « Retirer » et « Remettre » sont corrects en français et en anglais.
 
 ## Tâche 16 : langues, accessibilité, archive
 - [ ] En français et en anglais (Réglages Système > Langue), tous les textes sont traduits, sans tiret long.
 - [ ] VoiceOver lit chaque bouton et le titre de chaque image ; la grille se parcourt au clavier.
 - [ ] Dans la fenêtre de réglages : Espace met en pause ou reprend, flèche droite passe à l'image suivante, Échap ferme un menu.
-- [ ] Avec le compte payant : archive (configuration Release-Signed), puis validation sans erreur dans Xcode Organizer.
+- [ ] Avec le compte payant : archive (configuration Release), puis validation sans erreur dans Xcode Organizer.
 - [ ] Passage complet de cette liste sur un Mac à deux écrans.

@@ -4,7 +4,6 @@ import ImageIO
 
 public enum ApplyError: Error, Equatable {
     case allScreensFailed(String)
-    case sensitive(Int)
     case unknownImage(Int)
 }
 
@@ -16,7 +15,6 @@ public actor WallpaperService {
     private let renderedDirectory: URL
     private let setter: WallpaperSetter
     private let player: LiveWallpaperPlayer
-    private let checker: SensitivityChecker
     private let now: @Sendable () -> Date
     private let reduceMotion: @Sendable () -> Bool
 
@@ -31,7 +29,7 @@ public actor WallpaperService {
 
     public init(
         repository: ConfigRepository, cache: ImageCache, renderedDirectory: URL,
-        setter: WallpaperSetter, player: LiveWallpaperPlayer, checker: SensitivityChecker,
+        setter: WallpaperSetter, player: LiveWallpaperPlayer,
         now: @escaping @Sendable () -> Date = { Date() },
         reduceMotion: @escaping @Sendable () -> Bool = { false }
     ) {
@@ -40,7 +38,6 @@ public actor WallpaperService {
         self.renderedDirectory = renderedDirectory
         self.setter = setter
         self.player = player
-        self.checker = checker
         self.now = now
         self.reduceMotion = reduceMotion
     }
@@ -57,7 +54,6 @@ public actor WallpaperService {
             }
             originals[id] = try await cache.original(for: block)
         }
-        try await checkSensitive(originals: originals, config: config)
         let files = try await render(ids: ids, screens: screens, originals: originals, config: config)
         guard mine == generation else { return }
 
@@ -105,23 +101,6 @@ public actor WallpaperService {
             ids: ids, screens: screens, blocks: blocks, originals: originals, frameCounts: frameCounts, imageSizes: sizes,
             mode: config.screenMode, reduceMotion: reduceMotion(), fit: config.fit, positionX: config.positionX, positionY: config.positionY
         )
-    }
-
-    /// Each image is checked once, on the device, before it is first set; the verdict stays
-    /// in the local config. Images the user chose to keep are not checked again.
-    private func checkSensitive(originals: [Int: URL], config: Config) async throws {
-        guard config.hideSensitive, await checker.isActive() else { return }
-        let allowed = Set(config.sensitiveAllowed)
-        for (id, url) in originals.sorted(by: { $0.key < $1.key }) where !allowed.contains(id) {
-            let flagged: Bool
-            if let verdict = config.sensitiveVerdicts[id] {
-                flagged = verdict
-            } else {
-                flagged = try await checker.isSensitive(url)
-                try await repository.update { $0.sensitiveVerdicts[id] = flagged }
-            }
-            if flagged { throw ApplyError.sensitive(id) }
-        }
     }
 
     /// Sets the current files again: after a Space change, the system may still show an older

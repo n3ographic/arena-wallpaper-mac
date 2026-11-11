@@ -7,7 +7,7 @@ private let rightScreen = testScreen("right", 192, 0, 128, 102)
 
 private func service(_ repository: ConfigRepository, _ cache: ImageCache, _ rendered: URL, setter: RecordingSetter, player: RecordingPlayer = RecordingPlayer()) -> WallpaperService {
     let clock = TestClock()
-    return WallpaperService(repository: repository, cache: cache, renderedDirectory: rendered, setter: setter, player: player, checker: NoSensitivityChecker(), now: { clock.now() })
+    return WallpaperService(repository: repository, cache: cache, renderedDirectory: rendered, setter: setter, player: player, now: { clock.now() })
 }
 
 private func renderedFiles(_ dir: URL) throws -> [String] {
@@ -117,7 +117,7 @@ private func renderedFiles(_ dir: URL) throws -> [String] {
     let player = RecordingPlayer()
     let wallpaper = WallpaperService(
         repository: repository, cache: cache, renderedDirectory: rendered, setter: RecordingSetter(), player: player,
-        checker: NoSensitivityChecker(), reduceMotion: { true }
+        reduceMotion: { true }
     )
     try await wallpaper.apply(ids: [1], screens: [mainScreen])
     #expect(await player.shown == [[]])
@@ -129,7 +129,7 @@ private func renderedFiles(_ dir: URL) throws -> [String] {
     let flag = ReduceMotionFlag()
     let wallpaper = WallpaperService(
         repository: repository, cache: cache, renderedDirectory: rendered, setter: RecordingSetter(), player: player,
-        checker: NoSensitivityChecker(), reduceMotion: { flag.value }
+        reduceMotion: { flag.value }
     )
     try await wallpaper.apply(ids: [1], screens: [mainScreen])
     #expect(await player.shown.last?.count == 1)
@@ -138,19 +138,16 @@ private func renderedFiles(_ dir: URL) throws -> [String] {
     #expect(await player.shown.last == [])
 }
 
-/// Holds `isSensitive` for the image 1 until released, so a newer application can finish first.
-private actor GateChecker: SensitivityChecker {
+/// Holds the call for the image 1 (file "0-1-...") until released, so a newer application can finish first.
+private actor GateSetter: WallpaperSetter {
     private var waiting: CheckedContinuation<Void, Never>?
     private(set) var isHolding = false
 
-    func isActive() async -> Bool { true }
-
-    func isSensitive(_ file: URL) async throws -> Bool {
-        if file.lastPathComponent == "1" {
+    func setWallpaper(_ file: URL, screenID: String) async throws {
+        if file.lastPathComponent.hasPrefix("0-1-") {
             isHolding = true
             await withCheckedContinuation { waiting = $0 }
         }
-        return false
     }
 
     func release() {
@@ -161,14 +158,12 @@ private actor GateChecker: SensitivityChecker {
 
 @Test func olderApplicationDoesNotOverrideANewerOne() async throws {
     let (repository, cache, rendered) = try await fixture(ids: [1, 2])
-    let setter = RecordingSetter()
-    let gate = GateChecker()
-    let wallpaper = WallpaperService(repository: repository, cache: cache, renderedDirectory: rendered, setter: setter, player: RecordingPlayer(), checker: gate)
+    let gate = GateSetter()
+    let wallpaper = WallpaperService(repository: repository, cache: cache, renderedDirectory: rendered, setter: gate, player: RecordingPlayer())
     let older = Task { try await wallpaper.apply(ids: [1], screens: [mainScreen]) }
     while await !gate.isHolding { await Task.yield() }
     try await wallpaper.apply(ids: [2], screens: [mainScreen])
     await gate.release()
     try await older.value
-    #expect(await setter.calls.count == 1)
     #expect(await wallpaper.current == [2])
 }

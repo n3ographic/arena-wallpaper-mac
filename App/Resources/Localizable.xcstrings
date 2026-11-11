@@ -4,35 +4,12 @@
     "": {
       "shouldTranslate": false
     },
-    "%lld": {
-      "shouldTranslate": false
-    },
-    ", exclue": {
+    ", retirée": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": ", excluded"
-          }
-        }
-      }
-    },
-    ", à vérifier": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": ", to review"
-          }
-        }
-      }
-    },
-    "Active": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "On"
+            "value": ", removed"
           }
         }
       }
@@ -207,6 +184,16 @@
         }
       }
     },
+    "Charger plus": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Load more"
+          }
+        }
+      }
+    },
     "Choisis un channel pour voir ses images.": {
       "localizations": {
         "en": {
@@ -257,16 +244,6 @@
         }
       }
     },
-    "Contenu sensible": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sensitive content"
-          }
-        }
-      }
-    },
     "Couleur": {
       "localizations": {
         "en": {
@@ -297,16 +274,6 @@
         }
       }
     },
-    "Détection": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Detection"
-          }
-        }
-      }
-    },
     "En pause": {
       "localizations": {
         "en": {
@@ -323,36 +290,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Save token"
-          }
-        }
-      }
-    },
-    "Exclue": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Excluded"
-          }
-        }
-      }
-    },
-    "Exclure": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Exclude"
-          }
-        }
-      }
-    },
-    "Exclure de la rotation": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Exclude from rotation"
           }
         }
       }
@@ -397,16 +334,6 @@
         }
       }
     },
-    "Garder cette image": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keep this image"
-          }
-        }
-      }
-    },
     "Général": {
       "localizations": {
         "en": {
@@ -437,16 +364,6 @@
         }
       }
     },
-    "Image masquée : contenu sensible détecté.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Image hidden: sensitive content detected."
-          }
-        }
-      }
-    },
     "Image sans titre": {
       "localizations": {
         "en": {
@@ -463,36 +380,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Image too large."
-          }
-        }
-      }
-    },
-    "Images à vérifier": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Images to review"
-          }
-        }
-      }
-    },
-    "Inactive": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Off"
-          }
-        }
-      }
-    },
-    "L'analyse se fait sur ton Mac. Aucun résultat n'est envoyé.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The check runs on your Mac. No result is sent anywhere."
           }
         }
       }
@@ -547,16 +434,6 @@
         }
       }
     },
-    "Masquer le contenu sensible": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hide sensitive content"
-          }
-        }
-      }
-    },
     "Même image partout": {
       "localizations": {
         "en": {
@@ -573,16 +450,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Order"
-          }
-        }
-      }
-    },
-    "Ouvrir Réglages Système": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open System Settings"
           }
         }
       }
@@ -627,16 +494,6 @@
         }
       }
     },
-    "Pour que l'app masque les images sensibles, active l'avertissement de contenu sensible dans Réglages Système, section Confidentialité et sécurité.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "To let the app hide sensitive images, turn on Sensitive Content Warning in System Settings, under Privacy & Security."
-          }
-        }
-      }
-    },
     "Prochain changement dans %lld min": {
       "localizations": {
         "en": {
@@ -677,6 +534,26 @@
         }
       }
     },
+    "Remettre": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Put back"
+          }
+        }
+      }
+    },
+    "Remettre dans la rotation": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Put back in rotation"
+          }
+        }
+      }
+    },
     "Remplir": {
       "localizations": {
         "en": {
@@ -707,6 +584,26 @@
         }
       }
     },
+    "Retirer de la rotation": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove from rotation"
+          }
+        }
+      }
+    },
+    "Retirée": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Removed"
+          }
+        }
+      }
+    },
     "Rotation": {
       "localizations": {
         "en": {
@@ -723,26 +620,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Settings"
-          }
-        }
-      }
-    },
-    "Réinclure": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Include"
-          }
-        }
-      }
-    },
-    "Réinclure dans la rotation": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Include in rotation"
           }
         }
       }
@@ -837,6 +714,16 @@
         }
       }
     },
+    "Tu es responsable du contenu des channels que tu ajoutes.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You are responsible for the content of the channels you add."
+          }
+        }
+      }
+    },
     "Téléchargement impossible (%@).": {
       "localizations": {
         "en": {
@@ -873,16 +760,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Use a personal token"
-          }
-        }
-      }
-    },
-    "À vérifier": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "To review"
           }
         }
       }

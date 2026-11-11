@@ -30,11 +30,6 @@ public struct Config: Codable, Equatable, Sendable {
     public var matchOrientation = true
     /// Images the user removed from the rotation (they stay in the grid).
     public var excluded: [Int] = []
-    public var hideSensitive = true
-    /// Local result of the sensitive content check, per image. Never leaves the device.
-    public var sensitiveVerdicts: [Int: Bool] = [:]
-    /// Flagged images the user chose to keep anyway.
-    public var sensitiveAllowed: [Int] = []
 
     public init() {}
 
@@ -52,9 +47,6 @@ public struct Config: Codable, Equatable, Sendable {
         background = try c.decodeIfPresent(Background.self, forKey: .background) ?? d.background
         matchOrientation = try c.decodeIfPresent(Bool.self, forKey: .matchOrientation) ?? d.matchOrientation
         excluded = try c.decodeIfPresent([Int].self, forKey: .excluded) ?? d.excluded
-        hideSensitive = try c.decodeIfPresent(Bool.self, forKey: .hideSensitive) ?? d.hideSensitive
-        sensitiveVerdicts = try c.decodeIfPresent([Int: Bool].self, forKey: .sensitiveVerdicts) ?? d.sensitiveVerdicts
-        sensitiveAllowed = try c.decodeIfPresent([Int].self, forKey: .sensitiveAllowed) ?? d.sensitiveAllowed
     }
 
     static func clampPosition(_ value: Int) -> Int {

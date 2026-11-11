@@ -9,7 +9,8 @@ final class AppModel: ObservableObject {
     @Published private(set) var isConnected = false
     @Published private(set) var nowPlaying = NowPlaying(ids: [], nextChange: nil, paused: false)
     @Published private(set) var launchAtLogin = LaunchAtLogin.isEnabled
-    @Published private(set) var sensitiveDetectionActive = false
+    /// Channels with a page request running from the "Charger plus" button.
+    @Published private(set) var loadingSlugs: Set<String> = []
     @Published var lastError: String?
 
     let repository: ConfigRepository
@@ -20,12 +21,13 @@ final class AppModel: ObservableObject {
     let screens = SystemScreens()
     private let secrets: SecretStore
     private let auth: WebAuthenticator
-    private let checker: SensitivityChecker
     private var clock: RotationClock?
+    /// Channels whose page load asked by the rotation failed: left alone until the next launch.
+    private var failedGrowSlugs: Set<String> = []
 
     nonisolated static var userAgent: String {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0"
-        return "ArenaWallpaper/\(version)"
+        return arenaUserAgent(version: version, contact: AppInfo.contactEmail)
     }
 
     init() {
@@ -34,20 +36,16 @@ final class AppModel: ObservableObject {
         let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
         let secrets = KeychainSecretStore()
         self.secrets = secrets
-        #if SENSITIVE_CONTENT
-        let checker: SensitivityChecker = AppleSensitivityChecker()
-        #else
-        let checker: SensitivityChecker = NoSensitivityChecker()
-        #endif
-        self.checker = checker
         repository = ConfigRepository(store: ConfigStore(directory: support))
         cache = ImageCache(directory: caches.appendingPathComponent("originals"))
+        // One gate for every client: they are recreated at each call to read the current token.
+        let gate = RequestGate()
         library = LibraryService(repository: repository) {
-            ArenaClient(token: secrets.token(), userAgent: AppModel.userAgent)
+            ArenaClient(token: secrets.token(), userAgent: AppModel.userAgent, gate: gate)
         }
         wallpaper = WallpaperService(
             repository: repository, cache: cache, renderedDirectory: support.appendingPathComponent("rendered"),
-            setter: WorkspaceWallpaper(), player: DesktopGIFPlayer(), checker: checker,
+            setter: WorkspaceWallpaper(), player: DesktopGIFPlayer(),
             reduceMotion: { NSWorkspace.shared.accessibilityDisplayShouldReduceMotion }
         )
         engine = RotationEngine(repository: repository, wallpaper: wallpaper, screens: screens, cache: cache)
@@ -60,7 +58,7 @@ final class AppModel: ObservableObject {
         let clock = RotationClock(
             engine: engine,
             onError: { [weak self] error in self?.lastError = Self.message(for: error) },
-            onDailyRefresh: { [weak self] in await self?.refresh() }
+            onRotated: { [weak self] in await self?.refresh(force: false) }
         )
         self.clock = clock
         Task {
@@ -69,9 +67,12 @@ final class AppModel: ObservableObject {
                 nowPlaying = state
             }
         }
-        Task {
-            if isConnected { await refresh() }
+        Task { [weak self] in
+            guard let self else { return }
+            // Public channels are readable without an account, so this does not wait for a sign-in.
+            await engine.setOnLowPool { [weak self] in await self?.growLibrary() }
             clock.start(rotateNow: true)
+            await refresh(force: false)
         }
     }
 
@@ -99,7 +100,6 @@ final class AppModel: ObservableObject {
             try secrets.setToken(try await exchangeCode(code, pkce: pkce, config: oauth))
             isConnected = true
             lastError = nil
-            await refresh()
         } catch let error as ASWebAuthenticationSessionError where error.code == .canceledLogin {
             return
         } catch {
@@ -115,7 +115,6 @@ final class AppModel: ObservableObject {
             try secrets.setToken(token)
             isConnected = true
             lastError = nil
-            await refresh()
         } catch {
             lastError = Self.message(for: error)
         }
@@ -140,14 +139,47 @@ final class AppModel: ObservableObject {
         }
     }
 
-    func refresh() async {
-        let failures = await library.refreshAll()
+    /// Revalidates the channels: all of them with `force` (the "Actualiser" button), otherwise
+    /// only those not checked for a day.
+    func refresh(force: Bool) async {
+        let failures = await library.refreshAll(force: force)
         if failures.values.contains(.unauthorized) {
             // The token no longer works: back to signed out, so "Sign in" is offered.
             disconnect()
             lastError = String(localized: "Reconnecte-toi à Are.na.")
         } else if let (slug, error) = failures.first {
             lastError = "\(slug) : \(Self.message(for: error))"
+        }
+        await reloadConfig()
+    }
+
+    /// "Charger plus": the next page of a channel.
+    func loadMore(_ slug: String) async {
+        loadingSlugs.insert(slug)
+        do {
+            try await library.loadMore(slug: slug)
+            lastError = nil
+        } catch ArenaError.unauthorized {
+            disconnect()
+            lastError = String(localized: "Reconnecte-toi à Are.na.")
+        } catch {
+            lastError = Self.message(for: error)
+        }
+        await reloadConfig()
+        loadingSlugs.remove(slug)
+    }
+
+    /// Asked by the rotation when few images are left: one more page, silently.
+    private func growLibrary() async {
+        guard let slug = await library.channelToGrow(excluding: failedGrowSlugs) else { return }
+        do {
+            try await library.loadMore(slug: slug)
+        } catch ArenaError.unauthorized {
+            disconnect()
+            lastError = String(localized: "Reconnecte-toi à Are.na.")
+        } catch {
+            // Silent (the rotation goes on with what is loaded), and not tried again this session.
+            failedGrowSlugs.insert(slug)
         }
         await reloadConfig()
     }
@@ -222,30 +254,6 @@ final class AppModel: ObservableObject {
         }
     }
 
-    /// Flagged as sensitive and not kept by the user.
-    func isFlagged(_ id: Int) -> Bool {
-        config.sensitiveVerdicts[id] == true && !config.sensitiveAllowed.contains(id)
-    }
-
-    var flaggedCount: Int {
-        config.sensitiveVerdicts.filter { $0.value && !config.sensitiveAllowed.contains($0.key) }.count
-    }
-
-    /// The user looked at a flagged image and keeps it in the rotation.
-    func keepSensitive(_ id: Int) async {
-        do {
-            try await repository.update { if !$0.sensitiveAllowed.contains(id) { $0.sensitiveAllowed.append(id) } }
-            await reloadConfig()
-        } catch {
-            lastError = Self.message(for: error)
-        }
-    }
-
-    func refreshSensitiveStatus() async {
-        sensitiveDetectionActive = await checker.isActive()
-        await reloadConfig()
-    }
-
     func openOnArena(_ id: Int) {
         NSWorkspace.shared.open(blockURL(id))
     }
@@ -307,7 +315,6 @@ final class AppModel: ObservableObject {
         case ImageCacheError.download(let detail): return String(localized: "Téléchargement impossible (\(detail)).")
         case ApplyError.allScreensFailed(let detail): return String(localized: "Le système a refusé le fond d'écran (\(detail)).")
         case ApplyError.unknownImage: return String(localized: "Image introuvable, actualise les channels.")
-        case ApplyError.sensitive: return String(localized: "Image masquée : contenu sensible détecté.")
         default: return error.localizedDescription
         }
     }

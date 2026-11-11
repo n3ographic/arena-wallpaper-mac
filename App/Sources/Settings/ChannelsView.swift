@@ -14,9 +14,13 @@ struct ChannelsView: View {
                     .onSubmit(add)
                 Button("Ajouter", action: add)
                     .disabled(input.trimmingCharacters(in: .whitespaces).isEmpty)
-                Button("Actualiser") { Task { await model.refresh() } }
+                Button("Actualiser") { Task { await model.refresh(force: true) } }
             }
-            .padding()
+            .padding([.horizontal, .top])
+            Text("Tu es responsable du contenu des channels que tu ajoutes.")
+                .font(.caption).foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding([.horizontal, .bottom])
             if let error = model.lastError {
                 Text(error).foregroundStyle(.red).padding(.horizontal)
             }
@@ -32,7 +36,7 @@ struct ChannelsView: View {
                             .accessibilityLabel(Text("Utiliser \(channel.slug) dans la rotation"))
                             Text(verbatim: channel.slug)
                             Spacer()
-                            Text("\(channel.blocks.count)").foregroundStyle(.secondary)
+                            Text(verbatim: "\(channel.blocks.count)" + (channel.nextPage != nil ? "+" : "")).foregroundStyle(.secondary)
                         }
                         .tag(channel.slug)
                         .contextMenu {
@@ -43,7 +47,7 @@ struct ChannelsView: View {
                 .frame(width: 240)
                 Divider()
                 if let channel = model.config.channels.first(where: { $0.slug == selection }) {
-                    GridView(blocks: channel.blocks)
+                    GridView(channel: channel)
                 } else {
                     Text("Choisis un channel pour voir ses images.")
                         .foregroundStyle(.secondary)

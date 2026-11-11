@@ -14,17 +14,35 @@ public struct Scheduler {
         self.shuffle = shuffle
     }
 
-    /// Follows the config without restarting the cycle when nothing changed.
+    /// Ids of the pool not yet drawn in the current cycle.
+    public var remainingInCycle: Int { remaining.count }
+
+    /// Follows the config without restarting the cycle when nothing changed. A pool that only
+    /// grew (a new page was loaded) keeps the cycle: the new ids come after the ones left.
     public mutating func sync(pool: [Int], order: RotationOrder) {
+        let orderChanged = order != self.order
         if pool != self.pool {
+            if !orderChanged, !self.pool.isEmpty, Self.isSubsequence(self.pool, of: pool) {
+                let known = Set(self.pool)
+                let added = pool.filter { !known.contains($0) }
+                // The next id is popped from the end, so what comes last in the cycle goes first.
+                remaining = (order == .ordered ? Array(added.reversed()) : shuffle(added)) + remaining
+            } else {
+                remaining = []
+                last = nil
+            }
             self.pool = pool
-            remaining = []
-            last = nil
         }
-        if order != self.order {
+        if orderChanged {
             self.order = order
             remaining = []
         }
+    }
+
+    private static func isSubsequence(_ small: [Int], of big: [Int]) -> Bool {
+        var rest = small[...]
+        for id in big where id == rest.first { rest.removeFirst() }
+        return rest.isEmpty
     }
 
     public mutating func next() -> Int? {

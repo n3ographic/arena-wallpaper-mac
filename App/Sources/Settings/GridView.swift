@@ -3,7 +3,9 @@ import ArenaKit
 
 struct GridView: View {
     @EnvironmentObject private var model: AppModel
-    let blocks: [Block]
+    let channel: Channel
+
+    private var blocks: [Block] { channel.blocks }
 
     var body: some View {
         ScrollView {
@@ -12,13 +14,18 @@ struct GridView: View {
             }
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: 8)], spacing: 8) {
                 ForEach(blocks, id: \.id) { block in
-                    ThumbnailView(block: block, excluded: model.isExcluded(block.id), flagged: model.isFlagged(block.id))
+                    ThumbnailView(block: block, excluded: model.isExcluded(block.id))
                         .onTapGesture { Task { await model.apply(block) } }
                         .accessibilityAddTraits(.isButton)
                         .contextMenu { menu(for: block) }
                 }
             }
             .padding()
+            if channel.nextPage != nil {
+                Button("Charger plus") { Task { await model.loadMore(channel.slug) } }
+                    .disabled(model.loadingSlugs.contains(channel.slug))
+                    .padding(.bottom)
+            }
         }
     }
 
@@ -34,21 +41,17 @@ struct GridView: View {
             Button("Appliquer") { Task { await model.apply(block) } }
         }
         Divider()
-        Button(model.isExcluded(block.id) ? String(localized: "Réinclure dans la rotation") : String(localized: "Exclure de la rotation")) {
+        Button(model.isExcluded(block.id) ? String(localized: "Remettre dans la rotation") : String(localized: "Retirer de la rotation")) {
             Task { await model.toggleExcluded([block.id]) }
-        }
-        if model.isFlagged(block.id) {
-            Button("Garder cette image") { Task { await model.keepSensitive(block.id) } }
         }
         Button("Ouvrir sur Are.na") { model.openOnArena(block.id) }
     }
 }
 
-/// A square cell; a GIF shows its first frame and a badge; an excluded image is dimmed.
+/// A square cell; a GIF shows its first frame and a badge; a removed image is dimmed.
 struct ThumbnailView: View {
     let block: Block
     var excluded = false
-    var flagged = false
     @State private var image: NSImage?
 
     var body: some View {
@@ -58,13 +61,12 @@ struct ThumbnailView: View {
                 if let image {
                     Image(nsImage: image).resizable().scaledToFill()
                         .opacity(excluded ? 0.35 : 1)
-                        .blur(radius: flagged ? 12 : 0)
                 }
             }
             .clipShape(RoundedRectangle(cornerRadius: 6))
             .overlay(alignment: .bottomLeading) {
-                if excluded || flagged {
-                    Text(flagged ? "À vérifier" : "Exclue")
+                if excluded {
+                    Text("Retirée")
                         .font(.caption2)
                         .padding(.horizontal, 5)
                         .background(.background, in: RoundedRectangle(cornerRadius: 4))
@@ -82,7 +84,7 @@ struct ThumbnailView: View {
                 }
             }
             .accessibilityElement()
-            .accessibilityLabel(Text(verbatim: block.title ?? String(localized: "Image sans titre")) + Text(flagged ? ", à vérifier" : excluded ? ", exclue" : ""))
+            .accessibilityLabel(Text(verbatim: block.title ?? String(localized: "Image sans titre")) + Text(excluded ? ", retirée" : ""))
             .task(id: block.id) { image = await Thumbnails.shared.image(for: block) }
     }
 }

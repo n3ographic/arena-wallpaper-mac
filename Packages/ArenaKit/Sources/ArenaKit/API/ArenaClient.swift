@@ -8,44 +8,57 @@ public enum ArenaError: Error, Equatable {
     case decoding
 }
 
-/// Reads channels from the Are.na API v3.
+/// What one request for a channel page returns.
+public enum PageResult: Equatable, Sendable {
+    case notModified
+    case page(blocks: [Block], hasMore: Bool, etag: String?)
+}
+
+/// `ArenaWallpaper/<version>`, followed by the optional contact: `ArenaWallpaper/<version> (+<contact>)`.
+public func arenaUserAgent(version: String, contact: String) -> String {
+    let contact = contact.trimmingCharacters(in: .whitespacesAndNewlines)
+    return contact.isEmpty ? "ArenaWallpaper/\(version)" : "ArenaWallpaper/\(version) (+\(contact))"
+}
+
+/// Reads channels from the Are.na API v3, one page per request.
 public struct ArenaClient: Sendable {
     public static let apiBase = URL(string: "https://api.are.na")!
+    public static let pageSize = 50
 
     private let token: String?
     private let userAgent: String
+    private let gate: RequestGate
     private let baseURL: URL
     private let session: URLSession
 
-    public init(token: String?, userAgent: String, baseURL: URL = apiBase, session: URLSession = .shared) {
+    public init(token: String?, userAgent: String, gate: RequestGate, baseURL: URL = apiBase, session: URLSession = .shared) {
         self.token = token
         self.userAgent = userAgent
+        self.gate = gate
         self.baseURL = baseURL
         self.session = session
     }
 
-    /// Every usable image of a channel, following all pages.
-    public func channelBlocks(slug: String) async throws -> [Block] {
-        var blocks: [Block] = []
-        var page = 1
-        while true {
-            let body: Page = try await get("/v3/channels/\(slug)/contents", query: [("per", "100"), ("page", String(page))])
-            blocks += body.data.compactMap(\.block).filter(isUsable)
-            guard body.meta.has_more_pages else { return blocks }
-            page += 1
-        }
-    }
-
-    private func get<T: Decodable>(_ path: String, query: [(String, String)]) async throws -> T {
+    /// One page of a channel, newest additions first. With an `etag`, an unchanged page gives `.notModified`.
+    public func channelPage(slug: String, page: Int, etag: String? = nil) async throws -> PageResult {
         var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false)!
-        components.path = path
-        components.queryItems = query.map { URLQueryItem(name: $0.0, value: $0.1) }
-        var request = URLRequest(url: components.url!)
+        components.path = "/v3/channels/\(slug)/contents"
+        components.queryItems = [
+            URLQueryItem(name: "per", value: String(Self.pageSize)),
+            URLQueryItem(name: "page", value: String(page)),
+            URLQueryItem(name: "sort", value: "created_at_desc"),
+        ]
+        // The URL cache would answer a 304 by itself and hide it from the app.
+        var request = URLRequest(url: components.url!, cachePolicy: .reloadIgnoringLocalCacheData)
         // Are.na asks API clients to identify themselves; the image CDN never gets this header.
         request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
         if let token {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
+        if let etag {
+            request.setValue(etag, forHTTPHeaderField: "If-None-Match")
+        }
+        await gate.wait()
         let data: Data
         let response: URLResponse
         do {
@@ -53,22 +66,28 @@ public struct ArenaClient: Sendable {
         } catch {
             throw ArenaError.network(error.localizedDescription)
         }
-        let http = response as? HTTPURLResponse
-        switch http?.statusCode ?? 0 {
+        guard let http = response as? HTTPURLResponse else { throw ArenaError.network("no response") }
+        let pause = await gate.record(http)
+        switch http.statusCode {
+        case 304:
+            return .notModified
         case 401, 403:
             throw ArenaError.unauthorized
         case 404:
             throw ArenaError.notFound
         case 429:
-            let retry = http?.value(forHTTPHeaderField: "Retry-After").flatMap(Int.init) ?? 60
-            throw ArenaError.rateLimited(retryAfterSeconds: retry)
+            throw ArenaError.rateLimited(retryAfterSeconds: pause ?? 60)
         case let status where status >= 400:
             throw ArenaError.network("HTTP \(status)")
         default:
             break
         }
         do {
-            return try JSONDecoder().decode(T.self, from: data)
+            let body = try JSONDecoder().decode(Page.self, from: data)
+            return .page(
+                blocks: body.data.compactMap(\.block).filter(isUsable),
+                hasMore: body.meta.has_more_pages,
+                etag: http.value(forHTTPHeaderField: "ETag"))
         } catch {
             throw ArenaError.decoding
         }

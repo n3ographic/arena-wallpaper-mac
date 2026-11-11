@@ -14,7 +14,7 @@ private func engine(
     _ repository: ConfigRepository, _ cache: ImageCache, _ rendered: URL, setter: RecordingSetter,
     screens: [Screen] = [landscape], now: @escaping @Sendable () -> Date = { Date(timeIntervalSince1970: 1_000) }
 ) -> RotationEngine {
-    let wallpaper = WallpaperService(repository: repository, cache: cache, renderedDirectory: rendered, setter: setter, player: RecordingPlayer(), checker: NoSensitivityChecker())
+    let wallpaper = WallpaperService(repository: repository, cache: cache, renderedDirectory: rendered, setter: setter, player: RecordingPlayer())
     return RotationEngine(repository: repository, wallpaper: wallpaper, screens: FixedScreens(list: screens), cache: cache, now: now)
 }
 
@@ -111,4 +111,45 @@ extension Network {
     }
     try? await task.value
     #expect(await setter.calls.isEmpty)
+}
+
+/// Counts the calls of `onLowPool` and holds each one until released.
+private actor LowPoolProbe {
+    private(set) var calls = 0
+    private var released = false
+
+    func handler() async {
+        calls += 1
+        while !released { await Task.yield() }
+    }
+
+    func release() { released = true }
+}
+
+@Test func lowPoolAsksForMoreOnce() async throws {
+    let (repository, cache, rendered) = try await fixture(ids: [1, 2, 3, 4, 5])
+    let rotation = engine(repository, cache, rendered, setter: RecordingSetter())
+    let probe = LowPoolProbe()
+    await rotation.setOnLowPool { await probe.handler() }
+    try await rotation.rotate(manual: true)
+    while await probe.calls == 0 { await Task.yield() }
+    try await rotation.rotate(manual: true)
+    for _ in 0..<50 { await Task.yield() }
+    #expect(await probe.calls == 1)
+    await probe.release()
+    for _ in 0..<500 where await probe.calls < 2 {
+        try await rotation.rotate(manual: true)
+        await Task.yield()
+    }
+    #expect(await probe.calls >= 2)
+}
+
+@Test func gridClickDoesNotAskForMore() async throws {
+    let (repository, cache, rendered) = try await fixture(ids: [1, 2, 3, 4, 5])
+    let rotation = engine(repository, cache, rendered, setter: RecordingSetter())
+    let probe = LowPoolProbe()
+    await rotation.setOnLowPool { await probe.handler() }
+    try await rotation.apply(ids: [1], screens: [landscape])
+    for _ in 0..<50 { await Task.yield() }
+    #expect(await probe.calls == 0)
 }
