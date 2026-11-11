@@ -22,6 +22,8 @@ struct LibraryView: View {
                 .navigationSplitViewColumnWidth(min: 220, ideal: 250, max: 320)
         } detail: {
             VStack(spacing: 0) {
+                ScreenBar()
+                Divider()
                 LibraryGridView(blocks: shown, channel: channel, selected: $selectedID)
                 Divider()
                 ActionBar(block: selectedBlock)
