@@ -54,6 +54,16 @@
         }
       }
     },
+    "Actualiser les channels": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh channels"
+          }
+        }
+      }
+    },
     "Adapter l'image à l'orientation de chaque écran": {
       "localizations": {
         "en": {

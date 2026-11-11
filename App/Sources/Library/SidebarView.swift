@@ -14,7 +14,7 @@ struct SidebarView: View {
                 Label("Tout", systemImage: "square.grid.2x2").tag(LibrarySelection.all)
                 Label("Retirées", systemImage: "eye.slash").tag(LibrarySelection.removed)
                 Label("Général", systemImage: "gearshape").tag(LibrarySelection.general)
-                Section("Channels") {
+                Section {
                     ForEach(library.config.channels, id: \.slug) { channel in
                         HStack {
                             Toggle("", isOn: Binding(
@@ -35,6 +35,17 @@ struct SidebarView: View {
                                 Task { await library.removeChannel(channel.slug) }
                             }
                         }
+                    }
+                } header: {
+                    HStack {
+                        Text("Channels")
+                        Spacer()
+                        Button { Task { await library.refresh(force: true) } } label: {
+                            Image(systemName: "arrow.clockwise")
+                        }
+                        .buttonStyle(.borderless)
+                        .help(Text("Actualiser les channels"))
+                        .accessibilityLabel(Text("Actualiser"))
                     }
                 }
             }

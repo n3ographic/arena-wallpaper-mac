@@ -48,26 +48,6 @@ struct LibraryView: View {
                 }
             }
         }
-        .toolbar {
-            ToolbarItemGroup {
-                TimelineView(.periodic(from: .now, by: 15)) { context in
-                    Text(nextChangeText(playback.nowPlaying, now: context.date)).foregroundStyle(.secondary)
-                }
-                Button { Task { await playback.togglePause() } } label: {
-                    Label(playback.nowPlaying.paused ? String(localized: "Reprendre") : String(localized: "Pause"),
-                          systemImage: playback.nowPlaying.paused ? "play.fill" : "pause.fill")
-                }
-                Button { Task { await playback.previous() } } label: {
-                    Label("Précédent", systemImage: "backward.end.fill")
-                }
-                Button { Task { await playback.next() } } label: {
-                    Label("Suivant", systemImage: "forward.end.fill")
-                }
-                Button { Task { await library.refresh(force: true) } } label: {
-                    Label("Actualiser", systemImage: "arrow.clockwise")
-                }
-            }
-        }
         .onChange(of: selection) { selectedID = nil }
         // The blue selection follows the image on screen, and the grid scrolls to it.
         .onChange(of: currentID) {
