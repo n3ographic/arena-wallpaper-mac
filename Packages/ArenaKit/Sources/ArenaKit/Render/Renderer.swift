@@ -11,11 +11,29 @@ public enum RenderError: Error, Equatable {
 
 /// Composes the wallpaper of one screen: framing, position, blurred or colored bands.
 public enum Renderer {
-    /// First frame of the file (the still image of a GIF).
-    public static func loadFirstFrame(_ url: URL) throws -> CGImage {
-        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
-              let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else { throw RenderError.unreadable }
+    /// First frame of the file (the still image of a GIF), turned upright per its EXIF
+    /// orientation and, with `maxPixelSize`, decoded no larger than that on its long side.
+    public static func loadFirstFrame(_ url: URL, maxPixelSize: Int? = nil) throws -> CGImage {
+        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil) else { throw RenderError.unreadable }
+        var options: [CFString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceShouldCacheImmediately: true,
+        ]
+        if let maxPixelSize { options[kCGImageSourceThumbnailMaxPixelSize] = max(1, maxPixelSize) }
+        guard let image = CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary) else { throw RenderError.unreadable }
         return image
+    }
+
+    /// Size of the first frame once upright, read from the header without decoding.
+    public static func orientedSize(_ url: URL) throws -> CGSize {
+        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+              let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+              let width = properties[kCGImagePropertyPixelWidth] as? Int,
+              let height = properties[kCGImagePropertyPixelHeight] as? Int else { throw RenderError.unreadable }
+        // EXIF orientations 5 to 8 turn the image a quarter.
+        let orientation = properties[kCGImagePropertyOrientation] as? Int ?? 1
+        return orientation >= 5 ? CGSize(width: height, height: width) : CGSize(width: width, height: height)
     }
 
     public static func render(_ image: CGImage, canvasSize: CGSize, fit: Fit, positionX: Int, positionY: Int, background: Background) -> CGImage {

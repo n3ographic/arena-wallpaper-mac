@@ -34,6 +34,19 @@ public enum FrameGeometry {
         }
     }
 
+    /// Long side to decode the image at so the framing never scales it up: the scale the
+    /// framing applies (the larger axis for fill and stretch), capped at 1.
+    public static func decodeMaxPixelSize(imageSize: CGSize, canvasSize: CGSize, fit: Fit) -> Int {
+        let iw = max(1, Double(imageSize.width)), ih = max(1, Double(imageSize.height))
+        let sx = Double(canvasSize.width) / iw, sy = Double(canvasSize.height) / ih
+        let scale: Double
+        switch fit {
+        case .fill, .stretch: scale = max(sx, sy)
+        case .contain, .center: scale = min(sx, sy)
+        }
+        return max(1, Int((max(iw, ih) * min(1, scale)).rounded(.up)))
+    }
+
     /// Share of `free` pixels placed before the image, for a position from 0 to 100.
     static func offset(_ free: Int, _ position: Int) -> Int {
         free * position / 100

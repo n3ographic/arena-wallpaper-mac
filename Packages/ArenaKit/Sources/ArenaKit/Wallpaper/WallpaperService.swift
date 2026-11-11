@@ -116,11 +116,14 @@ public actor WallpaperService {
     private func render(ids: [Int], screens: [Screen], originals: [Int: URL], config: Config) async throws -> [URL] {
         try FileManager.default.createDirectory(at: renderedDirectory, withIntermediateDirectories: true)
         let stamp = Int(now().timeIntervalSince1970 * 1000)
+        // Decoded once per image, at the largest size a screen needs.
         var images: [Int: CGImage] = [:]
-        func image(_ id: Int) async throws -> CGImage {
-            if let cached = images[id] { return cached }
+        func image(_ id: Int, canvas: CGSize) async throws -> CGImage {
             do {
-                let loaded = try Renderer.loadFirstFrame(originals[id]!)
+                let url = originals[id]!
+                let needed = FrameGeometry.decodeMaxPixelSize(imageSize: try Renderer.orientedSize(url), canvasSize: canvas, fit: config.fit)
+                if let cached = images[id], max(cached.width, cached.height) >= needed { return cached }
+                let loaded = try Renderer.loadFirstFrame(url, maxPixelSize: needed)
                 images[id] = loaded
                 return loaded
             } catch {
@@ -130,7 +133,7 @@ public actor WallpaperService {
             }
         }
         func compose(_ id: Int, _ size: CGSize) async throws -> CGImage {
-            Renderer.render(try await image(id), canvasSize: size, fit: config.fit, positionX: config.positionX, positionY: config.positionY, background: config.background)
+            Renderer.render(try await image(id, canvas: size), canvasSize: size, fit: config.fit, positionX: config.positionX, positionY: config.positionY, background: config.background)
         }
 
         var big: (canvas: PixelRect, image: CGImage)?
