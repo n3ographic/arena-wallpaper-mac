@@ -95,7 +95,7 @@
 - [ ] La rangée de boutons du bas tient sur une ligne en français et en anglais.
 
 ### Flash de Space (tâche 11)
-- [ ] Mesure avant et après dans `docs/space-flash-notes.md`, décision notée.
+- [x] Mesure avant et après dans `docs/space-flash-notes.md`, décision notée (gain nul, pose anticipée retirée, limite du système).
 
 ### Accessibilité (tâche 12)
 - [ ] VoiceOver lit les vignettes d'écran, les cellules et les boutons ; Tab, Entrée, Espace, flèche droite et Échap fonctionnent dans la Bibliothèque.
