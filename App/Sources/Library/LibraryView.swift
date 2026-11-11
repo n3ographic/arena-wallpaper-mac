@@ -4,6 +4,7 @@ import SwiftUI
 
 /// The library window: sidebar, screen bar and grid, action bar.
 struct LibraryView: View {
+    @Environment(AppCoordinator.self) private var app
     @Environment(PlaybackStore.self) private var playback
     @Environment(LibraryStore.self) private var library
     @State private var selection: LibrarySelection = .all
@@ -30,6 +31,12 @@ struct LibraryView: View {
             }
         }
         .toolbar {
+            ToolbarItem {
+                Button { app.openPreferences() } label: {
+                    Label("Préférences", systemImage: "gearshape")
+                }
+                .keyboardShortcut(",", modifiers: .command)
+            }
             ToolbarItem {
                 Button { Task { await library.refresh(force: true) } } label: {
                     Label("Actualiser", systemImage: "arrow.clockwise")

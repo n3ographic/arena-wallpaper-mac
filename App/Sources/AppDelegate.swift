@@ -5,13 +5,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: StatusItemController?
     private let app = AppCoordinator()
     private lazy var library = LibraryWindowController(app: app)
+    private lazy var preferences = PreferencesWindowController(app: app)
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         statusItem = StatusItemController(
-            panel: PanelView(openLibrary: { [weak self] in self?.showLibrary() }).injecting(app),
+            panel: PanelView(openLibrary: { [weak self] in self?.showLibrary() }, openPreferences: { [weak self] in self?.showPreferences() }).injecting(app),
             paused: { [app] in app.playback.nowPlaying.paused }
         )
+        app.openPreferences = { [weak self] in self?.showPreferences() }
         app.start()
     }
 
@@ -22,5 +24,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func showLibrary() {
         statusItem?.closePopover()
         library.show()
+    }
+
+    func showPreferences() {
+        statusItem?.closePopover()
+        preferences.show()
     }
 }

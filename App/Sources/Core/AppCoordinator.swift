@@ -13,6 +13,9 @@ final class AppCoordinator {
     let playback: PlaybackStore
     let display: DisplayStore
 
+    /// Opens the preferences window (set by the app delegate).
+    @ObservationIgnored var openPreferences: () -> Void = {}
+
     init() {
         // Inside the sandbox these are the app's own container folders.
         let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
