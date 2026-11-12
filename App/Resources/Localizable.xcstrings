@@ -14,6 +14,96 @@
         }
       }
     },
+    "%lld images": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld images"
+          }
+        }
+      }
+    },
+    "%lld images remises dans la lecture": {
+      "localizations": {
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld image remise dans la lecture"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld images remises dans la lecture"
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld image put back in playback"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld images put back in playback"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld images retirées de la lecture": {
+      "localizations": {
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld image retirée de la lecture"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld images retirées de la lecture"
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld image removed from playback"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld images removed from playback"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld j": {
       "localizations": {
         "en": {
@@ -144,6 +234,16 @@
         }
       }
     },
+    "Afficher l'inspecteur": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show inspector"
+          }
+        }
+      }
+    },
     "Ajouter": {
       "localizations": {
         "en": {
@@ -194,6 +294,26 @@
         }
       }
     },
+    "Annuler": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Undo"
+          }
+        }
+      }
+    },
+    "Annuler la sélection": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear selection"
+          }
+        }
+      }
+    },
     "Appliquer": {
       "localizations": {
         "en": {
@@ -234,6 +354,16 @@
         }
       }
     },
+    "Arena Wallpaper vit dans la barre des menus": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arena Wallpaper lives in the menu bar"
+          }
+        }
+      }
+    },
     "Aucun nouveau channel suivi.": {
       "localizations": {
         "en": {
@@ -270,6 +400,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "No images here."
+          }
+        }
+      }
+    },
+    "Aucune sélection": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No selection"
           }
         }
       }
@@ -320,6 +460,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "This channel is already added."
+          }
+        }
+      }
+    },
+    "Ce channel est privé : Are.na ne le partage pas.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This channel is private: Are.na doesn't share it."
           }
         }
       }
@@ -394,22 +544,22 @@
         }
       }
     },
-    "Channels en pause": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Paused channels"
-          }
-        }
-      }
-    },
     "Channels en réserve": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Channels on hold"
+          }
+        }
+      }
+    },
+    "Channels hors lecture": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Channels not in playback"
           }
         }
       }
@@ -430,6 +580,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Load more"
+          }
+        }
+      }
+    },
+    "Clique sur son icône, en haut à droite de l'écran, pour changer d'image ou mettre en pause. Fermer cette fenêtre ne quitte pas l'app.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Click its icon, at the top right of the screen, to change the image or pause. Closing this window doesn't quit the app."
+          }
+        }
+      }
+    },
+    "Clique sur une image, ou glisse pour en sélectionner plusieurs.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Click an image, or drag to select several."
           }
         }
       }
@@ -460,6 +630,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Paste a channel link or slug"
+          }
+        }
+      }
+    },
+    "Compris": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Got it"
           }
         }
       }
@@ -594,6 +774,16 @@
         }
       }
     },
+    "Dans la lecture": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In playback"
+          }
+        }
+      }
+    },
     "Depuis": {
       "localizations": {
         "en": {
@@ -634,6 +824,16 @@
         }
       }
     },
+    "Désactivé, ses images ne passent plus dans la lecture": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When off, its images no longer play"
+          }
+        }
+      }
+    },
     "Effacer la bibliothèque retire tes channels et les images téléchargées de ce Mac. Le fond d'écran affiché reste en place.": {
       "localizations": {
         "en": {
@@ -670,6 +870,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Save token"
+          }
+        }
+      }
+    },
+    "Exclure de la lecture": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave out of playback"
+          }
+        }
+      }
+    },
+    "Exclure de la lecture : ses images ne passent plus": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave out of playback: its images no longer play"
           }
         }
       }
@@ -734,12 +954,32 @@
         }
       }
     },
+    "Gardées": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kept"
+          }
+        }
+      }
+    },
     "Général": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "General"
+          }
+        }
+      }
+    },
+    "Hors lecture": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not in playback"
           }
         }
       }
@@ -854,6 +1094,26 @@
         }
       }
     },
+    "Inclure dans la lecture": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include in playback"
+          }
+        }
+      }
+    },
+    "Inclure dans la lecture : ses images repassent": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include in playback: its images play again"
+          }
+        }
+      }
+    },
     "La connexion Are.na n'est pas encore configurée : utilise un token personnel.": {
       "localizations": {
         "en": {
@@ -914,6 +1174,16 @@
         }
       }
     },
+    "Le channel quitte ta bibliothèque et la lecture, et ses images téléchargées sont effacées de ce Mac. Rien n'est supprimé sur Are.na : tu pourras le rajouter depuis Découvrir.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The channel leaves your library and the playback, and its downloaded images are erased from this Mac. Nothing is deleted on Are.na: you can add it again from Discover."
+          }
+        }
+      }
+    },
     "Le système a refusé le fond d'écran (%@).": {
       "localizations": {
         "en": {
@@ -964,6 +1234,16 @@
         }
       }
     },
+    "Masquer l'inspecteur": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide inspector"
+          }
+        }
+      }
+    },
     "Membre depuis": {
       "localizations": {
         "en": {
@@ -990,16 +1270,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pause"
-          }
-        }
-      }
-    },
-    "Mettre en pause : ses images ne passent plus dans la lecture": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pause: its images no longer play"
           }
         }
       }
@@ -1314,6 +1584,16 @@
         }
       }
     },
+    "Remettre les %lld images dans la lecture": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Put the %lld images back in playback"
+          }
+        }
+      }
+    },
     "Remplir": {
       "localizations": {
         "en": {
@@ -1344,16 +1624,6 @@
         }
       }
     },
-    "Reprendre : ses images repassent dans la lecture": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Resume: its images play again"
-          }
-        }
-      }
-    },
     "Retirer": {
       "localizations": {
         "en": {
@@ -1370,6 +1640,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Remove from playback"
+          }
+        }
+      }
+    },
+    "Retirer les %lld images de la lecture": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove the %lld images from playback"
           }
         }
       }
@@ -1470,6 +1750,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Results"
+          }
+        }
+      }
+    },
+    "Rétablir": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redo"
           }
         }
       }
@@ -1594,6 +1884,46 @@
         }
       }
     },
+    "Supprimer": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete"
+          }
+        }
+      }
+    },
+    "Supprimer ce channel": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete this channel"
+          }
+        }
+      }
+    },
+    "Supprimer le channel…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete channel…"
+          }
+        }
+      }
+    },
+    "Supprimer « %@ » ?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete “%@”?"
+          }
+        }
+      }
+    },
     "Sélectionne une image.": {
       "localizations": {
         "en": {
@@ -1660,16 +1990,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Select All"
-          }
-        }
-      }
-    },
-    "Toutes": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "All"
           }
         }
       }
@@ -1850,16 +2170,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "View on Are.na"
-          }
-        }
-      }
-    },
-    "en pause": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "paused"
           }
         }
       }

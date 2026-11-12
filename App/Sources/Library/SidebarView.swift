@@ -13,6 +13,7 @@ struct SidebarView: View {
     @Environment(LibraryStore.self) private var library
     @Environment(ErrorCenter.self) private var errors
     @Binding var item: SidebarItem
+    @State private var deleting: String?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -29,9 +30,14 @@ struct SidebarView: View {
                     Label("Découvrir", systemImage: "safari").tag(SidebarItem.discover)
                 }
                 Section {
-                    // Active channels first, paused ones after, each group in the user's order.
-                    let channels = library.config.channels.filter(\.enabled) + library.config.channels.filter { !$0.enabled }
-                    ForEach(channels, id: \.slug, content: row)
+                    // Active channels first, paused ones after, each group in the user's order,
+                    // which a drag changes inside the group.
+                    let active = library.config.channels.filter(\.enabled)
+                    let paused = library.config.channels.filter { !$0.enabled }
+                    ForEach(active, id: \.slug, content: row)
+                        .onMove { move(in: active, from: $0, to: $1) { $0 + paused.map(\.slug) } }
+                    ForEach(paused, id: \.slug, content: row)
+                        .onMove { move(in: paused, from: $0, to: $1) { active.map(\.slug) + $0 } }
                 } header: {
                     HStack(spacing: 6) {
                         Text("Mes channels")
@@ -54,6 +60,9 @@ struct SidebarView: View {
                 Text(error).font(.caption).foregroundStyle(.red).padding(10)
             }
         }
+        .confirmChannelDeletion($deleting) { slug in
+            if item == .images(.channel(slug)) { item = .images(.all) }
+        }
     }
 
     /// One channel: a full dot when it feeds the playback, an empty one when paused (a click
@@ -68,32 +77,66 @@ struct SidebarView: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .help(channel.enabled ? Text("Mettre en pause : ses images ne passent plus dans la lecture") : Text("Reprendre : ses images repassent dans la lecture"))
+            .help(channel.enabled ? Text("Exclure de la lecture : ses images ne passent plus") : Text("Inclure dans la lecture : ses images repassent"))
             .accessibilityHidden(true)
             Text(verbatim: channel.slug).lineLimit(1)
                 .foregroundStyle(channel.enabled ? .primary : .secondary)
-            if !channel.enabled {
-                Text("en pause").font(.caption).foregroundStyle(.secondary)
-            }
             Spacer()
-            Text(verbatim: "\(channel.blocks.count)" + (channel.nextPage != nil ? "+" : ""))
+            // The images kept in the playback, like the grid shows them.
+            Text(verbatim: "\(blocks(for: .channel(channel.slug), in: library.config).count)" + (channel.nextPage != nil ? "+" : ""))
                 .foregroundStyle(.secondary)
         }
         .tag(SidebarItem.images(.channel(channel.slug)))
         .accessibilityElement(children: .combine)
-        .accessibilityAction(named: channel.enabled ? Text("Mettre en pause") : Text("Reprendre")) { setEnabled(channel, !channel.enabled) }
+        // The dimmed text and empty dot say it to the eye; VoiceOver hears it here.
+        .accessibilityValue(channel.enabled ? Text(verbatim: "") : Text("Hors lecture"))
+        .accessibilityAction(named: channel.enabled ? Text("Exclure de la lecture") : Text("Inclure dans la lecture")) { setEnabled(channel, !channel.enabled) }
         .contextMenu {
-            Button(channel.enabled ? "Mettre en pause" : "Reprendre") { setEnabled(channel, !channel.enabled) }
+            Button(channel.enabled ? "Exclure de la lecture" : "Inclure dans la lecture") { setEnabled(channel, !channel.enabled) }
             Divider()
-            Button("Retirer") {
-                if item == .images(.channel(channel.slug)) { item = .images(.all) }
-                Task { await library.removeChannel(channel.slug) }
-            }
+            // "Supprimer", not "Retirer": that word is for images taken out of the playback.
+            Button("Supprimer le channel…") { deleting = channel.slug }
         }
+    }
+
+    private func move(in group: [Channel], from source: IndexSet, to destination: Int, order: ([String]) -> [String]) {
+        var slugs = group.map(\.slug)
+        slugs.move(fromOffsets: source, toOffset: destination)
+        let all = order(slugs)
+        Task { await library.reorder(all) }
     }
 
     private func setEnabled(_ channel: Channel, _ enabled: Bool) {
         Task { await library.setEnabled(channel.slug, enabled) }
+    }
+}
+
+extension View {
+    /// Asks before deleting the channel `slug` names (nil: no question); `before` runs just
+    /// before the deletion, to leave a page that shows the channel.
+    func confirmChannelDeletion(_ slug: Binding<String?>, before: @escaping (String) -> Void = { _ in }) -> some View {
+        modifier(ChannelDeletion(slug: slug, before: before))
+    }
+}
+
+private struct ChannelDeletion: ViewModifier {
+    @Environment(LibraryStore.self) private var library
+    @Binding var slug: String?
+    let before: (String) -> Void
+
+    func body(content: Content) -> some View {
+        content.confirmationDialog(
+            Text("Supprimer « \(slug ?? "") » ?"),
+            isPresented: Binding(get: { slug != nil }, set: { if !$0 { slug = nil } }),
+            presenting: slug
+        ) { slug in
+            Button("Supprimer", role: .destructive) {
+                before(slug)
+                Task { await library.removeChannel(slug) }
+            }
+        } message: { _ in
+            Text("Le channel quitte ta bibliothèque et la lecture, et ses images téléchargées sont effacées de ce Mac. Rien n'est supprimé sur Are.na : tu pourras le rajouter depuis Découvrir.")
+        }
     }
 }
 

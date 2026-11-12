@@ -24,6 +24,7 @@ final class ErrorCenter {
         case LibraryError.invalidChannel: return String(localized: "Lien ou slug de channel invalide.")
         case LibraryError.alreadyAdded: return String(localized: "Ce channel est déjà ajouté.")
         case ArenaError.unauthorized: return String(localized: "Reconnecte-toi à Are.na.")
+        case ArenaError.forbidden: return String(localized: "Ce channel est privé : Are.na ne le partage pas.")
         case ArenaError.notFound: return String(localized: "Channel introuvable ou privé.")
         case ArenaError.rateLimited(let seconds): return String(localized: "Are.na limite les requêtes : réessaie dans \(seconds) s.")
         case ArenaError.network(let detail): return String(localized: "Réseau indisponible (\(detail)).")

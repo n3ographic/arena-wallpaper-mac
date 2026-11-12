@@ -22,7 +22,8 @@ struct DiscoverView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 field
-                if !text.isEmpty, let slug {
+                // A plain word is a search when signed in: the direct add is for links (or slugs when signed out).
+                if !text.isEmpty, let slug, isLink || !account.isConnected {
                     HStack {
                         Text("Ajouter le channel « \(slug) »")
                         Spacer()
@@ -30,6 +31,10 @@ struct DiscoverView: View {
                     }
                     .padding(10)
                     .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 8))
+                }
+                // Next to the field and the buttons that cause it, not under a long list of results.
+                if let error = errors.message {
+                    Text(error).foregroundStyle(.red)
                 }
                 if text.isEmpty {
                     section(title: "Tes abonnements", channels: followed, empty: "Aucun nouveau channel suivi.")
@@ -39,9 +44,6 @@ struct DiscoverView: View {
                     } else {
                         section(title: "Résultats", channels: found, empty: "Aucun résultat.")
                     }
-                }
-                if let error = errors.message {
-                    Text(error).foregroundStyle(.red)
                 }
                 Text("Tu es responsable du contenu des channels que tu ajoutes.")
                     .font(.caption).foregroundStyle(.secondary)
@@ -64,7 +66,7 @@ struct DiscoverView: View {
                 .textFieldStyle(.plain)
                 .font(.title3)
                 .focused($fieldFocused)
-                .onSubmit { if let slug { add(slug) } }
+                .onSubmit { if let slug, isLink || !account.isConnected { add(slug) } }
         }
         .padding(10)
         .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 8))
@@ -126,7 +128,7 @@ struct DiscoverView: View {
         guard !Task.isCancelled else { return }
         do {
             found = try await account.searchChannels(text)
-        } catch ArenaError.unauthorized {
+        } catch ArenaError.forbidden {
             searchMessage = String(localized: "La recherche Are.na demande un compte Premium. Tu peux toujours coller un lien.")
         } catch {
             searchMessage = String(localized: "Recherche impossible pour le moment.")
