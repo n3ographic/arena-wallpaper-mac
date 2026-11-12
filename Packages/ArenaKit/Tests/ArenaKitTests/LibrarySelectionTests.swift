@@ -17,7 +17,11 @@ private func config() -> Config {
 }
 
 @Test func removedListsExcludedAcrossChannels() {
-    #expect(blocks(for: .removed, in: config()).map(\.id) == [3, 4])
+    #expect(blocks(for: .all, in: config(), removedOnly: true).map(\.id) == [3, 4])
+}
+
+@Test func removedOnlyFiltersAChannel() {
+    #expect(blocks(for: .channel("b"), in: config(), removedOnly: true).map(\.id) == [4])
 }
 
 @Test func channelKeepsOrder() {

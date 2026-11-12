@@ -82,6 +82,42 @@ extension ArenaClient {
         }
     }
 
+    /// The channels a user follows (`GET /v3/users/{slug}/following?type=Channel`), at most 300.
+    public func followedChannels(userSlug: String) async throws -> [ChannelSuggestion] {
+        var result: [ChannelSuggestion] = []
+        for page in 1...3 {
+            var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false)!
+            components.path = "/v3/users/\(userSlug)/following"
+            components.queryItems = [
+                URLQueryItem(name: "type", value: "Channel"),
+                URLQueryItem(name: "per", value: "100"),
+                URLQueryItem(name: "page", value: String(page)),
+            ]
+            let (data, _) = try await send(URLRequest(url: components.url!, cachePolicy: .reloadIgnoringLocalCacheData))
+            let body: RawFollowing
+            do { body = try JSONDecoder().decode(RawFollowing.self, from: data) } catch { throw ArenaError.decoding }
+            result += body.data.filter { $0.type == "Channel" }.compactMap { item in
+                item.slug.map { ChannelSuggestion(slug: $0, title: item.title ?? $0, blocks: item.counts?.blocks, owner: item.owner?.name) }
+            }
+            if !body.meta.has_more_pages { break }
+        }
+        return result
+    }
+
+    /// Channels matching `query` (`GET /v3/search?type=Channel`). Are.na answers 403 (so
+    /// `.unauthorized`) without a Premium account.
+    public func searchChannels(query: String) async throws -> [ChannelSuggestion] {
+        var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false)!
+        components.path = "/v3/search"
+        components.queryItems = [
+            URLQueryItem(name: "query", value: query),
+            URLQueryItem(name: "type", value: "Channel"),
+            URLQueryItem(name: "per", value: "25"),
+        ]
+        let (data, _) = try await send(URLRequest(url: components.url!, cachePolicy: .reloadIgnoringLocalCacheData))
+        do { return try JSONDecoder().decode(RawFollowing.self, from: data).suggestions } catch { throw ArenaError.decoding }
+    }
+
     /// Identifies the app, adds the token, waits for the gate, and turns error statuses into errors.
     /// A 304 comes back as a response: only the caller knows what it means.
     fileprivate func send(_ request: URLRequest) async throws -> (Data, HTTPURLResponse) {
@@ -157,7 +193,43 @@ private struct RawMe: Decodable {
     }
 }
 
+/// A channel offered as a suggestion (followed or found by search).
+public struct ChannelSuggestion: Equatable, Sendable, Identifiable {
+    public let slug: String
+    public let title: String
+    public let blocks: Int?
+    public let owner: String?
+    public var id: String { slug }
+
+    public init(slug: String, title: String, blocks: Int?, owner: String?) {
+        self.slug = slug
+        self.title = title
+        self.blocks = blocks
+        self.owner = owner
+    }
+}
+
 // MARK: - v3 payload
+
+private struct RawFollowing: Decodable {
+    let data: [Item]
+    let meta: Page.Meta
+
+    var suggestions: [ChannelSuggestion] {
+        data.filter { $0.type == "Channel" }.compactMap { item in
+            item.slug.map { ChannelSuggestion(slug: $0, title: item.title ?? $0, blocks: item.counts?.blocks, owner: item.owner?.name) }
+        }
+    }
+    struct Item: Decodable {
+        let type: String
+        let slug: String?
+        let title: String?
+        let counts: Counts?
+        let owner: Owner?
+        struct Counts: Decodable { let blocks: Int? }
+        struct Owner: Decodable { let name: String? }
+    }
+}
 
 private struct Page: Decodable {
     let data: [RawBlock]
