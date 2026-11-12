@@ -19,6 +19,10 @@ struct FramingPopover: View {
         let ids = playback.nowPlaying.ids
         return (ids.indices.contains(screenIndex) ? ids[screenIndex] : ids.first).flatMap(library.block)
     }
+    /// The screens the framing applies to.
+    private var targetScreens: [Screen] {
+        screenID == nil ? display.screens : display.screens.filter { $0.id == screenID }
+    }
     private var canvas: CGSize {
         guard display.screens.indices.contains(screenIndex) else { return CGSize(width: 1600, height: 1000) }
         let frame = display.screens[screenIndex].frame
@@ -32,6 +36,11 @@ struct FramingPopover: View {
                 .overlay { if let preview { Image(nsImage: preview).resizable() } }
                 .clipShape(RoundedRectangle(cornerRadius: 6))
                 .accessibilityHidden(true)
+            if let block, block.isLowResolution(for: targetScreens) {
+                Label("Image petite pour cet écran : elle sera un peu floue.", systemImage: "info.circle")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
             Picker("Cadrage", selection: Binding(get: { framing.fit }, set: { fit in framing.fit = fit; framing.positionX = 50; framing.positionY = 50; commit() })) {
                 Text("Remplir").tag(Fit.fill)
                 Text("Contenir").tag(Fit.contain)
