@@ -15,9 +15,12 @@ struct WelcomeView: View {
                 .accessibilityHidden(true)
             Text("Bienvenue dans Arena Wallpaper").font(.title2.weight(.semibold))
             if account.isConnected {
-                Text("Tu es connecté. Ajoute un channel avec le champ en bas de la barre latérale : colle son lien ou son slug.")
+                Text("Tu es connecté. Choisis des channels parmi tes abonnements, ou cherche-en sur Are.na.")
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.secondary)
+                Button("Découvrir des channels") { app.sidebarItem = .discover }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
             } else {
                 Text("Connecte ton compte Are.na pour utiliser tes channels, même privés.")
                     .multilineTextAlignment(.center)
@@ -27,7 +30,9 @@ struct WelcomeView: View {
                     .controlSize(.large)
                 Button("Utiliser un token personnel") { app.sidebarItem = .account }
                     .buttonStyle(.link)
-                Text("Sans compte, les channels publics marchent aussi : colle leur lien dans le champ en bas de la barre latérale.")
+                Button("Ajouter un channel public sans compte") { app.sidebarItem = .discover }
+                    .buttonStyle(.link)
+                Text("Sans compte, les channels publics marchent aussi : il suffit de coller leur lien.")
                     .font(.callout)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.secondary)

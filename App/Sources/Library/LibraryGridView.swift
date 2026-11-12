@@ -13,6 +13,10 @@ struct LibraryGridView: View {
     @Binding var selected: Int?
     /// Set by the window when the image on screen changes: the grid scrolls to it.
     @Binding var scrollTarget: Int?
+    /// A click on an image (the inspector opens).
+    var onPick: () -> Void = {}
+    /// Images per row, for the up and down arrows.
+    @Binding var columns: Int
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -31,12 +35,20 @@ struct LibraryGridView: View {
                         .onAppear { visible.insert(block.id) }
                         .onDisappear { visible.remove(block.id) }
                         .onTapGesture(count: 2) { Task { await app.apply(block) } }
-                        .onTapGesture { selected = block.id }
+                        .onTapGesture { selected = block.id; onPick() }
                         .accessibilityAddTraits(selected == block.id ? [.isButton, .isSelected] : .isButton)
                         .contextMenu { menu(for: block) }
                 }
             }
             .padding()
+            .background {
+                // Same rule as the adaptive grid: 120 pt cells, 8 pt apart, 16 pt padding.
+                GeometryReader { proxy in
+                    Color.clear.onChange(of: proxy.size.width, initial: true) { _, width in
+                        columns = max(1, Int((width - 32 + 8) / 128))
+                    }
+                }
+            }
             if let channel, channel.nextPage != nil {
                 Button("Charger plus") { Task { await library.loadMore(channel.slug) } }
                     .disabled(library.loadingSlugs.contains(channel.slug))
