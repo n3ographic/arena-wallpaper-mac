@@ -133,6 +133,44 @@ extension Network {
             #expect(request.value(forHTTPHeaderField: "User-Agent") == "ArenaWallpaper/0.1.0")
         }
 
+        @Test func listsFollowedChannelsOnly() async throws {
+            StubURLProtocol.reset { _ in
+                StubURLProtocol.json(#"""
+                {"data": [
+                  {"type": "Channel", "slug": "ceramics", "title": "Ceramics", "counts": {"blocks": 42}, "owner": {"name": "Ana"}},
+                  {"type": "User", "slug": "bob", "title": null},
+                  {"type": "Channel", "slug": "no-owner", "title": null}],
+                 "meta": {"has_more_pages": false}}
+                """#)
+            }
+            let list = try await client().followedChannels(userSlug: "neo-a")
+            #expect(list == [
+                ChannelSuggestion(slug: "ceramics", title: "Ceramics", blocks: 42, owner: "Ana"),
+                ChannelSuggestion(slug: "no-owner", title: "no-owner", blocks: nil, owner: nil)])
+            #expect(StubURLProtocol.requests[0].url?.path == "/v3/users/neo-a/following")
+            #expect(StubURLProtocol.requests[0].url?.query?.contains("type=Channel") == true)
+        }
+
+        @Test func searchesChannels() async throws {
+            StubURLProtocol.reset { _ in
+                StubURLProtocol.json(#"""
+                {"data": [{"type": "Channel", "slug": "clay", "title": "Clay", "counts": {"blocks": 9}, "owner": {"name": "Zoe"}},
+                          {"type": "Image", "id": 1}],
+                 "meta": {"has_more_pages": false}}
+                """#)
+            }
+            let list = try await client().searchChannels(query: "clay pots")
+            #expect(list == [ChannelSuggestion(slug: "clay", title: "Clay", blocks: 9, owner: "Zoe")])
+            let url = StubURLProtocol.requests[0].url!
+            #expect(url.path == "/v3/search")
+            #expect(URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.contains(URLQueryItem(name: "query", value: "clay pots")) == true)
+        }
+
+        @Test func searchWithoutPremiumIsUnauthorized() async throws {
+            StubURLProtocol.reset { _ in StubURLProtocol.json("{}", status: 403) }
+            await #expect(throws: ArenaError.unauthorized) { try await client().searchChannels(query: "x") }
+        }
+
         @Test func profileWithoutTokenIsUnauthorized() async throws {
             StubURLProtocol.reset { _ in .init(status: 401) }
             await #expect(throws: ArenaError.unauthorized) { try await client(token: nil).me() }

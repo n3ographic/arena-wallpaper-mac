@@ -2,7 +2,8 @@ import AppKit
 import SwiftUI
 import ArenaKit
 
-/// Content of the menu bar popover: the current image(s), the countdown and the actions.
+/// Content of the menu bar popover, like a music player: the image on screen with its own
+/// "…" menu, what it is and when it changes, the controls; then a thin bar for the app.
 struct PanelView: View {
     @Environment(PlaybackStore.self) private var playback
     @Environment(LibraryStore.self) private var library
@@ -18,30 +19,24 @@ struct PanelView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             if showsScreenRow {
-                PanelScreensRow()
+                PanelScreensRow(openLibrary: openLibrary)
             } else {
                 PanelArt(block: block)
+                    .overlay(alignment: .topTrailing) {
+                        if let block { ImageMenu(block: block, openLibrary: openLibrary).padding(6) }
+                    }
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text(title).font(.headline).lineLimit(1)
                 TimelineView(.periodic(from: .now, by: 15)) { context in
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(subtitle(now: context.date)).font(.subheadline).foregroundStyle(.secondary)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(subtitle(now: context.date)).font(.subheadline).foregroundStyle(.secondary).lineLimit(1)
                         ProgressView(value: progressValue(now: context.date))
                             .opacity(playback.nowPlaying.paused ? 0.35 : 1)
                     }
                 }
             }
-            PanelActions()
-            Picker("Rythme", selection: Binding(
-                get: { library.config.intervalMinutes },
-                set: { minutes in Task { await playback.setInterval(minutes) } }
-            )) {
-                ForEach(intervalOptions(current: library.config.intervalMinutes), id: \.self) { minutes in
-                    Text(intervalText(minutes)).tag(minutes)
-                }
-            }
-            .pickerStyle(.menu)
+            PanelControls()
             Divider()
             PanelFooter(openLibrary: openLibrary, openPreferences: openPreferences, openAbout: openAbout)
             if let error = errors.message {
@@ -50,6 +45,7 @@ struct PanelView: View {
         }
         .padding(14)
         .frame(width: 300)
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     private var title: String {
@@ -58,79 +54,130 @@ struct PanelView: View {
         return shortenedTitle(block.title ?? String(localized: "Sans titre"), max: 34) + (others > 0 ? " (+\(others))" : "")
     }
 
+    /// The channel of the image, then the time to the next change.
     private func subtitle(now: Date) -> String {
-        nextChangeText(playback.nowPlaying, now: now)
+        let channel = block.flatMap { block in library.config.channels.first { $0.blocks.contains { $0.id == block.id } }?.slug }
+        return [channel, nextChangeText(playback.nowPlaying, now: now)].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
     }
 
     private func progressValue(now: Date) -> Double {
         guard let next = playback.nowPlaying.nextChange else { return 0 }
         return progress(nextChange: next, intervalMinutes: library.config.intervalMinutes, now: now)
     }
+}
 
-    private func intervalText(_ minutes: Int) -> String {
-        let label = intervalLabel(minutes)
-        switch label.unit {
-        case .minutes: return String(localized: "\(label.value) min")
-        case .hours: return String(localized: "\(label.value) h")
-        case .days: return String(localized: "\(label.value) j")
+/// The "…" button on an image: everything about that image.
+private struct ImageMenu: View {
+    @Environment(AppCoordinator.self) private var app
+    @Environment(LibraryStore.self) private var library
+    let block: Block
+    let openLibrary: () -> Void
+
+    var body: some View {
+        Menu {
+            Button("Ouvrir sur Are.na") { library.openOnArena(block.id) }
+            Button(library.isExcluded(block.id) ? String(localized: "Remettre dans la lecture") : String(localized: "Retirer de la lecture")) {
+                Task { await app.toggleExcluded([block.id]) }
+            }
+            Button("Afficher dans la bibliothèque") {
+                app.sidebarItem = .images(.all)
+                app.reveal = block.id
+                openLibrary()
+            }
+        } label: {
+            Image(systemName: "ellipsis")
+                .font(.callout.weight(.semibold))
+                .frame(width: 26, height: 26)
+                .background(.regularMaterial, in: Circle())
         }
+        .menuStyle(.button)
+        .buttonStyle(.plain)
+        .menuIndicator(.hidden)
+        .fixedSize()
+        .help(Text("Actions sur cette image"))
+        .accessibilityLabel(Text("Actions sur cette image"))
     }
 }
 
-/// Next and pause.
-private struct PanelActions: View {
+/// Previous, pause, next, centered.
+private struct PanelControls: View {
     @Environment(PlaybackStore.self) private var playback
 
     var body: some View {
-        HStack(spacing: 8) {
-            Button { Task { await playback.next() } } label: {
-                Label("Suivant", systemImage: "forward.end.fill").frame(maxWidth: .infinity)
-            }
+        HStack(spacing: 28) {
+            Button { Task { await playback.previous() } } label: { Image(systemName: "backward.fill") }
+                .help(Text("Précédent"))
+                .accessibilityLabel(Text("Précédent"))
             Button { Task { await playback.togglePause() } } label: {
-                Label(playback.nowPlaying.paused ? String(localized: "Reprendre") : String(localized: "Pause"), systemImage: playback.nowPlaying.paused ? "play.fill" : "pause.fill")
-                    .frame(maxWidth: .infinity)
+                Image(systemName: playback.nowPlaying.paused ? "play.fill" : "pause.fill").font(.title)
             }
+            .help(playback.nowPlaying.paused ? Text("Reprendre") : Text("Pause"))
+            .accessibilityLabel(playback.nowPlaying.paused ? Text("Reprendre") : Text("Pause"))
+            Button { Task { await playback.next() } } label: { Image(systemName: "forward.fill") }
+                .help(Text("Suivant"))
+                .accessibilityLabel(Text("Suivant"))
         }
-        .controlSize(.large)
-        .buttonStyle(.bordered)
+        .font(.title3)
+        .buttonStyle(.plain)
+        .frame(maxWidth: .infinity)
     }
 }
 
-/// Remove, Are.na, windows, quit.
+/// The app: the library, the rhythm, and a menu with the settings, about and quit.
 private struct PanelFooter: View {
-    @Environment(AppCoordinator.self) private var app
     @Environment(PlaybackStore.self) private var playback
     @Environment(LibraryStore.self) private var library
     let openLibrary: () -> Void
     let openPreferences: () -> Void
     let openAbout: () -> Void
 
-    private var allExcluded: Bool {
-        !playback.nowPlaying.ids.isEmpty && playback.nowPlaying.ids.allSatisfy(library.isExcluded)
-    }
-
     var body: some View {
-        VStack(spacing: 8) {
-            HStack(spacing: 8) {
-                Button { openLibrary() } label: { Label("Bibliothèque", systemImage: "photo.on.rectangle").frame(maxWidth: .infinity) }
-                Button { openPreferences() } label: { Label("Préférences", systemImage: "gearshape").frame(maxWidth: .infinity) }
+        HStack {
+            Button { openLibrary() } label: { Label("Bibliothèque", systemImage: "photo.on.rectangle") }
+            Spacer()
+            Menu {
+                Picker("Rythme", selection: Binding(
+                    get: { library.config.intervalMinutes },
+                    set: { minutes in Task { await playback.setInterval(minutes) } }
+                )) {
+                    ForEach(intervalOptions(current: library.config.intervalMinutes), id: \.self) { minutes in
+                        Text(intervalText(minutes)).tag(minutes)
+                    }
+                }
+                .pickerStyle(.inline)
+            } label: {
+                Label(intervalText(library.config.intervalMinutes), systemImage: "clock")
             }
-            .buttonStyle(.bordered)
-            HStack {
-                Button(allExcluded ? String(localized: "Remettre") : String(localized: "Retirer")) { Task { await app.toggleExcluded(playback.nowPlaying.ids) } }
-                    .disabled(playback.nowPlaying.ids.isEmpty)
-                Button("Are.na") { playback.nowPlaying.ids.first.map(library.openOnArena) }
-                    .disabled(playback.nowPlaying.ids.isEmpty)
-                    .accessibilityLabel(Text("Ouvrir sur Are.na"))
-                Spacer()
-                Button { openAbout() } label: { Image(systemName: "info.circle") }
-                    .help(Text("À propos d'Arena Wallpaper"))
-                    .accessibilityLabel(Text("À propos d'Arena Wallpaper"))
+            .menuStyle(.button)
+            .menuIndicator(.hidden)
+            .fixedSize()
+            .help(Text("Rythme de la lecture"))
+            Spacer()
+            Menu {
+                Button("Réglages…") { openPreferences() }
+                Button("À propos d'Arena Wallpaper") { openAbout() }
+                Divider()
                 Button("Quitter") { NSApp.terminate(nil) }
+            } label: {
+                Image(systemName: "gearshape")
             }
-            .buttonStyle(.borderless)
+            .menuStyle(.button)
+            .menuIndicator(.hidden)
+            .fixedSize()
+            .help(Text("Réglages"))
+            .accessibilityLabel(Text("Réglages"))
         }
+        .buttonStyle(.borderless)
         .lineLimit(1)
+    }
+}
+
+func intervalText(_ minutes: Int) -> String {
+    let label = intervalLabel(minutes)
+    switch label.unit {
+    case .minutes: return String(localized: "\(label.value) min")
+    case .hours: return String(localized: "\(label.value) h")
+    case .days: return String(localized: "\(label.value) j")
     }
 }
 
@@ -160,6 +207,7 @@ struct PanelScreensRow: View {
     @Environment(PlaybackStore.self) private var playback
     @Environment(LibraryStore.self) private var library
     @Environment(DisplayStore.self) private var display
+    let openLibrary: () -> Void
 
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
@@ -171,6 +219,9 @@ struct PanelScreensRow: View {
                         .aspectRatio(CGFloat(screen.frame.width) / CGFloat(max(1, screen.frame.height)), contentMode: .fit)
                         .clipShape(RoundedRectangle(cornerRadius: 6))
                         .accessibilityLabel(Text(verbatim: block?.title ?? String(localized: "Aucune image affichée")))
+                        .overlay(alignment: .topTrailing) {
+                            if let block { ImageMenu(block: block, openLibrary: openLibrary).padding(4) }
+                        }
                     Button { Task { await playback.next(screenID: screen.id) } } label: {
                         Label("Suivant", systemImage: "forward.end.fill").labelStyle(.iconOnly).frame(maxWidth: .infinity)
                     }

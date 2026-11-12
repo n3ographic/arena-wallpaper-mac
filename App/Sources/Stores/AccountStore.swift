@@ -53,6 +53,24 @@ final class AccountStore {
         }
     }
 
+    /// The channels the user follows on Are.na; empty when signed out or on error.
+    func followedChannels() async -> [ChannelSuggestion] {
+        await loadProfile()
+        guard let slug = profile?.slug else { return [] }
+        do {
+            return try await makeClient().followedChannels(userSlug: slug)
+        } catch {
+            errors.report(error)
+            return []
+        }
+    }
+
+    /// Searches Are.na channels. Throws `ArenaError.unauthorized` without a Premium account;
+    /// unlike `loadProfile`, that never signs the user out.
+    func searchChannels(_ query: String) async throws -> [ChannelSuggestion] {
+        try await makeClient().searchChannels(query: query)
+    }
+
     private func signedIn(_ method: ConnectionMethod) {
         isConnected = true
         profile = nil

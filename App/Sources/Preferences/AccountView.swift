@@ -98,7 +98,7 @@ struct AccountView: View {
         let images = Set(channels.flatMap(\.blocks).map(\.id))
         return Section("Bibliothèque") {
             LabeledContent("Channels actifs") { Text(active.count, format: .number) }
-            LabeledContent("Channels en réserve") { Text(channels.count - active.count, format: .number) }
+            LabeledContent("Channels en pause") { Text(channels.count - active.count, format: .number) }
             LabeledContent("Images chargées") { Text(images.count, format: .number) }
             LabeledContent("Images retirées") { Text(library.config.excluded.count, format: .number) }
             if let date = library.lastRefresh {

@@ -57,7 +57,7 @@
 ## Tâche 16 : langues, accessibilité, archive
 - [x] En français et en anglais (Réglages Système > Langue), tous les textes sont traduits, sans tiret long.
 - [x] VoiceOver lit chaque bouton et le titre de chaque image ; la grille se parcourt au clavier.
-- [x] Dans la fenêtre de réglages : Espace met en pause ou reprend, flèche droite passe à l'image suivante, Échap ferme un menu.
+- [x] Dans la fenêtre de réglages : Espace met en pause ou reprend, flèche droite passe à l'image suivante (depuis la refonte de la Bibliothèque : ⌘→), Échap ferme un menu.
 - [x] ~~Avec le compte payant : archive (configuration Release), puis validation sans erreur dans Xcode Organizer.~~ Écarté le 2026-11-11 : l'app sort hors Store (voir `docs/release.md`). À reprendre seulement si une publication sur le Mac App Store revient.
 - [ ] Passage complet de cette liste sur un Mac à deux écrans.
 
@@ -98,5 +98,33 @@
 - [x] Mesure avant et après dans `docs/space-flash-notes.md`, décision notée (gain nul, pose anticipée retirée, limite du système).
 
 ### Accessibilité (tâche 12)
-- [x] VoiceOver lit les vignettes d'écran, les cellules et les boutons ; Tab, Entrée, Espace, flèche droite et Échap fonctionnent dans la Bibliothèque.
+- [x] VoiceOver lit les vignettes d'écran, les cellules et les boutons ; Tab, Entrée, Espace, flèche droite (depuis : ⌘→) et Échap fonctionnent dans la Bibliothèque.
 - [x] « Réduire les animations » est respecté. (réglage macOS, pas de l'app ; déjà vérifié avec les GIF.)
+
+## Découvrir, barre latérale, inspecteur et popover (2026-11-12)
+
+### Découvrir
+- [ ] « Découvrir » (barre latérale) et le « + » de « Mes channels » ouvrent la page ; le champ a le clavier.
+- [ ] Champ vide : les channels suivis sur Are.na s'affichent en cartes, sans ceux déjà ajoutés ; « Ajouter » ajoute et la carte disparaît.
+- [ ] Un mot : résultats de recherche en direct (compte Premium) ; sans Premium, message de repli ; « Ajouter le channel « slug » » marche aussi.
+- [ ] Un lien collé : seule la ligne d'ajout s'affiche, Entrée ajoute.
+- [ ] Taper une espace dans le champ ne met pas la lecture en pause.
+
+### Barre latérale
+- [ ] « Toutes les images » (avec compteur) et « Découvrir » en haut ; « Mes channels » avec point plein (actif) ou vide et « en pause » ; un clic sur le point bascule.
+- [ ] Clic droit sur un channel : « Mettre en pause » ou « Reprendre », puis « Retirer ».
+- [ ] « Réglages » : Lecture et Compte.
+
+### Grille et inspecteur
+- [ ] Le sélecteur « Toutes / Retirées » filtre « Toutes les images » et chaque channel.
+- [ ] Un clic sur une image ouvre l'inspecteur (aperçu, channel, dimensions, avis « image petite », Poser, Retirer, Ouvrir sur Are.na) ; Échap le ferme, un second Échap ferme la fenêtre.
+- [ ] Les quatre flèches déplacent la sélection dans la grille ; Entrée pose ; ⌘← et ⌘→ changent l'image de la lecture.
+- [ ] Barre de lecture : progression en haut, vignettes et titre à gauche, commandes au centre, temps restant à droite.
+- [ ] Cadrage d'un écran : l'avis « Image petite pour cet écran » apparaît pour une image agrandie plus de 2 fois.
+
+### Popover
+- [ ] Le « … » sur l'image : Ouvrir sur Are.na, Retirer de la lecture, Afficher dans la bibliothèque (ouvre la fenêtre, sélectionne et inspecte l'image).
+- [ ] Précédent, Pause, Suivant au centre ; en bas : Bibliothèque, rythme, roue dentée (Réglages, À propos, Quitter).
+- [ ] L'image remplit toute la largeur du popover.
+- [ ] Tous les nouveaux textes sont traduits en anglais.
+
