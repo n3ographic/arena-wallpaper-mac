@@ -52,16 +52,16 @@ public actor WallpaperService {
             guard let block = config.channels.lazy.flatMap(\.blocks).first(where: { $0.id == id }) else {
                 throw ApplyError.unknownImage(id)
             }
-            originals[id] = try await timed("original (cache or download)") { try await cache.original(for: block) }
+            originals[id] = try await cache.original(for: block)
         }
-        let files = try await timed("render") { try await render(ids: ids, screens: screens, originals: originals, config: config) }
+        let files = try await render(ids: ids, screens: screens, originals: originals, config: config)
         guard mine == generation else { return }
 
         var errors: [String] = []
         for (screen, file) in zip(screens, files) {
             guard mine == generation else { return }
             do {
-                try await timed("setWallpaper") { try await setter.setWallpaper(file, screenID: screen.id) }
+                try await setter.setWallpaper(file, screenID: screen.id)
             } catch {
                 errors.append(error.localizedDescription)
             }
@@ -74,7 +74,7 @@ public actor WallpaperService {
         current = ids
         currentFiles = zip(screens, files).map { ($0.id, $1) }
         lastApplied = (ids, screens, originals)
-        await timed("player.show") { await player.show(animatedTargets(ids: ids, screens: screens, originals: originals, config: config)) }
+        await player.show(animatedTargets(ids: ids, screens: screens, originals: originals, config: config))
     }
 
     /// Recomputes the animations of what is on screen (for example after "Reduce motion" changed).
@@ -145,7 +145,7 @@ public actor WallpaperService {
                 let url = originals[id]!
                 let needed = FrameGeometry.decodeMaxPixelSize(imageSize: try Renderer.orientedSize(url), canvasSize: canvas, framing: framing)
                 if let cached = images[id], max(cached.width, cached.height) >= needed { return cached }
-                let loaded = try await timed("  decode") { try Renderer.loadFirstFrame(url, maxPixelSize: needed) }
+                let loaded = try Renderer.loadFirstFrame(url, maxPixelSize: needed)
                 images[id] = loaded
                 return loaded
             } catch {
@@ -188,11 +188,11 @@ public actor WallpaperService {
                         output = spanCanvasImage.image.cropping(to: CGRect(x: crop.x, y: crop.y, width: crop.width, height: crop.height)) ?? spanCanvasImage.image
                     } else {
                         let size = CGSize(width: job.screen.frame.width, height: job.screen.frame.height)
-                        output = await timed("  compose") { Renderer.render(job.source!, canvasSize: size, framing: job.framing) }
+                        output = Renderer.render(job.source!, canvasSize: size, framing: job.framing)
                     }
                     // A unique name, so the system does not keep showing a cached older picture.
                     let file = directory.appendingPathComponent("\(job.index)-\(job.id)-\(stamp).tiff")
-                    try await timed("  writeTIFF") { try Renderer.writeTIFF(output, to: file) }
+                    try Renderer.writeTIFF(output, to: file)
                     return (job.index, file)
                 }
             }
