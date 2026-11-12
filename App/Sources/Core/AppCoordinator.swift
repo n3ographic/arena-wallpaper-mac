@@ -17,6 +17,8 @@ final class AppCoordinator {
     var sidebarItem: SidebarItem = .images(.all)
     /// An image to select and inspect when the library window shows (from the menu bar).
     var reveal: Int?
+    /// Bumped by ⌘A in the library window (see `LibraryWindowController.selectAll`).
+    var selectAllRequests = 0
 
     init() {
         // Inside the sandbox these are the app's own container folders.
@@ -81,13 +83,44 @@ final class AppCoordinator {
         playback.restartClock()
     }
 
-    /// Removes (or brings back) images; the screens showing a removed one move on.
+    /// Removes (or brings back) images; the screens showing a removed one move on. Undoable
+    /// (⌘Z in the library window, or the notice's "Annuler"), and the undo can be redone.
     func toggleExcluded(_ ids: [Int]) async {
+        guard !ids.isEmpty else { return }
+        registerUndo(ids)
+        await performToggle(ids)
+        let removed = ids.contains(where: library.isExcluded)
+        removalNotice = RemovalNotice(count: ids.count, removed: removed)
+    }
+
+    /// Registered synchronously inside the undo handler, so UndoManager files it as the redo.
+    /// An undo or redo shows no notice: offering to cancel it again would be confusing.
+    private func registerUndo(_ ids: [Int]) {
+        undoManager.registerUndo(withTarget: self) { app in
+            app.removalNotice = nil
+            app.registerUndo(ids)
+            Task { await app.performToggle(ids) }
+        }
+    }
+
+    private func performToggle(_ ids: [Int]) async {
         await library.toggleExcluded(ids)
         let nowExcluded = Set(ids).intersection(library.config.excluded)
         let screenIDs = screensToAdvance(afterExcluding: nowExcluded, current: playback.nowPlaying.ids, screens: display.screens)
         if !screenIDs.isEmpty { await playback.advance(screenIDs: screenIDs) }
     }
+
+    /// The library window's undo stack (given to its window by `LibraryWindowController`).
+    @ObservationIgnored let undoManager = UndoManager()
+    /// The last removal or return of images, shown a few seconds with "Annuler".
+    var removalNotice: RemovalNotice?
+}
+
+struct RemovalNotice: Equatable {
+    let id = UUID()
+    let count: Int
+    /// Taken out of the playback (true) or put back (false).
+    let removed: Bool
 }
 
 extension View {

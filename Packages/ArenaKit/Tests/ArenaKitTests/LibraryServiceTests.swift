@@ -32,17 +32,44 @@ private func pageNumber(_ request: URLRequest) -> Int {
 extension Network {
     @Suite struct LibraryServiceTests {
         @Test func addChannelLoadsOnePage() async throws {
-            StubURLProtocol.reset { _ in pageReply([1, 2], more: true, etag: #"W/"e1""#) }
+            StubURLProtocol.reset { _ in pageReply(Array(1...50), more: true, etag: #"W/"e1""#) }
             let repository = try await repositoryWith([])
             let service = library(repository)
             let added = try await service.addChannel(input: "https://www.are.na/jean/mon-channel")
-            #expect(added.slug == "mon-channel" && added.blocks.map(\.id) == [1, 2])
+            #expect(added.slug == "mon-channel" && added.blocks.map(\.id) == Array(1...50))
             #expect(StubURLProtocol.requests.count == 1)
             #expect(pageNumber(StubURLProtocol.requests[0]) == 1)
             #expect(added.nextPage == 2 && added.etag == #"W/"e1""# && added.lastRefresh == fixedNow)
             await #expect(throws: LibraryError.alreadyAdded) { try await service.addChannel(input: "mon-channel") }
             await #expect(throws: LibraryError.invalidChannel) { try await service.addChannel(input: "deux mots") }
             #expect(await repository.config.channels.map(\.slug) == ["mon-channel"])
+        }
+
+        /// A page with texts or links gives fewer than 50 images: the next pages fill it.
+        @Test func addChannelFillsAShortPage() async throws {
+            StubURLProtocol.reset { request in
+                switch pageNumber(request) {
+                case 1: pageReply(Array(1...47), more: true, etag: #"W/"e1""#)
+                case 2: pageReply(Array(48...60), more: true, etag: #"W/"e2""#)
+                default: pageReply([], more: false)
+                }
+            }
+            let added = try await library(try await repositoryWith([])).addChannel(input: "c")
+            #expect(added.blocks.map(\.id) == Array(1...60))
+            #expect(added.nextPage == 3 && added.etag == #"W/"e1""#)
+            #expect(StubURLProtocol.requests.count == 2)
+        }
+
+        @Test func addChannelStopsAfterMaxPages() async throws {
+            StubURLProtocol.reset { request in pageReply([pageNumber(request)], more: true) }
+            let added = try await library(try await repositoryWith([])).addChannel(input: "c")
+            #expect(added.blocks.map(\.id) == [1, 2, 3, 4] && added.nextPage == 5)
+        }
+
+        @Test func reorderFollowsTheGivenSlugs() async throws {
+            let repository = try await repositoryWith([Channel(slug: "a"), Channel(slug: "b"), Channel(slug: "c")])
+            try await library(repository).reorder(["c", "a"])
+            #expect(await repository.config.channels.map(\.slug) == ["c", "a", "b"])
         }
 
         @Test func addChannelWithoutMorePagesHasNoNextPage() async throws {
@@ -64,11 +91,11 @@ extension Network {
         }
 
         @Test func loadMoreSkipsKnownBlocks() async throws {
-            StubURLProtocol.reset { _ in pageReply([2, 3], more: true) }
+            StubURLProtocol.reset { _ in pageReply([2, 3], more: false) }
             let repository = try await repositoryWith([Channel(slug: "a", blocks: [testBlock(1), testBlock(2)], nextPage: 2)])
             #expect(try await library(repository).loadMore(slug: "a") == 1)
             let channel = await repository.config.channels[0]
-            #expect(channel.blocks.map(\.id) == [1, 2, 3] && channel.nextPage == 3)
+            #expect(channel.blocks.map(\.id) == [1, 2, 3] && channel.nextPage == nil)
         }
 
         @Test func concurrentLoadMoreSendsOneRequest() async throws {

@@ -14,7 +14,10 @@ final class LibraryWindowController: NSObject, NSWindowDelegate {
 
     func show() {
         if window == nil {
-            let w = NSWindow(contentViewController: NSHostingController(rootView: LibraryView().injecting(app)))
+            let host = NSHostingController(rootView: LibraryView().injecting(app))
+            // The view's toolbar items (the inspector button) go into the window's toolbar.
+            host.sceneBridgingOptions = [.toolbars]
+            let w = NSWindow(contentViewController: host)
             w.title = String(localized: "Bibliothèque")
             w.styleMask = [.titled, .closable, .miniaturizable, .resizable]
             w.isReleasedWhenClosed = false
@@ -27,6 +30,17 @@ final class LibraryWindowController: NSObject, NSWindowDelegate {
         }
         window?.makeKeyAndOrderFront(nil)
         NSApp.activate()
+    }
+
+    /// ⌘A when no text field takes it: the window delegate is the end of the window's
+    /// responder chain, so the menu item reaches it and selects every image of the grid.
+    @objc func selectAll(_ sender: Any?) {
+        app.selectAllRequests += 1
+    }
+
+    /// ⌘Z undoes the removals of images made in this window.
+    func windowWillReturnUndoManager(_ window: NSWindow) -> UndoManager? {
+        app.undoManager
     }
 
     func windowWillClose(_ notification: Notification) {

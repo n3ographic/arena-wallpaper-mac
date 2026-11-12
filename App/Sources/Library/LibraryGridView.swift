@@ -10,13 +10,24 @@ struct LibraryGridView: View {
     let blocks: [Block]
     /// The channel whose next page the "Charger plus" button loads, if any.
     let channel: Channel?
-    @Binding var selected: Int?
+    /// The selected images (several with Shift or Command).
+    let selection: Set<Int>
     /// Set by the window when the image on screen changes: the grid scrolls to it.
     @Binding var scrollTarget: Int?
-    /// A click on an image (the inspector opens).
-    var onPick: () -> Void = {}
+    /// A click on an image; the window reads the modifier keys and updates the selection.
+    var onClick: (Int) -> Void = { _ in }
     /// Images per row, for the up and down arrows.
     @Binding var columns: Int
+    /// The selection rectangle: called with nil and whether it adds to the selection when a
+    /// drag starts, then with the images it covers, in grid order.
+    var onMarquee: ([Int]?, Bool) -> Void = { _, _ in }
+    var onClickOutside: () -> Void = {}
+
+    private static let space = "grid"
+    @State private var marquee: CGRect?
+    /// Where each cell on screen is; a plain object, so a scroll does not redraw the grid.
+    @State private var cells = CellFrames()
+    final class CellFrames { var frames: [Int: CGRect] = [:] }
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -26,21 +37,57 @@ struct LibraryGridView: View {
             }
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: 8)], spacing: 8) {
                 ForEach(blocks, id: \.id) { block in
+                    let isSelected = selection.contains(block.id)
                     ThumbnailView(block: block, excluded: library.isExcluded(block.id))
                         .overlay {
-                            if selected == block.id {
+                            if isSelected {
                                 RoundedRectangle(cornerRadius: 6).strokeBorder(Color.accentColor, lineWidth: 3)
                             }
                         }
                         .onAppear { visible.insert(block.id) }
-                        .onDisappear { visible.remove(block.id) }
-                        .onTapGesture(count: 2) { Task { await app.apply(block) } }
-                        .onTapGesture { selected = block.id; onPick() }
-                        .accessibilityAddTraits(selected == block.id ? [.isButton, .isSelected] : .isButton)
+                        .onDisappear { visible.remove(block.id); cells.frames[block.id] = nil }
+                        .onGeometryChange(for: CGRect.self) { $0.frame(in: .named(Self.space)) } action: { cells.frames[block.id] = $0 }
+                        // One gesture, so a single click is not held back waiting for a second
+                        // one; the event's click count tells a double click.
+                        .onTapGesture {
+                            if NSApp.currentEvent?.clickCount == 2 { Task { await app.apply(block) } } else { onClick(block.id) }
+                        }
+                        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
                         .contextMenu { menu(for: block) }
                 }
             }
-            .padding()
+            // Less at the top: the filter bar above already leaves 10 pt.
+            .padding([.horizontal, .bottom])
+            .padding(.top, 6)
+            // A drag draws a selection rectangle, like on the desktop; a click still selects.
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 4, coordinateSpace: .named(Self.space))
+                    .onChanged { drag in
+                        let rect = CGRect(origin: drag.startLocation, size: .zero).union(CGRect(origin: drag.location, size: .zero))
+                        if marquee == nil {
+                            // Command or Shift adds to the selection, as in the Finder.
+                            let flags = NSApp.currentEvent?.modifierFlags ?? []
+                            onMarquee(nil, !flags.isDisjoint(with: [.command, .shift]))
+                        }
+                        marquee = rect
+                        // Only the cells on screen have a frame: enough, the rectangle is on screen too.
+                        let hits = blocks.lazy.map(\.id).filter { id in cells.frames[id]?.intersects(rect) == true }
+                        onMarquee(Array(hits), false)
+                    }
+                    .onEnded { _ in marquee = nil }
+            )
+            .overlay(alignment: .topLeading) {
+                if let marquee {
+                    Rectangle()
+                        .fill(Color.accentColor.opacity(0.12))
+                        .strokeBorder(Color.accentColor.opacity(0.6), lineWidth: 1)
+                        .frame(width: marquee.width, height: marquee.height)
+                        .offset(x: marquee.minX, y: marquee.minY)
+                        .allowsHitTesting(false)
+                }
+            }
+            .coordinateSpace(name: Self.space)
             .background {
                 // Same rule as the adaptive grid: 120 pt cells, 8 pt apart, 16 pt padding.
                 GeometryReader { proxy in
@@ -55,6 +102,10 @@ struct LibraryGridView: View {
                     .padding(.bottom)
             }
         }
+        // A click on empty space (between or under the images) clears the selection; a click on
+        // an image goes to the image's own gesture first.
+        .contentShape(Rectangle())
+        .onTapGesture { onClickOutside() }
         .onChange(of: scrollTarget) {
             guard let id = scrollTarget else { return }
             // Scrolling a long lazy grid is costly: only when the image is not already visible.
@@ -66,6 +117,21 @@ struct LibraryGridView: View {
 
     @ViewBuilder
     private func menu(for block: Block) -> some View {
+        // On an image of a multiple selection: only what works for several images.
+        let ids = selection.contains(block.id) && selection.count > 1 ? Array(selection) : [block.id]
+        if ids.count > 1 {
+            Button(library.isExcluded(block.id)
+                   ? String(localized: "Remettre les \(ids.count) images dans la lecture")
+                   : String(localized: "Retirer les \(ids.count) images de la lecture")) {
+                Task { await app.toggleExcluded(ids) }
+            }
+        } else {
+            singleMenu(for: block)
+        }
+    }
+
+    @ViewBuilder
+    private func singleMenu(for block: Block) -> some View {
         if library.config.screenMode == .perScreen && display.screens.count > 1 {
             ForEach(Array(display.screens.enumerated()), id: \.element.id) { index, screen in
                 Button("Écran \(index + 1)") { Task { await app.apply(block, to: .screen(screen.id)) } }

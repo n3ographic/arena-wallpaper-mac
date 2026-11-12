@@ -65,7 +65,7 @@ final class AccountStore {
         }
     }
 
-    /// Searches Are.na channels. Throws `ArenaError.unauthorized` without a Premium account;
+    /// Searches Are.na channels. Throws `ArenaError.forbidden` without a Premium account;
     /// unlike `loadProfile`, that never signs the user out.
     func searchChannels(_ query: String) async throws -> [ChannelSuggestion] {
         try await makeClient().searchChannels(query: query)

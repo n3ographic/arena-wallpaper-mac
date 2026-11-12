@@ -15,11 +15,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         )
         installMainMenu()
         app.start()
-        // First launch (or library erased): open the library on its welcome page.
+        // First launch (or library erased): open the library on its welcome page. Also until the
+        // menu bar hint is read, so a first launch never looks like nothing happened.
         Task {
             await app.library.reloadConfig()
-            if app.library.config.channels.isEmpty { showLibrary() }
+            if app.library.config.channels.isEmpty || !UserDefaults.standard.bool(forKey: MenuBarHint.seenKey) { showLibrary() }
         }
+    }
+
+    /// Opening the app again (Finder, Launchpad) while it runs shows the library.
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if !flag { showLibrary() }
+        return true
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
@@ -66,6 +73,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             NSMenuItem(title: String(localized: "Quitter"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"),
         ])
         submenu(String(localized: "Édition"), [
+            NSMenuItem(title: String(localized: "Annuler"), action: Selector(("undo:")), keyEquivalent: "z"),
+            {
+                let redo = NSMenuItem(title: String(localized: "Rétablir"), action: Selector(("redo:")), keyEquivalent: "z")
+                redo.keyEquivalentModifierMask = [.command, .shift]
+                return redo
+            }(),
+            .separator(),
             NSMenuItem(title: String(localized: "Couper"), action: #selector(NSText.cut(_:)), keyEquivalent: "x"),
             NSMenuItem(title: String(localized: "Copier"), action: #selector(NSText.copy(_:)), keyEquivalent: "c"),
             NSMenuItem(title: String(localized: "Coller"), action: #selector(NSText.paste(_:)), keyEquivalent: "v"),

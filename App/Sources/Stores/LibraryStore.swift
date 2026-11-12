@@ -129,8 +129,17 @@ final class LibraryStore {
         await reloadConfig()
     }
 
+    func reorder(_ slugs: [String]) async {
+        try? await library.reorder(slugs)
+        await reloadConfig()
+    }
+
+    /// Also frees the downloaded originals of its images, unless another channel has them too.
     func removeChannel(_ slug: String) async {
+        let others = Set(config.channels.filter { $0.slug != slug }.flatMap(\.blocks).map(\.id))
+        let orphans = (config.channels.first { $0.slug == slug }?.blocks ?? []).map(\.id).filter { !others.contains($0) }
         try? await library.removeChannel(slug: slug)
+        for id in orphans { await cache.discard(id) }
         await reloadConfig()
     }
 

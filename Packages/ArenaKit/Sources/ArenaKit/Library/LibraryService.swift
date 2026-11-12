@@ -22,16 +22,41 @@ public actor LibraryService {
         self.client = client
     }
 
-    /// Adds a channel with its first page only.
+    /// Most pages read in a row to fill one page of images.
+    static let maxPagesPerLoad = 4
+
+    /// Adds a channel with its first page of images.
     public func addChannel(input: String) async throws -> Channel {
         guard let slug = parseChannelSlug(input) else { throw LibraryError.invalidChannel }
         guard await !repository.config.channels.contains(where: { $0.slug == slug }) else { throw LibraryError.alreadyAdded }
-        guard case .page(let blocks, let hasMore, let etag) = try await client().channelPage(slug: slug, page: 1) else {
-            throw ArenaError.network("unexpected 304")
-        }
-        let channel = Channel(slug: slug, enabled: true, blocks: blocks, nextPage: hasMore ? 2 : nil, etag: etag, lastRefresh: now())
+        let loaded = try await fetchImages(slug: slug, from: 1)
+        let channel = Channel(slug: slug, enabled: true, blocks: loaded.blocks, nextPage: loaded.nextPage, etag: loaded.etag, lastRefresh: now())
         try await repository.update { $0.channels.append(channel) }
         return channel
+    }
+
+    /// Are.na pages count every block (texts, links...), the app keeps only images: pages are read
+    /// from `start` until they give a page's worth of images. A failure after the first page keeps
+    /// what was read; `nextPage` is then the page that failed.
+    private func fetchImages(slug: String, from start: Int) async throws -> (blocks: [Block], nextPage: Int?, etag: String?) {
+        var blocks: [Block] = []
+        var etag: String?
+        var page = start
+        for _ in 0..<Self.maxPagesPerLoad {
+            let result: PageResult
+            do {
+                result = try await client().channelPage(slug: slug, page: page)
+            } catch where page > start {
+                break
+            }
+            guard case .page(let found, let hasMore, let tag) = result else { throw ArenaError.network("unexpected 304") }
+            if page == start { etag = tag }
+            blocks += found
+            page += 1
+            if !hasMore { return (blocks, nil, etag) }
+            if blocks.count >= ArenaClient.pageSize { break }
+        }
+        return (blocks, page, etag)
     }
 
     /// Loads the next page of a channel. Returns the number of new blocks; 0 when there is no
@@ -42,14 +67,14 @@ public actor LibraryService {
         guard loading.insert(slug).inserted else { return 0 }
         defer { loading.remove(slug) }
         guard let page = await repository.config.channels.first(where: { $0.slug == slug })?.nextPage else { return 0 }
-        guard case .page(let blocks, let hasMore, _) = try await client().channelPage(slug: slug, page: page) else { return 0 }
+        let loaded = try await fetchImages(slug: slug, from: page)
         var added = 0
         try await repository.update { config in
             guard let index = config.channels.firstIndex(where: { $0.slug == slug }) else { return }
             var known = Set(config.channels[index].blocks.map(\.id))
-            let fresh = blocks.filter { known.insert($0.id).inserted }
+            let fresh = loaded.blocks.filter { known.insert($0.id).inserted }
             config.channels[index].blocks += fresh
-            config.channels[index].nextPage = hasMore ? page + 1 : nil
+            config.channels[index].nextPage = loaded.nextPage
             added = fresh.count
         }
         return added
@@ -115,6 +140,14 @@ public actor LibraryService {
 
     public func removeChannel(slug: String) async throws {
         try await repository.update { $0.channels.removeAll { $0.slug == slug } }
+    }
+
+    /// Puts the channels in the order of `slugs`; a channel left out goes last.
+    public func reorder(_ slugs: [String]) async throws {
+        let rank = Dictionary(slugs.enumerated().map { ($1, $0) }, uniquingKeysWith: { first, _ in first })
+        try await repository.update { config in
+            config.channels.sort { (rank[$0.slug] ?? .max) < (rank[$1.slug] ?? .max) }
+        }
     }
 
     public func setEnabled(slug: String, enabled: Bool) async throws {

@@ -1,7 +1,10 @@
 import Foundation
 
 public enum ArenaError: Error, Equatable {
+    /// 401: the token is missing or no longer valid.
     case unauthorized
+    /// 403: signed in, but not allowed (a private channel, search without Premium).
+    case forbidden
     case notFound
     case rateLimited(retryAfterSeconds: Int)
     case network(String)
@@ -105,7 +108,7 @@ extension ArenaClient {
     }
 
     /// Channels matching `query` (`GET /v3/search?type=Channel`). Are.na answers 403 (so
-    /// `.unauthorized`) without a Premium account.
+    /// `.forbidden`) without a Premium account.
     public func searchChannels(query: String) async throws -> [ChannelSuggestion] {
         var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false)!
         components.path = "/v3/search"
@@ -138,8 +141,10 @@ extension ArenaClient {
         guard let http = response as? HTTPURLResponse else { throw ArenaError.network("no response") }
         let pause = await gate.record(http)
         switch http.statusCode {
-        case 401, 403:
+        case 401:
             throw ArenaError.unauthorized
+        case 403:
+            throw ArenaError.forbidden
         case 404:
             throw ArenaError.notFound
         case 429:

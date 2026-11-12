@@ -12,20 +12,21 @@ private func config() -> Config {
     return config
 }
 
-@Test func allSkipsDisabledChannels() {
-    #expect(blocks(for: .all, in: config()).map(\.id) == [1, 2, 4])
+@Test func allSkipsDisabledChannelsAndRemovedImages() {
+    #expect(blocks(for: .all, in: config()).map(\.id) == [1, 2])
 }
 
 @Test func removedListsExcludedAcrossChannels() {
-    #expect(blocks(for: .all, in: config(), removedOnly: true).map(\.id) == [3, 4])
+    #expect(blocks(for: .all, in: config(), removed: true).map(\.id) == [3, 4])
 }
 
-@Test func removedOnlyFiltersAChannel() {
-    #expect(blocks(for: .channel("b"), in: config(), removedOnly: true).map(\.id) == [4])
+@Test func removedFiltersAChannel() {
+    #expect(blocks(for: .channel("b"), in: config(), removed: true).map(\.id) == [4])
 }
 
-@Test func channelKeepsOrder() {
-    #expect(blocks(for: .channel("b"), in: config()).map(\.id) == [2, 4])
+@Test func channelKeepsOrderWithoutRemovedImages() {
+    #expect(blocks(for: .channel("b"), in: config()).map(\.id) == [2])
+    #expect(blocks(for: .channel("a"), in: config()).map(\.id) == [1, 2])
     #expect(blocks(for: .channel("unknown"), in: config()).isEmpty)
 }
 
