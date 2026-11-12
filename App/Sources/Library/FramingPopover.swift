@@ -32,7 +32,7 @@ struct FramingPopover: View {
                 .overlay { if let preview { Image(nsImage: preview).resizable() } }
                 .clipShape(RoundedRectangle(cornerRadius: 6))
                 .accessibilityHidden(true)
-            Picker("Cadrage", selection: Binding(get: { framing.fit }, set: { fit in framing.fit = fit; commit() })) {
+            Picker("Cadrage", selection: Binding(get: { framing.fit }, set: { fit in framing.fit = fit; framing.positionX = 50; framing.positionY = 50; commit() })) {
                 Text("Remplir").tag(Fit.fill)
                 Text("Contenir").tag(Fit.contain)
                 Text("Étirer").tag(Fit.stretch)
