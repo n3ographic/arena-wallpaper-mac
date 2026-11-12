@@ -64,6 +64,16 @@
         }
       }
     },
+    "Actions sur cette image": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actions for this image"
+          }
+        }
+      }
+    },
     "Actualisation…": {
       "localizations": {
         "en": {
@@ -114,12 +124,62 @@
         }
       }
     },
+    "Afficher": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show"
+          }
+        }
+      }
+    },
+    "Afficher dans la bibliothèque": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show in Library"
+          }
+        }
+      }
+    },
     "Ajouter": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Add"
+          }
+        }
+      }
+    },
+    "Ajouter le channel « %@ »": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add the channel “%@”"
+          }
+        }
+      }
+    },
+    "Ajouter un channel": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a channel"
+          }
+        }
+      }
+    },
+    "Ajouter un channel public sans compte": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a public channel without an account"
           }
         }
       }
@@ -170,6 +230,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Are.na is limiting requests. Try again in %lld s."
+          }
+        }
+      }
+    },
+    "Aucun nouveau channel suivi.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No new followed channels."
+          }
+        }
+      }
+    },
+    "Aucun résultat.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No results."
           }
         }
       }
@@ -314,6 +394,16 @@
         }
       }
     },
+    "Channels en pause": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paused channels"
+          }
+        }
+      }
+    },
     "Channels en réserve": {
       "localizations": {
         "en": {
@@ -364,6 +454,16 @@
         }
       }
     },
+    "Coller le lien ou le slug d'un channel": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste a channel link or slug"
+          }
+        }
+      }
+    },
     "Compte": {
       "localizations": {
         "en": {
@@ -380,6 +480,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Connect your Are.na account to use your channels, private ones included."
+          }
+        }
+      }
+    },
+    "Connecte-toi à Are.na (page Compte) pour voir tes abonnements et chercher des channels.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign in to Are.na (Account page) to see the channels you follow and search for channels."
           }
         }
       }
@@ -500,6 +610,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Last refresh"
+          }
+        }
+      }
+    },
+    "Découvrir": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discover"
+          }
+        }
+      }
+    },
+    "Découvrir des channels": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discover channels"
           }
         }
       }
@@ -634,6 +764,16 @@
         }
       }
     },
+    "Image petite pour cet écran : elle sera un peu floue.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Small image for this screen: it will look a bit soft."
+          }
+        }
+      }
+    },
     "Image sans titre": {
       "localizations": {
         "en": {
@@ -734,6 +874,16 @@
         }
       }
     },
+    "La recherche Are.na demande un compte Premium. Tu peux toujours coller un lien.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Are.na search needs a Premium account. You can still paste a link."
+          }
+        }
+      }
+    },
     "Lancer au démarrage": {
       "localizations": {
         "en": {
@@ -824,6 +974,36 @@
         }
       }
     },
+    "Mes channels": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My channels"
+          }
+        }
+      }
+    },
+    "Mettre en pause": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause"
+          }
+        }
+      }
+    },
+    "Mettre en pause : ses images ne passent plus dans la lecture": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause: its images no longer play"
+          }
+        }
+      }
+    },
     "Méthode": {
       "localizations": {
         "en": {
@@ -874,6 +1054,36 @@
         }
       }
     },
+    "Pause (espace)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause (Space)"
+          }
+        }
+      }
+    },
+    "Petite pour l'écran %@ : elle sera un peu floue.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Small for screen %@: it will look a bit soft."
+          }
+        }
+      }
+    },
+    "Petite pour tes écrans : elle sera un peu floue.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Small for your screens: it will look a bit soft."
+          }
+        }
+      }
+    },
     "Poser": {
       "localizations": {
         "en": {
@@ -900,6 +1110,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Set on all screens"
+          }
+        }
+      }
+    },
+    "Poser sur…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set on…"
           }
         }
       }
@@ -984,6 +1204,16 @@
         }
       }
     },
+    "Précédent (⌘←)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previous (⌘←)"
+          }
+        }
+      }
+    },
     "Préférences": {
       "localizations": {
         "en": {
@@ -1014,12 +1244,32 @@
         }
       }
     },
+    "Recherche impossible pour le moment.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search isn't available right now."
+          }
+        }
+      }
+    },
     "Rechercher une mise à jour": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Check for Updates"
+          }
+        }
+      }
+    },
+    "Rechercher, ou coller un lien Are.na": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search, or paste an Are.na link"
           }
         }
       }
@@ -1084,6 +1334,26 @@
         }
       }
     },
+    "Reprendre (espace)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resume (Space)"
+          }
+        }
+      }
+    },
+    "Reprendre : ses images repassent dans la lecture": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resume: its images play again"
+          }
+        }
+      }
+    },
     "Retirer": {
       "localizations": {
         "en": {
@@ -1114,6 +1384,16 @@
         }
       }
     },
+    "Retirée de la lecture": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Removed from playback"
+          }
+        }
+      }
+    },
     "Retirées": {
       "localizations": {
         "en": {
@@ -1130,6 +1410,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Rhythm"
+          }
+        }
+      }
+    },
+    "Rythme de la lecture": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playback interval"
+          }
+        }
+      }
+    },
+    "Réglages": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
+          }
+        }
+      }
+    },
+    "Réglages…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings…"
           }
         }
       }
@@ -1154,12 +1464,32 @@
         }
       }
     },
+    "Résultats": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Results"
+          }
+        }
+      }
+    },
     "Sans compte, les channels publics marchent aussi : colle leur lien dans le champ en bas de la barre latérale.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Public channels work without an account too: paste their link in the field at the bottom of the sidebar."
+          }
+        }
+      }
+    },
+    "Sans compte, les channels publics marchent aussi : il suffit de coller leur lien.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Without an account, public channels work too: paste their link."
           }
         }
       }
@@ -1254,12 +1584,32 @@
         }
       }
     },
+    "Suivant (⌘→)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next (⌘→)"
+          }
+        }
+      }
+    },
     "Sélectionne une image.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Select an image."
+          }
+        }
+      }
+    },
+    "Tes abonnements": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Channels you follow"
           }
         }
       }
@@ -1314,6 +1664,26 @@
         }
       }
     },
+    "Toutes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All"
+          }
+        }
+      }
+    },
+    "Toutes les images": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All images"
+          }
+        }
+      }
+    },
     "Trousseau indisponible (%d)": {
       "localizations": {
         "en": {
@@ -1340,6 +1710,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "You're signed in. Add a channel with the field at the bottom of the sidebar: paste its link or slug."
+          }
+        }
+      }
+    },
+    "Tu es connecté. Choisis des channels parmi tes abonnements, ou cherche-en sur Are.na.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You're signed in. Pick channels you follow, or search Are.na."
           }
         }
       }
@@ -1470,6 +1850,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "View on Are.na"
+          }
+        }
+      }
+    },
+    "en pause": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "paused"
           }
         }
       }
