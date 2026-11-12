@@ -87,7 +87,7 @@ extension Network {
         @Test func statusCodesMapToErrors() async {
             let cases: [(StubURLProtocol.Reply, ArenaError)] = [
                 (.init(status: 401), .unauthorized),
-                (.init(status: 403), .unauthorized),
+                (.init(status: 403), .forbidden),
                 (.init(status: 404), .notFound),
                 (.init(status: 429, headers: ["Retry-After": "90"]), .rateLimited(retryAfterSeconds: 90)),
                 (.init(status: 429), .rateLimited(retryAfterSeconds: 60)),
@@ -166,9 +166,9 @@ extension Network {
             #expect(URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.contains(URLQueryItem(name: "query", value: "clay pots")) == true)
         }
 
-        @Test func searchWithoutPremiumIsUnauthorized() async throws {
+        @Test func searchWithoutPremiumIsForbidden() async throws {
             StubURLProtocol.reset { _ in StubURLProtocol.json("{}", status: 403) }
-            await #expect(throws: ArenaError.unauthorized) { try await client().searchChannels(query: "x") }
+            await #expect(throws: ArenaError.forbidden) { try await client().searchChannels(query: "x") }
         }
 
         @Test func profileWithoutTokenIsUnauthorized() async throws {
