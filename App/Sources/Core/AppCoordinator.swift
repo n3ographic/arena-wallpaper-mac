@@ -15,6 +15,8 @@ final class AppCoordinator {
 
     /// What the library window shows; kept here so the menu bar can open it on a given page.
     var sidebarItem: SidebarItem = .images(.all)
+    /// An image to select and inspect when the library window shows (from the menu bar).
+    var reveal: Int?
 
     init() {
         // Inside the sandbox these are the app's own container folders.

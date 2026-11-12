@@ -12,7 +12,10 @@ final class StatusItemController: NSObject {
     init<Content: View>(panel: Content, paused: @escaping @MainActor () -> Bool) {
         super.init()
         popover.behavior = .transient
-        popover.contentViewController = NSHostingController(rootView: panel)
+        let host = NSHostingController(rootView: panel)
+        // The popover follows the panel's own height, so the image is never squeezed.
+        host.sizingOptions = .preferredContentSize
+        popover.contentViewController = host
         if let button = item.button {
             button.image = Self.icon
             button.target = self
