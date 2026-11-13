@@ -63,11 +63,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         let preferences = NSMenuItem(title: String(localized: "Préférences"), action: #selector(openPreferencesFromMenu), keyEquivalent: ",")
         preferences.target = self
-        let aboutItem = NSMenuItem(title: String(localized: "À propos d'Arena Wallpaper"), action: #selector(openAboutFromMenu), keyEquivalent: "")
+        let aboutItem = NSMenuItem(title: String(localized: "À propos de Wallpaper for Are.na"), action: #selector(openAboutFromMenu), keyEquivalent: "")
         aboutItem.target = self
         let reportItem = NSMenuItem(title: String(localized: "Signaler un problème…"), action: #selector(reportProblem), keyEquivalent: "")
         reportItem.target = self
-        submenu("Arena Wallpaper", [
+        submenu("Wallpaper for Are.na", [
             aboutItem, reportItem, .separator(),
             preferences, .separator(),
             NSMenuItem(title: String(localized: "Quitter"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"),

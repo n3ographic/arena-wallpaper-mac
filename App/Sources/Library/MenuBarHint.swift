@@ -14,7 +14,7 @@ struct MenuBarHint: View {
                     .foregroundStyle(.tint)
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Arena Wallpaper vit dans la barre des menus").font(.headline)
+                    Text("Wallpaper for Are.na vit dans la barre des menus").font(.headline)
                     Text("Clique sur son icône, en haut à droite de l'écran, pour changer d'image ou mettre en pause. Fermer cette fenêtre ne quitte pas l'app.")
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)

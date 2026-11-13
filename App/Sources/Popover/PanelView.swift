@@ -155,7 +155,7 @@ private struct PanelFooter: View {
             Spacer()
             Menu {
                 Button("Réglages…") { openPreferences() }
-                Button("À propos d'Arena Wallpaper") { openAbout() }
+                Button("À propos de Wallpaper for Are.na") { openAbout() }
                 Divider()
                 Button("Quitter") { NSApp.terminate(nil) }
             } label: {

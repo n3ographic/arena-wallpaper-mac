@@ -56,7 +56,7 @@ final class StatusItemController: NSObject {
             return true
         }
         image.isTemplate = true
-        image.accessibilityDescription = "Arena Wallpaper"
+        image.accessibilityDescription = "Wallpaper for Are.na"
         return image
     }()
 

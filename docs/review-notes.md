@@ -4,7 +4,7 @@
 
 ## Texte à coller
 
-> Arena Wallpaper sets images from the user's own Are.na channels as the desktop wallpaper, by hand or on a timer.
+> Wallpaper for Are.na sets images from the user's own Are.na channels as the desktop wallpaper, by hand or on a timer.
 >
 > Sign in: the app uses Are.na OAuth (read-only scope) through ASWebAuthenticationSession. A demo Are.na account with public channels is provided in the review information.
 >

@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// "About Arena Wallpaper": version, updates and links, opened from the app menu or the popover.
+/// "About Wallpaper for Are.na": version, updates and links, opened from the app menu or the popover.
 struct AboutView: View {
     @StateObject private var updates = UpdateChecker()
 
@@ -12,7 +12,7 @@ struct AboutView: View {
                 .frame(width: 72, height: 72)
                 .accessibilityHidden(true)
             VStack(spacing: 2) {
-                Text(verbatim: "Arena Wallpaper").font(.title2.weight(.semibold))
+                Text(verbatim: "Wallpaper for Are.na").font(.title2.weight(.semibold))
                 Text("Version \(UpdateChecker.currentVersion) (\(UpdateChecker.build))")
                     .foregroundStyle(.secondary)
             }
@@ -58,7 +58,7 @@ final class AboutWindowController: NSObject, NSWindowDelegate {
     func show() {
         if window == nil {
             let w = NSWindow(contentViewController: NSHostingController(rootView: AboutView()))
-            w.title = String(localized: "À propos d'Arena Wallpaper")
+            w.title = String(localized: "À propos de Wallpaper for Are.na")
             w.styleMask = [.titled, .closable]
             w.isReleasedWhenClosed = false
             w.delegate = self

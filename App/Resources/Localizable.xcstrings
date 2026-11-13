@@ -354,12 +354,12 @@
         }
       }
     },
-    "Arena Wallpaper vit dans la barre des menus": {
+    "Wallpaper for Are.na vit dans la barre des menus": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Arena Wallpaper lives in the menu bar"
+            "value": "Wallpaper for Are.na lives in the menu bar"
           }
         }
       }
@@ -424,12 +424,12 @@
         }
       }
     },
-    "Bienvenue dans Arena Wallpaper": {
+    "Bienvenue dans Wallpaper for Are.na": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Welcome to Arena Wallpaper"
+            "value": "Welcome to Wallpaper for Are.na"
           }
         }
       }
@@ -2194,12 +2194,12 @@
         }
       }
     },
-    "À propos d'Arena Wallpaper": {
+    "À propos de Wallpaper for Are.na": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "About Arena Wallpaper"
+            "value": "About Wallpaper for Are.na"
           }
         }
       }

@@ -13,7 +13,7 @@ struct WelcomeView: View {
                 .resizable()
                 .frame(width: 80, height: 80)
                 .accessibilityHidden(true)
-            Text("Bienvenue dans Arena Wallpaper").font(.title2.weight(.semibold))
+            Text("Bienvenue dans Wallpaper for Are.na").font(.title2.weight(.semibold))
             if account.isConnected {
                 Text("Tu es connecté. Choisis des channels parmi tes abonnements, ou cherche-en sur Are.na.")
                     .multilineTextAlignment(.center)
