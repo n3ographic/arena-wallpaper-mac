@@ -20,8 +20,8 @@ private func renderedFiles(_ dir: URL) throws -> [String] {
     try await service(repository, cache, rendered, setter: setter).apply(ids: [1, 2], screens: [mainScreen, rightScreen])
     let calls = await setter.calls
     #expect(calls.map(\.screenID) == ["main", "right"])
-    #expect(calls[0].file.lastPathComponent.range(of: #"^0-1-\d+\.tiff$"#, options: .regularExpression) != nil)
-    #expect(calls[1].file.lastPathComponent.range(of: #"^1-2-\d+\.tiff$"#, options: .regularExpression) != nil)
+    #expect(calls[0].file.lastPathComponent.range(of: #"^0-[ab]\.tiff$"#, options: .regularExpression) != nil)
+    #expect(calls[1].file.lastPathComponent.range(of: #"^1-[ab]\.tiff$"#, options: .regularExpression) != nil)
     #expect(try renderedFiles(rendered).count == 2)
 }
 
@@ -142,9 +142,12 @@ private func renderedFiles(_ dir: URL) throws -> [String] {
 private actor GateSetter: WallpaperSetter {
     private var waiting: CheckedContinuation<Void, Never>?
     private(set) var isHolding = false
+    private var held = false
 
+    /// Holds the first call only (the older application).
     func setWallpaper(_ file: URL, screenID: String) async throws {
-        if file.lastPathComponent.hasPrefix("0-1-") {
+        if !held {
+            held = true
             isHolding = true
             await withCheckedContinuation { waiting = $0 }
         }

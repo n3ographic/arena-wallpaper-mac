@@ -13,6 +13,7 @@ public actor WallpaperService {
     private let repository: ConfigRepository
     private let cache: ImageCache
     private let renderedDirectory: URL
+    private var lastSlot: [Int: String] = [:]
     private let setter: WallpaperSetter
     private let player: LiveWallpaperPlayer
     private let now: @Sendable () -> Date
@@ -137,7 +138,6 @@ public actor WallpaperService {
 
     private func render(ids: [Int], screens: [Screen], originals: [Int: URL], config: Config) async throws -> [URL] {
         try FileManager.default.createDirectory(at: renderedDirectory, withIntermediateDirectories: true)
-        let stamp = Int(now().timeIntervalSince1970 * 1000)
         // Decoded once per image, at the largest size a screen needs.
         var images: [Int: CGImage] = [:]
         func image(_ id: Int, canvas: CGSize, framing: Framing) async throws -> CGImage {
@@ -177,6 +177,16 @@ public actor WallpaperService {
             }
         }
         let directory = renderedDirectory
+        // Two names per screen, used in turn: the path changes (no cached older picture) while
+        // the system's wallpaper history keeps two entries per screen instead of one per change.
+        // Tracked at render time, not at pose time, so two overlapping renders never share a path.
+        var slots: [Int: String] = [:]
+        for job in jobs {
+            let slot = lastSlot[job.index] == "a" ? "b" : "a"
+            lastSlot[job.index] = slot
+            slots[job.index] = slot
+        }
+        let chosen = slots
         let spanCanvasImage = big
         var written = [URL?](repeating: nil, count: jobs.count)
         try await withThrowingTaskGroup(of: (Int, URL).self) { group in
@@ -190,8 +200,7 @@ public actor WallpaperService {
                         let size = CGSize(width: job.screen.frame.width, height: job.screen.frame.height)
                         output = Renderer.render(job.source!, canvasSize: size, framing: job.framing)
                     }
-                    // A unique name, so the system does not keep showing a cached older picture.
-                    let file = directory.appendingPathComponent("\(job.index)-\(job.id)-\(stamp).tiff")
+                    let file = directory.appendingPathComponent("\(job.index)-\(chosen[job.index]!).tiff")
                     try Renderer.writeTIFF(output, to: file)
                     return (job.index, file)
                 }
