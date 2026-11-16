@@ -22,7 +22,9 @@ struct PlaybackBar: View {
                 .opacity(playback.nowPlaying.paused ? 0 : 1)
                 .transaction { $0.animation = nil }
                 .accessibilityHidden(true)
-                ZStack {
+                // Left and right take the same share around the controls, so the controls stay
+                // centered and the texts truncate instead of running under them.
+                HStack(spacing: 10) {
                     HStack(spacing: 10) {
                         HStack(spacing: 3) {
                             ForEach(Array(Set(ids).sorted().prefix(4)), id: \.self) { id in
@@ -34,14 +36,15 @@ struct PlaybackBar: View {
                         .accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 1) {
                             Text(verbatim: current.map { shortenedTitle($0.title ?? String(localized: "Sans titre"), max: 32) } ?? String(localized: "Aucune image affichée"))
-                                .font(.callout.weight(.medium)).lineLimit(1)
-                            Text("À l'écran").font(.caption).foregroundStyle(.secondary)
+                                .font(.callout.weight(.medium)).lineLimit(1).truncationMode(.tail)
+                            Text("À l'écran").font(.caption).foregroundStyle(.secondary).lineLimit(1)
                         }
-                        Spacer()
-                        Text(nextChangeText(playback.nowPlaying, now: context.date))
-                            .font(.caption).foregroundStyle(.secondary).lineLimit(1)
                     }
-                    controls
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    controls.fixedSize()
+                    Text(nextChangeText(playback.nowPlaying, now: context.date))
+                        .font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.tail)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)

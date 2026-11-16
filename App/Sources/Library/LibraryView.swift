@@ -54,18 +54,35 @@ struct LibraryView: View {
     /// The source's name with its playback switch, the "Gardées / Retirées" filter, and the
     /// channel's removal.
     private var filterBar: some View {
+        // The roomy version first; when the column is narrow (inspector open), the name truncates
+        // and the switch loses its text (its help and VoiceOver label stay).
+        ViewThatFits(in: .horizontal) {
+            filterBarContent(roomy: true)
+            filterBarContent(roomy: false)
+        }
+        .padding(.horizontal, 16)
+        // A margin under the bar, so the scrolled images stop short of it.
+        .padding(.vertical, 10)
+    }
+
+    private func filterBarContent(roomy: Bool) -> some View {
         HStack(spacing: 12) {
             Text(verbatim: channel?.slug ?? String(localized: "Toutes les images")).font(.headline)
+                .lineLimit(1).truncationMode(.middle)
+                .fixedSize(horizontal: roomy, vertical: false)
             // The same switch as the sidebar dot and its menu, where the channel is in view.
             if let channel {
-                Toggle("Dans la lecture", isOn: Binding(
+                let toggle = Toggle("Dans la lecture", isOn: Binding(
                     get: { channel.enabled },
                     set: { enabled in Task { await library.setEnabled(channel.slug, enabled) } }))
                     .toggleStyle(.switch)
                     .controlSize(.mini)
+                    .lineLimit(1)
+                    .fixedSize()
                     .help(Text("Désactivé, ses images ne passent plus dans la lecture"))
+                if roomy { toggle } else { toggle.labelsHidden() }
             }
-            Spacer()
+            Spacer(minLength: 0)
             Picker("Afficher", selection: $removedOnly) {
                 Text("Gardées").tag(false)
                 Text("Retirées").tag(true)
@@ -81,9 +98,6 @@ struct LibraryView: View {
                     .confirmChannelDeletion($deleting) { _ in app.sidebarItem = .images(.all) }
             }
         }
-        .padding(.horizontal, 16)
-        // A margin under the bar, so the scrolled images stop short of it.
-        .padding(.vertical, 10)
     }
 
     var body: some View {
