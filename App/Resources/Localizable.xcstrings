@@ -2263,6 +2263,16 @@
           }
         }
       }
+    },
+    "Channel « %@ » ajouté": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Channel “%@” added"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

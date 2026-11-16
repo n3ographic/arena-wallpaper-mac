@@ -137,6 +137,7 @@ struct LibraryView: View {
                     }
                 }
             }
+            .overlay(alignment: .top) { AddedNoticeBar() }
         }
         .onChange(of: item) { clearSelection() }
         // An image leaves the grid (removed, put back, other filter): it leaves the selection too.

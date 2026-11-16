@@ -48,9 +48,9 @@
 ## API Are.na
 - [x] Ajouter un gros channel : une seule requête à l'API, compteur « 50+ ».
 - [x] « Charger plus » : 50 images de plus, bouton grisé pendant le chargement, absent quand Are.na n'a plus de page.
-- [ ] Rotation longue : une page se charge quand le cycle s'épuise, sans revenir à la première image en ordre fixe.
-- [ ] Relancer l'app dans les 24 h : aucune requête à l'API.
-- [ ] « Actualiser » envoie une requête par channel et ne recharge pas les images.
+- [ ] Rotation longue : une page se charge quand le cycle s'épuise, sans revenir à la première image en ordre fixe. (Couvert par un test automatique, non vu à la main.)
+- [x] Relancer l'app dans les 24 h : aucune requête à l'API. Neo et Claude 2026-11-16 : `lastRefresh` inchangé après relance (vérifié dans `config.json`).
+- [x] « Actualiser » envoie une requête par channel et ne recharge pas les images. 2026-11-16 : dates de revalidation mises à jour, nombre d'images et cache des originaux (141 fichiers) identiques.
 - [x] La phrase « Tu es responsable du contenu des channels que tu ajoutes. » est visible sous le champ d'ajout.
 - [x] Les libellés « Retirer » et « Remettre » sont corrects en français et en anglais.
 
@@ -59,7 +59,7 @@
 - [x] VoiceOver lit chaque bouton et le titre de chaque image ; la grille se parcourt au clavier.
 - [x] Dans la fenêtre de réglages : Espace met en pause ou reprend, flèche droite passe à l'image suivante (depuis la refonte de la Bibliothèque : ⌘→), Échap ferme un menu.
 - [x] ~~Avec le compte payant : archive (configuration Release), puis validation sans erreur dans Xcode Organizer.~~ Écarté le 2026-11-11 : l'app sort hors Store (voir `docs/release.md`). À reprendre seulement si une publication sur le Mac App Store revient.
-- [ ] Passage complet de cette liste sur un Mac à deux écrans.
+- [x] Passage complet de cette liste sur un Mac à deux écrans. Neo 2026-11-16 (v0.1.5), sauf le premier lancement et la rotation longue.
 
 ## Refonte : stores, Bibliothèque, Préférences, popover
 
@@ -104,27 +104,41 @@
 ## Découvrir, barre latérale, inspecteur et popover (2026-11-12)
 
 ### Découvrir
-- [ ] « Découvrir » (barre latérale) et le « + » de « Mes channels » ouvrent la page ; le champ a le clavier.
-- [ ] Champ vide : les channels suivis sur Are.na s'affichent en cartes, sans ceux déjà ajoutés ; « Ajouter » ajoute et la carte disparaît.
-- [ ] Un mot : résultats de recherche en direct (compte Premium) ; sans Premium, message de repli ; « Ajouter le channel « slug » » marche aussi.
-- [ ] Un lien collé : seule la ligne d'ajout s'affiche, Entrée ajoute.
-- [ ] Taper une espace dans le champ ne met pas la lecture en pause.
+- [x] « Découvrir » (barre latérale) et le « + » de « Mes channels » ouvrent la page ; le champ a le clavier.
+- [x] Champ vide : les channels suivis sur Are.na s'affichent en cartes, sans ceux déjà ajoutés ; « Ajouter » ajoute et la carte disparaît.
+- [x] Un mot : résultats de recherche en direct (compte Premium) ; sans Premium, message de repli ; « Ajouter le channel « slug » » marche aussi.
+- [x] Un lien collé : seule la ligne d'ajout s'affiche, Entrée ajoute.
+- [x] Taper une espace dans le champ ne met pas la lecture en pause.
 
 ### Barre latérale
-- [ ] « Toutes les images » (avec compteur) et « Découvrir » en haut ; « Mes channels » avec point plein (actif) ou vide et « en pause » ; un clic sur le point bascule.
-- [ ] Clic droit sur un channel : « Mettre en pause » ou « Reprendre », puis « Retirer ».
-- [ ] « Réglages » : Lecture et Compte.
+- [x] « Toutes les images » (avec compteur) et « Découvrir » en haut ; « Mes channels » avec point plein (inclus) ou vide (exclu) ; un clic sur le point bascule.
+- [x] Clic droit sur un channel : « Exclure de la lecture » ou « Inclure dans la lecture », puis « Supprimer le channel… ».
+- [x] « Réglages » : Lecture et Compte.
 
 ### Grille et inspecteur
-- [ ] Le sélecteur « Toutes / Retirées » filtre « Toutes les images » et chaque channel.
-- [ ] Un clic sur une image ouvre l'inspecteur (aperçu, channel, dimensions, avis « image petite », Poser, Retirer, Ouvrir sur Are.na) ; Échap le ferme, un second Échap ferme la fenêtre.
-- [ ] Les quatre flèches déplacent la sélection dans la grille ; Entrée pose ; ⌘← et ⌘→ changent l'image de la lecture.
-- [ ] Barre de lecture : progression en haut, vignettes et titre à gauche, commandes au centre, temps restant à droite.
-- [ ] Cadrage d'un écran : l'avis « Image petite pour cet écran » apparaît pour une image agrandie plus de 2 fois.
+- [x] Le sélecteur « Toutes / Retirées » filtre « Toutes les images » et chaque channel.
+- [x] Un clic sur une image ouvre l'inspecteur (aperçu, channel, dimensions, avis « image petite », Poser, Retirer, Ouvrir sur Are.na) ; Échap le ferme, un second Échap ferme la fenêtre.
+- [x] Les quatre flèches déplacent la sélection dans la grille ; Entrée pose ; ⌘← et ⌘→ changent l'image de la lecture.
+- [x] Barre de lecture : progression en haut, vignettes et titre à gauche, commandes au centre, temps restant à droite.
+- [x] Cadrage d'un écran : l'avis « Image petite pour cet écran » apparaît pour une image agrandie plus de 2 fois.
 
 ### Popover
-- [ ] Le « … » sur l'image : Ouvrir sur Are.na, Retirer de la lecture, Afficher dans la bibliothèque (ouvre la fenêtre, sélectionne et inspecte l'image).
-- [ ] Précédent, Pause, Suivant au centre ; en bas : Bibliothèque, rythme, roue dentée (Réglages, À propos, Quitter).
-- [ ] L'image remplit toute la largeur du popover.
-- [ ] Tous les nouveaux textes sont traduits en anglais.
+- [x] Le « … » sur l'image : Ouvrir sur Are.na, Retirer de la lecture, Afficher dans la bibliothèque (ouvre la fenêtre, sélectionne et inspecte l'image).
+- [x] Précédent, Pause, Suivant au centre ; en bas : Bibliothèque, rythme, roue dentée (Réglages, À propos, Quitter).
+- [x] L'image remplit toute la largeur du popover.
+- [x] Tous les nouveaux textes sont traduits en anglais.
 
+## Retours de test et sélection multiple (2026-11-12, v0.1.3)
+- [x] Sélection multiple : Maj+clic (plage), ⌘+clic, ⌘A, lasso, clic dans le vide ; inspecteur en pile avec un seul bouton.
+- [x] « Retirer de la lecture » en lot : message « N images retirées de la lecture · Annuler », ⌘Z annule, ⌘⇧Z refait.
+- [x] Vue « Gardées » sans les images retirées ; « Retirées » les liste.
+- [x] Glisser-déposer des channels dans la barre latérale (ordre, groupe).
+- [x] « Supprimer le channel… » avec avertissement ; efface aussi ses images téléchargées.
+- [ ] Premier lancement : fenêtre de bienvenue et bandeau sur la barre des menus (demande d'effacer la config pour le voir).
+
+## Confirmation d'ajout et pause (2026-11-16, après v0.1.5)
+- [x] Ajouter un channel affiche le bandeau « Channel « slug » ajouté » en haut de la fenêtre, 3 secondes, sur toutes les pages.
+- [x] En pause, la barre de progression est masquée (pas de retour à 0 animé) ; elle réapparaît à la reprise.
+
+## Historique du fond d'écran (v0.1.5)
+- [x] Après plusieurs changements, Réglages Système > Fond d'écran ne grossit plus (deux fichiers par écran, `0-a` et `0-b`). Neo 2026-11-16.

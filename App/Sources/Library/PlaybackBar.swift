@@ -12,11 +12,15 @@ struct PlaybackBar: View {
         let current = ids.first.flatMap(library.block)
         TimelineView(.periodic(from: .now, by: 15)) { context in
             VStack(spacing: 0) {
-                ProgressView(value: playback.nowPlaying.paused ? 0 : playback.nowPlaying.nextChange.map {
+                // While paused the line is hidden, not reset to 0: no sliding back, and nothing to
+                // slide forward again on "Reprendre". The right-hand text already says "En pause".
+                ProgressView(value: playback.nowPlaying.nextChange.map {
                     progress(nextChange: $0, intervalMinutes: library.config.intervalMinutes, now: context.date)
                 } ?? 0)
                 .progressViewStyle(.linear)
                 .controlSize(.mini)
+                .opacity(playback.nowPlaying.paused ? 0 : 1)
+                .transaction { $0.animation = nil }
                 .accessibilityHidden(true)
                 ZStack {
                     HStack(spacing: 10) {

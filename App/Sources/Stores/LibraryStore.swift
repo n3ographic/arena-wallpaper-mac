@@ -11,6 +11,8 @@ final class LibraryStore {
     private(set) var loadingSlugs: Set<String> = []
     /// A revalidation of the channels is running.
     private(set) var isRefreshing = false
+    /// The last channel added, shown a few seconds as a confirmation.
+    var addedNotice: AddedNotice?
 
     @ObservationIgnored let cache: ImageCache
     @ObservationIgnored private let repository: ConfigRepository
@@ -70,8 +72,9 @@ final class LibraryStore {
 
     func addChannel(_ input: String) async -> Bool {
         do {
-            _ = try await library.addChannel(input: input)
+            let channel = try await library.addChannel(input: input)
             errors.clear()
+            addedNotice = AddedNotice(slug: channel.slug)
             await reloadConfig()
             return true
         } catch {
@@ -166,4 +169,9 @@ final class LibraryStore {
         account.disconnect()
         errors.report(String(localized: "Reconnecte-toi à Are.na."))
     }
+}
+
+struct AddedNotice: Equatable {
+    let id = UUID()
+    let slug: String
 }

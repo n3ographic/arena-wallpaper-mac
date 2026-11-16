@@ -92,3 +92,30 @@ struct RemovalNoticeBar: View {
         }
     }
 }
+
+/// "Channel « slug » ajouté" for a few seconds, on every page of the library.
+struct AddedNoticeBar: View {
+    @Environment(LibraryStore.self) private var library
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        if let notice = library.addedNotice {
+            HStack(spacing: 10) {
+                Image(systemName: "checkmark.circle.fill").foregroundStyle(.green).font(.title2)
+                Text("Channel « \(notice.slug) » ajouté").font(.body.weight(.medium))
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 14)
+            .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(.quaternary))
+            .shadow(color: .black.opacity(0.25), radius: 10, y: 3)
+            .padding(.top, 16)
+                .transition(reduceMotion ? .opacity : .move(edge: .top).combined(with: .opacity))
+                .accessibilityElement(children: .combine)
+                .task(id: notice.id) {
+                    try? await Task.sleep(for: .seconds(3))
+                    if library.addedNotice?.id == notice.id { library.addedNotice = nil }
+                }
+        }
+    }
+}
