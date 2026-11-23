@@ -56,7 +56,7 @@ private final class GIFWindow {
         window.hasShadow = false
         window.isReleasedWhenClosed = false
         window.ignoresMouseEvents = true
-        window.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.desktopWindow)) + 1)
+        window.level = .desktopGIF
         window.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
         imageView = NSImageView(frame: content)
         imageView.image = image

@@ -14,6 +14,7 @@ struct WorkspaceWallpaper: WallpaperSetter {
         try await MainActor.run {
             guard let screen = NSScreen.screens.first(where: { $0.screenID == screenID }) else { throw WallpaperError.screenGone }
             try NSWorkspace.shared.setDesktopImageURL(file, for: screen, options: [.imageScaling: NSImageScaling.scaleProportionallyUpOrDown.rawValue])
+            DesktopCover.shared.show(file, on: screen, screenID: screenID)
         }
     }
 }
