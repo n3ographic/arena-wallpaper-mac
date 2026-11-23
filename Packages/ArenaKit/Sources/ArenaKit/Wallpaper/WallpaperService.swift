@@ -67,7 +67,7 @@ public actor WallpaperService {
                 errors.append(error.localizedDescription)
             }
         }
-        removeStaleFiles(keeping: files, keep: 3 * screens.count)
+        removeStaleFiles(keeping: files, keep: 4 * screens.count)
         if errors.count == screens.count {
             throw ApplyError.allScreensFailed(errors.first ?? "")
         }
@@ -104,9 +104,19 @@ public actor WallpaperService {
         )
     }
 
-    /// Sets the current files again: after a Space change, the system may still show an older
-    /// picture on the newly active Space.
+    /// Sets the current files again after a Space change. The newly active Space may point to
+    /// the same path with older content, and macOS keeps its cached picture when a path is set
+    /// again, so each file is first set under a second name (`N-a-s.tiff`, a hard link), then
+    /// under its own: whatever that Space held, the path changes at least once and the picture
+    /// is read again. The system's state can't be read per Space: it returns the last path set.
     public func reapply() async {
+        let fm = FileManager.default
+        for (screenID, file) in currentFiles {
+            let alias = file.deletingLastPathComponent().appendingPathComponent(file.deletingPathExtension().lastPathComponent + "-s.tiff")
+            try? fm.removeItem(at: alias)
+            guard (try? fm.linkItem(at: file, to: alias)) != nil else { continue }
+            try? await setter.setWallpaper(alias, screenID: screenID)
+        }
         for (screenID, file) in currentFiles {
             try? await setter.setWallpaper(file, screenID: screenID)
         }
@@ -130,7 +140,7 @@ public actor WallpaperService {
         if let at = currentFiles.firstIndex(where: { $0.screenID == screenID }) {
             currentFiles[at] = (screenID, files[0])
         }
-        removeStaleFiles(keeping: currentFiles.map(\.file), keep: 3 * applied.screens.count)
+        removeStaleFiles(keeping: currentFiles.map(\.file), keep: 4 * applied.screens.count)
         await player.show(animatedTargets(ids: applied.ids, screens: applied.screens, originals: applied.originals, config: config))
     }
 
