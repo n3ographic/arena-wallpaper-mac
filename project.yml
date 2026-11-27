@@ -40,6 +40,9 @@ targets:
         CODE_SIGN_STYLE: Manual
         ENABLE_HARDENED_RUNTIME: YES
       configs:
+        Debug:
+          # Own identifier, so a Debug build never shares settings, files or the login item with the installed release.
+          PRODUCT_BUNDLE_IDENTIFIER: com.n3ographic.arenawallpaper.mac.debug
         Release:
           # No debugger attachment in a published build.
           CODE_SIGN_INJECT_BASE_ENTITLEMENTS: NO
